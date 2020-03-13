@@ -1,0 +1,57 @@
+{
+  "name": "Renren_rn",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@react-native-community/async-storage": "^1.8.1",
+    "@react-native-community/masked-view": "^0.1.7",
+    "animated-lazy-image": "^1.0.1",
+    "assign-deep": "^1.0.1",
+    "prop-types": "^15.7.2",
+    "react": "16.9.0",
+    "react-native": "0.61.1",
+    "react-native-app-intro": "https://github.com/merryjs/react-native-app-intro",
+    "react-native-blur": "^3.2.2",
+    "react-native-easy-dialog": "^1.1.1",
+    "react-native-easy-toast": "^1.2.0",
+    "react-native-easy-top-nav-bar": "^1.1.1",
+    "react-native-flash-message": "^0.1.15",
+    "react-native-gesture-handler": "^1.6.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.1",
+    "react-native-modalbox": "^2.0.0",
+    "react-native-reanimated": "^1.7.0",
+    "react-native-safe-area-context": "^0.7.3",
+    "react-native-screens": "^2.2.0",
+    "react-native-scrollable-tab-view": "^1.0.0",
+    "react-native-swipeable": "^0.6.0",
+    "react-native-swiper": "^1.5.14",
+    "react-native-vector-icons": "^6.6.0",
+    "react-native-video": "^5.0.2",
+    "react-navigation": "4.0.10",
+    "react-navigation-stack": "^2.2.3",
+    "react-navigation-tabs": "^2.8.2",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/runtime": "^7.8.7",
+    "@react-native-community/eslint-config": "^0.0.7",
+    "babel-jest": "^25.1.0",
+    "eslint": "^6.8.0",
+    "jest": "^25.1.0",
+    "metro-react-native-babel-preset": "^0.58.0",
+    "react-test-renderer": "16.9.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
