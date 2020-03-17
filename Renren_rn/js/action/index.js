@@ -4,6 +4,8 @@ import {onLoadTravel, onLoadMoreTravel} from './travel'
 import {onLoadOrder,onLoadMoreOrder} from './order'
 import {onLoadWish} from './wish'
 import {onLoadWishDetail} from './wishdetail'
+import {initJoin} from './join'
+import {initSlot} from './slot'
 export default {
     InitUser,
     InitToken,
@@ -12,5 +14,7 @@ export default {
     onLoadOrder,
     onLoadMoreOrder,
     onLoadWish,
-    onLoadWishDetail
+    onLoadWishDetail,
+    initJoin,
+    initSlot
 }

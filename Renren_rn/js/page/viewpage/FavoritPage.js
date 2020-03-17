@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     modal_con:{
         width: '100%',
         backgroundColor: '#fff',
-        height: 120
+        height: 140
     },
     modal_btn:{
         height:60,

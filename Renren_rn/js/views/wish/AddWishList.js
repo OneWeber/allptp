@@ -1,11 +1,20 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Dimensions} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Dimensions, TextInput} from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import NavigatorUtils from '../../navigator/NavigatorUtils';
 import {connect} from 'react-redux'
+import CommonStyle from '../../../assets/css/Common_css';
+import Radios from '../../model/Radios';
 const widthScreen = Dimensions.get('window').width;
 class AddWishList extends Component {
+    constructor(props) {
+        super(props);
+        this.tabNames = [
+            {label: '共享心愿单', val: 0},
+            {label: '私密心愿单', val: 1},
+        ]
+    }
     getLeftButton() {
         return <TouchableOpacity
             style={styles.back_icon}
@@ -28,9 +37,8 @@ class AddWishList extends Component {
         </TouchableOpacity>
     }
     render() {
-
         return (
-            <View>
+            <View style={CommonStyle.flexCenter}>
                 <RNEasyTopNavBar
                     title={'添加心愿单'}
                     backgroundTheme={'#fff'}
@@ -38,6 +46,20 @@ class AddWishList extends Component {
                     leftButton={this.getLeftButton()}
                     rightButton={this.getRightButton()}
                 />
+                <TextInput
+                    style={[CommonStyle.commonWidth, styles.input]}
+                    placeholder={'请输入心愿单名称'}
+                    placeholderTextColor={'#999'}
+                />
+                <View style={{marginTop: 15,width: '100%'}}>
+                    <Radios
+                        r_props={this.tabNames}
+                        arrange_style={{width:'100%',flexDirection: 'row',justifyContent:'flex-start',alignItems:'center'}}
+                        onPress={(label, val, index) => {
+
+                        }}
+                    />
+                </View>
             </View>
         )
     }
@@ -52,6 +74,13 @@ const styles = StyleSheet.create({
     right_btn_txt: {
         fontWeight: 'bold',
         fontSize: 16
+    },
+    input: {
+        height: 45,
+        backgroundColor: '#fff',
+        marginTop:20,
+        borderRadius: 3,
+        padding: 10
     }
 })
 const mapStateToProps = state => ({

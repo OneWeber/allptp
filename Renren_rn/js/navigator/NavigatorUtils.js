@@ -1,16 +1,26 @@
 export default class NavigatorUtils {
     //跳转到指定页面
-    static goPage(params, page) {
+    static goPage(params, page, type) {
         const navigation = NavigatorUtils.navigation;
         if(!navigation) {
             console.log('NavigatorUtils.navigation can not be null')
         }
-        navigation.navigate(
-            page,
-            {
-                ...params
-            }
-        )
+        if(type==='push'){
+            navigation.push(
+                page,
+                {
+                    ...params
+                }
+            )
+        }else{
+            navigation.navigate(
+                page,
+                {
+                    ...params
+                }
+            )
+        }
+
     }
     //重置到首页
     static resetToHomePage(params) {

@@ -6,6 +6,8 @@ import travel from './travel'
 import order from './order'
 import wish from './wish'
 import wishdetail from './wishdetail'
+import join from './join'
+import slot from './slot'
 const index = combineReducers({
     theme: theme,
     user: user,
@@ -13,6 +15,8 @@ const index = combineReducers({
     travel: travel,
     order: order,
     wish: wish,
-    wishdetail: wishdetail
+    wishdetail: wishdetail,
+    join: join,
+    slot: slot
 })
 export default index

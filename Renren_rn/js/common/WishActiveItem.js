@@ -3,11 +3,26 @@ import {StyleSheet, View, Text, TouchableOpacity} from 'react-native'
 import CommonStyle from '../../assets/css/Common_css';
 import LazyImage from 'animated-lazy-image';
 import {connect} from 'react-redux';
+import NavigatorUtils from '../navigator/NavigatorUtils';
 class WishActiveItem extends Component{
+    doWishDetailItem(){
+        this.props.doWishDetailItem()
+    }
+    goDetail(tabLabel, table_id){
+        if(tabLabel === '体验'){
+            NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
+            return
+        }
+        NavigatorUtils.goPage({table_id: table_id}, 'StoryDetail')
+    }
     render() {
-        const {data_w, data_index, theme} = this.props
+        const {data_w, data_index, theme, tabLabel} = this.props
         return (
-            <TouchableOpacity style={[styles.wish_active_item, CommonStyle.commonWidth,{marginTop:data_index===0?15:10}]}>
+            <TouchableOpacity
+                style={[styles.wish_active_item, CommonStyle.commonWidth,{marginTop:data_index===0?15:10}]}
+                onLongPress={()=>this.doWishDetailItem()}
+                onPress={() => {this.goDetail(tabLabel, data_w.table_id)}}
+            >
                 <LazyImage
                     source={data_w.domain && data_w.image_url ?
                         {uri:data_w.domain + data_w.image_url}

@@ -166,9 +166,12 @@ class InputContainer extends Component{
                 console.log(res)
                 AsyncStorage.setItem('username', JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name))
                 AsyncStorage.setItem('avatar', JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url))
+                AsyncStorage.setItem('userid', JSON.stringify(res.data.user_id))
+                console.log('res', res.data)
                 onInitUser({
                     username: res.data.family_name+res.data.middle_name+res.data.name,
-                    avatar: res.data.headimage.domain + res.data.headimage.image_url
+                    avatar: res.data.headimage.domain + res.data.headimage.image_url,
+                    userid:res.data.user_id
                 })
                 NavigatorUtils.goPage({}, 'Main')
             } else {

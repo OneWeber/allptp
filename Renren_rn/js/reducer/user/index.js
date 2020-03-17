@@ -3,7 +3,8 @@ import Types from '../../action/Types';
 const defaultState = {
     user: {
         username: '',
-        avatar: ''
+        avatar: '',
+        userid:''
     }
 }
 AsyncStorage.getItem('username', (error, result) => {
@@ -18,6 +19,13 @@ AsyncStorage.getItem('avatar', (error, result) => {
         defaultState.user.avatar = result
     } else {
         defaultState.user.avatar = ''
+    }
+})
+AsyncStorage.getItem('userid', (error, result) => {
+    if(result) {
+        defaultState.user.userid = result
+    } else {
+        defaultState.user.userid = ''
     }
 })
 export default function onAction(state= defaultState, action) {

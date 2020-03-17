@@ -10,6 +10,8 @@ import action from '../../action'
 import NewHttp from '../../utils/NewHttp';
 import WishActiveItem from '../../common/WishActiveItem';
 import CommonStyle from '../../../assets/css/Common_css';
+import Modal from 'react-native-modalbox';
+import NoData from '../../common/NoData';
 const widthScreen = Dimensions.get('window').width;
 class WishDetail extends Component{
     constructor(props) {
@@ -73,7 +75,7 @@ class WishDetail extends Component{
                     />)}>
                     {
                         this.tabNames.map((item, index) => {
-                            return <WishItemD tabLabel={item} store={store}/>
+                            return <WishItemD key={index} tabLabel={item} store={store}/>
                         })
                     }
                 </ScrollableTabView>
@@ -88,6 +90,19 @@ const styles = StyleSheet.create({
     back_icon: {
         paddingLeft: widthScreen*0.03
     },
+    modal_con:{
+        width: '100%',
+        backgroundColor: '#fff',
+        height: 80
+    },
+    items_btn:{
+        width: '100%',
+        height: 60
+    },
+    items_text: {
+        fontWeight: "bold",
+        color:'red'
+    }
 })
 const mapStateToProps = state => ({
     theme: state.theme.theme,
@@ -99,8 +114,17 @@ const mapDispatchToProps = dispatch => ({
 })
 export default connect(mapStateToProps, mapDispatchToProps)(WishDetail)
 class WishItemD extends Component{
-    renderActive(data) {
-        return <WishActiveItem data_w={data.item}  data_index={data.index}/>
+    renderActive(data, tabLabel) {
+        return <WishActiveItem doWishDetailItem={()=>this._doWishDetailItem()} tabLabel={tabLabel} data_w={data.item}  data_index={data.index}/>
+    }
+    _doWishDetailItem(){
+        this.refs.doWish.open()
+    }
+    onClose() {
+
+    }
+    onOpen() {
+
     }
     render(){
         const {tabLabel, store} = this.props;
@@ -122,18 +146,56 @@ class WishItemD extends Component{
             }
             return storyList
         }
-        let active = store && store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length >0
+        let active = store && store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
         ? getActive(store.items.data.data.data) : []
-        let story = store && store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length >0
+        let story = store && store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
             ? getStory(store.items.data.data.data) : []
         return(
             <View tabLabel={tabLabel} style={[CommonStyle.flexCenter,{flex: 1}]}>
-                <FlatList
-                    data={tabLabel==='体验'?active:story}
-                    showsVerticalScrollIndicator = {false}
-                    renderItem={data=>this.renderActive(data)}
-                    keyExtractor={(item, index) => index.toString()}
-                />
+                {
+                    tabLabel==='体验'
+                    ?
+                        active.length > 0
+                        ?
+                            <FlatList
+                                data={active}
+                                showsVerticalScrollIndicator = {false}
+                                renderItem={data=>this.renderActive(data, tabLabel)}
+                                keyExtractor={(item, index) => index.toString()}
+                            />
+                        :
+                        <NoData></NoData>
+                    :
+                        story.length > 0
+                        ?
+                            <FlatList
+                                data={story}
+                                showsVerticalScrollIndicator = {false}
+                                renderItem={data=>this.renderActive(data, tabLabel)}
+                                keyExtractor={(item, index) => index.toString()}
+                            />
+                        :
+                            <NoData></NoData>
+                }
+
+                <Modal
+                    style={styles.modal_con}
+                    ref={"doWish"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.1)'}
+                    swipeToClose={false}
+                    onClosed={this.onClose}
+                    onOpened={this.onOpen}
+                    backdropPressToClose={true}
+                    coverScreen={true}
+                    onClosingState={this.onClosingState}>
+                    <View style={[styles.modal_con,CommonStyle.flexCenter,{justifyContent: 'flex-start'}]}>
+                        <TouchableOpacity style={[styles.items_btn, CommonStyle.flexCenter]}>
+                            <Text style={styles.items_text}>移除</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View>
         )
     }

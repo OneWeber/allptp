@@ -18,6 +18,7 @@ class WishItem extends Component{
         return(
             <TouchableOpacity
                 style={[CommonStyle.commonWidth,styles.wish_item,CommonStyle.spaceRow,{marginTop:data_index==0?15:5}]}
+                underlayColor='rgba(0,0,0,0)'
                 onLongPress={()=>this.doWish()}
                 onPress={()=>this.goWishDetail(data_w.group_id, data_w.group_name)}
             >
