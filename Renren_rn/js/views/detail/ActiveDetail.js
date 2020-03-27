@@ -17,6 +17,7 @@ import ActiveList from '../../common/ActiveList';
 import NoData from '../../common/NoData';
 import Loading from '../../common/Loading';
 import action from '../../action'
+import Toast from 'react-native-easy-toast';
 const {width, height} = Dimensions.get('window')
 class ActiveDetail extends Component{
     constructor(props) {
@@ -141,19 +142,27 @@ class ActiveDetail extends Component{
             opacity:opacityPercent
         })
     }
-    goDay(isMe, long_day, table_id) {
-        if(long_day === 1){
-            const {initJoin, join, initSlot} = this.props
-            initSlot({
-                slot: this.state.data.slot
-            })
-            let data = join
-            data.activity_id = table_id
-            initJoin(data)
-            NavigatorUtils.goPage({},'SingleDay', 'navigate')
+    goDay(vol, isMe, long_day, table_id) {
+        const {isOverdue, data} = this.state
+        if(isOverdue || !data.price) {
+            this.refs.toast.show('该体验暂已过期')
         } else {
-            alert('多天活动')
+            if(long_day === 1){
+                const {initJoin, join, initSlot} = this.props
+                initSlot({
+                    slot: this.state.data.slot
+                })
+                let datas = join
+                datas.activity_id = table_id;
+                datas.age_limit = data.age_limit;
+                datas.house = data.house
+                initJoin(datas)
+                NavigatorUtils.goPage({vol: vol, isMe: isMe, issatay: data.issatay},'SingleDay', 'navigate')
+            } else {
+                alert('多天活动')
+            }
         }
+
     }
     _onSliderChange(index){
 
@@ -168,6 +177,7 @@ class ActiveDetail extends Component{
                 borderBottomWidth: onTouchEnd > 300 ? 1 : 0
             }}>
                 <View style={[styles.nav_header,CommonStyle.flexCenter]}>
+                    <Toast ref="toast" position='center' positionValue={0}/>
                     <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
                         <AntDesign
                             name={'left'}
@@ -230,8 +240,16 @@ class ActiveDetail extends Component{
                                         <AboutActive {...this.state} {...this.props}/>
                                     </View>
                                 </View>
-                                <VolunteerApply />
-                                <Preferential />
+                                {
+                                    data.is_volunteen === 1
+                                    ?
+                                        <VolunteerApply isMe={data.user.user_id === user.userid?1:0} goDaySelect={(val) => this.goDay(val,data.user.user_id === user.userid?1:0, data.long_day, this.table_id )} />
+                                    :
+                                        null
+                                }
+                                <View style={{marginTop: data.is_volunteen === 1?0:10}}>
+                                    <Preferential />
+                                </View>
                                 <ActiveContent {...this.state} {...this.props}/>
                                 <Comments {...this.state} {...this.props} table_id={this.table_id}/>
                                 <AboutOther {...this.state} {...this.props}/>
@@ -251,7 +269,7 @@ class ActiveDetail extends Component{
                             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{height:60}]}>
                                 <View style={[CommonStyle.spaceCol,{height: 40,alignItems: "flex-start"}]}>
                                     {
-                                        data.price
+                                        data.price && !isOverdue
                                             ?
                                             <Text style={{fontWeight: 'bold',color:'#333',fontSize: 15}}>¥{data.price}/人</Text>
                                             :
@@ -272,7 +290,7 @@ class ActiveDetail extends Component{
                                     </View>
                                 </View>
                                 {
-                                    isOverdue
+                                    isOverdue || !data.price
                                         ?
                                         <View style={[styles.bot_btn,CommonStyle.flexCenter,{backgroundColor: '#ff5673'}]}>
                                             <Text style={{color: '#fff',fontWeight: 'bold'}}>已过期</Text>
@@ -286,7 +304,7 @@ class ActiveDetail extends Component{
                                         :
                                         <TouchableOpacity
                                             style={[styles.bot_btn,CommonStyle.flexCenter,{backgroundColor: theme}]}
-                                            onPress={()=>this.goDay(data.user.user_id === user.userid?1:0, data.long_day, this.table_id)}
+                                            onPress={()=>this.goDay(0,data.user.user_id === user.userid?1:0, data.long_day, this.table_id)}
                                         >
                                             <Text style={{color: '#fff',fontWeight: 'bold'}}>
                                                 {
@@ -357,7 +375,7 @@ const mapStateToProps = state => ({
     token: state.token.token,
     theme: state.theme.theme,
     user: state.user.user,
-    join: state.join
+    join: state.join.join
 })
 const mapDispatchTopProps = dispatch => ({
     initJoin: join => dispatch(action.initJoin(join)),
@@ -563,10 +581,21 @@ class PromtItem extends Component{
 //志愿者报名
 class VolunteerApply extends Component{
     render(){
+        const {isMe} = this.props
         return (
-            <TouchableOpacity style={[aboutStyles.apply_btn,CommonStyle.flexCenter]}>
+            <TouchableOpacity style={[aboutStyles.apply_btn,CommonStyle.flexCenter]}
+                onPress={() => this.props.goDaySelect(1)}
+            >
                 <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>志愿者报名</Text>
+                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>
+                        {
+                            isMe
+                            ?
+                                '邀请志愿者'
+                            :
+                                '志愿者报名'
+                        }
+                    </Text>
                     <AntDesign
                         name={'right'}
                         size={16}
@@ -581,7 +610,7 @@ class VolunteerApply extends Component{
 class Preferential extends Component{
     render(){
         return(
-            <View style={[aboutStyles.preferential_con,CommonStyle.flexCenter]}>
+            <View style={[aboutStyles.preferential_con,CommonStyle.flexCenter,{marginBottom: 10}]}>
                 <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{alignItems: 'flex-start'}]}>
                     <View style={{width:45}}>
                         <Text style={{color:'#333',fontWeight:'bold',fontSize: 16}}>优惠</Text>

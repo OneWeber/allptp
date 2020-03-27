@@ -31,7 +31,7 @@ class TravelPage extends Component{
                             tabUnderlineScaleX={6} // default 3
                             activeColor={theme}
                             isWishLarge={true}
-                            inactiveColor={theme}
+                            inactiveColor={'#999'}
                         />)}>
                         {
                             this.tabNames.map((item, index) => {
@@ -123,7 +123,7 @@ class TravelComponent extends Component{
         const {travel} = this.props
         let store = travel[this.storeName]
         return store.hideMoreshow?null:
-            <View style={[CommonStyle.flexCenter, {width: '100%'}]}>
+            <View style={[CommonStyle.flexCenter, {width: '100%',paddingTop: 10,paddingBottom: 10}]}>
                <ActivityIndicator size={'small'} color={'#999'}/>
             </View>
     }

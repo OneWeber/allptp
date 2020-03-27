@@ -8,6 +8,20 @@ import wish from './wish'
 import wishdetail from './wishdetail'
 import join from './join'
 import slot from './slot'
+import comming from './comming'
+import hotcity from './hotcity'
+import cityitem from './cityitem'
+import selectstory from './selectstory'
+import history from './history'
+import activelist from './activelist'
+import storylist from './storylist'
+import volunteer from './volunteer'
+import creater from './creater'
+import focus from './focus'
+import fans from './focus/fans'
+import trading from './trading'
+import reverse from './info/reserve'
+import mystory from './info/mystory'
 const index = combineReducers({
     theme: theme,
     user: user,
@@ -17,6 +31,20 @@ const index = combineReducers({
     wish: wish,
     wishdetail: wishdetail,
     join: join,
-    slot: slot
+    slot: slot,
+    comming: comming,
+    hotcity: hotcity,
+    cityitem: cityitem,
+    selectstory: selectstory,
+    history: history,
+    activelist: activelist,
+    storylist: storylist,
+    volunteer: volunteer,
+    creater: creater,
+    focus: focus,
+    fans: fans,
+    trading: trading,
+    reverse: reverse,
+    mystory: mystory
 })
 export default index

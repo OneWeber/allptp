@@ -1,10 +1,14 @@
 import Types from '../../action/Types';
 const defaultState = {
-    activity_id: '',
-    slot_id: '',
-    num: '',
-    person: '',
-    house: []
+    join:{activity_id: '',
+        slot_id: '',
+        num: '',
+        person: [],
+        house: [],
+        price: '',
+        age_limit: '',
+        date: '',
+        slot_time: ''}
 }
 export default function onAction(state=defaultState, action) {
     switch (action.type) {

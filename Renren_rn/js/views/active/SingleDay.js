@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, Dimensions, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, Dimensions, TouchableOpacity, FlatList} from 'react-native';
 import {connect} from 'react-redux'
 import CommonStyle from '../../../assets/css/Common_css';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Loading from '../../common/Loading';
+import action from '../../action';
 const {width, height} = Dimensions.get('window')
 class SingleDay extends Component{
     constructor(props) {
@@ -15,7 +15,11 @@ class SingleDay extends Component{
         this.state = {
             monthList: [],
             selected: [],
-            calendarArr: []
+            calendarArr: [],
+            topIndex:-1,
+            date:'',
+            isSlotView: false,
+            slotList: []
         }
     }
     componentDidMount(){
@@ -55,10 +59,12 @@ class SingleDay extends Component{
                     }
                 }
                 temp=this.removeDuplicatedItem(temp);
-                for(let k=0;k<dayIn;k++){
-                    temp.unshift(" ");
-                    selectArr.unshift(1);
-                    selecting.unshift(0);
+                if (dayIn != 7){
+                    for(let k=0;k<dayIn;k++){
+                        temp.unshift(" ");
+                        selectArr.unshift(1);
+                        selecting.unshift(0);
+                    }
                 }
                 this.setState({
                     selected:selectArr
@@ -159,6 +165,102 @@ class SingleDay extends Component{
             />
         </TouchableOpacity>
     }
+    selectDay(status,date,i,index){
+        this.setState({
+            topIndex: i,
+            date: date
+        })
+        const {calendarArr} = this.state
+        const {slot} = this.props
+        for(let j=0; j<calendarArr[i].select.length; j++) {
+            if(status === 0) {
+                if(j===index) {
+                    calendarArr[i].selecting[j]=1
+                } else {
+                    calendarArr[i].selecting[j]=0
+                }
+            }
+        }
+        //isSlotView
+        if(status === 0) {
+            this.setState({
+                isSlotView: true
+            }, () => {
+                for(let i=0; i<slot.length; i++) {
+                    if(this.parseDate(date) === this.parseDate(slot[i].day)) {
+                        this.setState({
+                            slotList: slot[i].list
+                        })
+                    }
+                }
+            })
+        }
+    }
+    toNext(price,slot_id,beginTme,endTime){
+        const {issatay} = this.props.navigation.state.params
+        if(issatay){
+            alert(111)
+            return
+        }
+        const {join, initJoin} = this.props
+        let datas = join;
+        datas.price = price
+        datas.slot_id = slot_id;
+        datas.date = this.state.date
+        datas.slot_time = beginTme+"-"+endTime
+        initJoin(datas)
+        NavigatorUtils.goPage({}, 'Requirements', 'navigate')
+    }
+    _renderList(data){
+        const {isMe, vol} = this.props.navigation.state.params
+        return (
+            <View style={[CommonStyle.flexCenter,{paddingTop: 10, paddingBottom: 10}]}>
+                <View style={[CommonStyle.commonWidth, CommonStyle.spaceRow]}>
+                    <View style={[CommonStyle.spaceCol,{height: 40,width: width*0.94 - 80,alignItems: 'flex-start'}]}>
+                        <Text numberOfLines={1} ellipsizeMode={'tail'} style={{color:"#333333",fontWeight: "bold"}}>
+                            {data.item.time[0]} - {data.item.time[1]}
+                        </Text>
+                        {
+                            vol
+                            ?
+                                <Text style={{color: '#999'}}>志愿者无需付费</Text>
+                            :
+                                <Text style={{color: '#999'}}>
+                                    <Text style={{color:this.props.theme,fontWeight:'bold'}}>¥{data.item.price}/人起 </Text>
+                                    还剩{data.item.personNum-data.item.order_person_num}个名额
+                                </Text>
+                        }
+                    </View>
+                    {
+                        isMe
+                        ?
+                            null
+                        :
+                        data.item.online === 1 || data.item.status === 1 || data.item.status === 2
+                        ?
+                            <View style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: '#ff5673'}]}>
+                                <Text style={{color: '#fff', fontWeight: 'bold'}}>{
+                                    data.item.online === 1 ? '已取消' : data.item.status === 1 ? '已删除' : '已过期'
+                                }</Text>
+                            </View>
+                        :
+                            vol
+                            ?
+                            <TouchableOpacity style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: this.props.theme}]}>
+                                <Text style={{color: '#fff', fontWeight: 'bold'}}>报名</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity
+                                style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: this.props.theme}]}
+                                onPress={() => this.toNext(data.item.price,data.item.slot_id,data.item.time[0],data.item.time[1])}
+                            >
+                                <Text style={{color: '#fff', fontWeight: 'bold'}}>选择</Text>
+                            </TouchableOpacity>
+                    }
+                </View>
+            </View>
+        )
+    }
     render(){
         let Day = <View style={CommonStyle.flexCenter}>
             <View style={[CommonStyle.flexStart,CommonStyle.commonWidth]}>
@@ -171,9 +273,48 @@ class SingleDay extends Component{
                 })}
             </View>
         </View>
-        const {calendarArr} = this.state
+        const {theme} = this.props
+        const {calendarArr, topIndex, isSlotView, slotList} = this.state
+        let single = [];
+        for(let i=0;i<calendarArr.length;i++) {
+            single.push(
+                <View style={[CommonStyle.commonWidth]} key={i}>
+                    <Text style={styles.year_title}>{calendarArr[i].y}年{calendarArr[i].m}月</Text>
+                    <View style={[CommonStyle.flexStart,{flexWrap: 'wrap'}]}>
+                        {calendarArr[i].list.map((item, index) => {
+                            return(
+                                <View>
+                                    {
+                                        calendarArr[i].select[index] === 0
+                                        ?
+                                            <TouchableOpacity
+                                                style={[CommonStyle.flexCenter,styles.day_one,{
+                                                    marginLeft: index%7===0?0:10,
+                                                    backgroundColor: calendarArr[i].selecting[index]==1&&i==topIndex&&calendarArr[i].select[index]==0?theme:'#fff'
+                                                }]}
+                                                onPress={()=>this.selectDay(calendarArr[i].select[index],JSON.stringify(calendarArr[i].y)+"-"+JSON.stringify(calendarArr[i].m)+"-"+JSON.stringify(item),i,index)}
+                                            >
+                                                <Text style={[styles.day_txt,{
+                                                    color:calendarArr[i].selecting[index]===1&&i===topIndex&&calendarArr[i].select[index]===0?'#fff':theme
+                                                }]}>{item}</Text>
+                                            </TouchableOpacity>
+                                        :
+                                            <View style={[CommonStyle.flexCenter,styles.day_one,{
+                                                marginLeft: index%7===0?0:10,
+                                            }]}>
+                                                <Text style={[styles.day_txt,{color: '#999'}]}>{item}</Text>
+                                            </View>
+                                    }
+                                </View>
+                            )
+                        })}
+                    </View>
+                </View>
+            )
+        }
+
         return(
-            <View style={[CommonStyle.flexCenter,{flex: 1,backgroundColor:'#fff',justifyContent:'flex-start'}]}>
+            <View style={[CommonStyle.flexCenter,{flex: 1,backgroundColor:'#fff',justifyContent:'flex-start',position: 'relative'}]}>
                 <RNEasyTopNavBar
                     title={'我的订单'}
                     backgroundTheme={'#fff'}
@@ -184,9 +325,24 @@ class SingleDay extends Component{
                 {
                     calendarArr.length > 0
                     ?
-                        <Text>111</Text>
+                        single
                     :
                        <Loading></Loading>
+                }
+                {
+                    isSlotView
+                    ?
+                        <View style={styles.slot_modal}>
+                            <FlatList
+                                data={slotList}
+                                horizontal={false}
+                                renderItem={(data)=>this._renderList(data)}
+                                showsHorizontalScrollIndicator = {false}
+                                keyExtractor={(item, index) => index.toString()}
+                            />
+                        </View>
+                    :
+                        null
                 }
             </View>
         )
@@ -199,9 +355,45 @@ const styles = StyleSheet.create({
     },
     back_icon: {
         paddingLeft: width*0.03
+    },
+    year_title:{
+        fontWeight:'bold',
+        color: '#333',
+        fontSize: 16,
+        marginTop: 20
+    },
+    day_one:{
+        marginTop: 10,
+        width:(width*0.94-60)/7,
+        borderRadius:(width*0.94-60)/7/2,
+        position:'relative',
+        height: (width*0.94-60)/7
+    },
+    day_txt:{
+        fontWeight: "bold"
+    },
+    slot_modal:{
+        position:'absolute',
+        left: 0,
+        right: 0,
+        bottom:0,
+        borderTopWidth: 1,
+        borderTopColor: '#f5f5f5',
+        minHeight: 100,
+        maxHeight: 400
+    },
+    select_btn: {
+        width: 75,
+        height: 40,
+        borderRadius: 3
     }
 })
 const mapStateToProps = state => ({
-    slot: state.slot.slot.slot
+    slot: state.slot.slot.slot,
+    theme: state.theme.theme,
+    join: state.join.join
 })
-export default connect(mapStateToProps)(SingleDay)
+const mapDispatchToProps = dispatch => ({
+    initJoin: join => dispatch(action.initJoin(join))
+})
+export default connect(mapStateToProps, mapDispatchToProps)(SingleDay)

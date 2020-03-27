@@ -47,19 +47,16 @@ class OrderPage extends Component{
     }
     render(){
         const {theme} = this.props
-        let statusBar = {
-            barStyle: 'dark-content',
-        };
         return (
             <View style={{flex: 1}}>
                 <RNEasyTopNavBar
                     title={'我的订单'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
-                    statusBar={statusBar}
                     leftButton={this.getLeftButton()}
                 />
                 <ScrollableTabView
+                    initialPage={this.props.navigation.state.params.initPage?this.props.navigation.state.params.initPage:0}
                     renderTabBar={() => (<CustomeTabBar
                         backgroundColor={'rgba(0,0,0,0)'}
                         locked={true}

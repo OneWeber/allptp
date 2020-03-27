@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet} from 'react-native'
+import {StyleSheet, View, ActivityIndicator,Text} from 'react-native'
 import ViewBotNavigator from '../navigator/ViewBotNavigator';
 import NavigatorUtils from '../navigator/NavigatorUtils';
 import {connect} from 'react-redux'
@@ -9,10 +9,12 @@ import AsyncStorage from '@react-native-community/async-storage';
 import InitToken from '../expand/dao/InitToken';
 import Fetch from '../expand/dao/Fetch';
 import actions from '../action'
+import CommonStyle from '../../assets/css/Common_css';
 class ViewPage extends Component{
     constructor(props) {
         super(props);
         this.InitTokens = new InitToken()
+        console.disableYellowBox = true;
     }
     componentDidMount(){
         this.InitTokens.goInitToken().then(res => {
@@ -44,7 +46,27 @@ class ViewPage extends Component{
     }
     render(){
         NavigatorUtils.navigation = this.props.navigation
-        return <ViewBotNavigator />
+        const {theme,comming,hotcity,cityitem,selectstory,history} = this.props
+        return <View style={{flex: 1,position:'relative'}}>
+            <ViewBotNavigator />
+            {
+                comming.isLoading || hotcity.isLoading || cityitem.isLoading || selectstory.isLoading || history.isLoading
+                ?
+                    <View style={[CommonStyle.flexCenter,{
+                        position:'absolute',
+                        left:0,
+                        top:0,
+                        right:0,
+                        bottom:0,
+                        backgroundColor: '#fff'
+                    }]}>
+                        <ActivityIndicator size={'small'} color={theme}/>
+                        <Text style={{color:'#999',marginTop: 10}}>加载中</Text>
+                    </View>
+                :
+                    null
+            }
+        </View>
     }
 }
 const styles = StyleSheet.create({
@@ -56,6 +78,12 @@ const styles = StyleSheet.create({
 })
 const mapStateToProps = state => ({
     user: state.user.user,
+    theme:state.theme.theme,
+    comming: state.comming,
+    hotcity: state.hotcity,
+    cityitem: state.cityitem,
+    selectstory: state.selectstory,
+    history: state.history,
     //token: state.token.token?state.token.token:''
 })
 const mapDispatchToProps = dispatch => ({

@@ -1,6 +1,6 @@
 import Types from '../Types';
 import DataStore from '../../expand/dao/DataStore';
-export function onLoadWish(storeName, url, data) {
+export function onLoadWish(storeName, url, data, callBack) {
     return dispatch => {
         dispatch({type:Types.WISH_REFRESH, storeName: storeName})
         let dataStore = new DataStore()
@@ -12,6 +12,9 @@ export function onLoadWish(storeName, url, data) {
                 storeName,
                 error
             })
+            if(typeof callBack === 'function'){
+                callBack(error)
+            }
         })
     }
 }

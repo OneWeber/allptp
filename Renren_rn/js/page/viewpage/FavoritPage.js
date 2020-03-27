@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Dimensions, FlatList, RefreshControl} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Dimensions, FlatList, RefreshControl,SafeAreaView} from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import CommonStyle from '../../../assets/css/Common_css';
@@ -29,7 +29,9 @@ class FavoritePage extends Component{
         let formData = new FormData();
         formData.append('token', token);
         formData.append('flag',1);
-        onLoadWish(this.storeName, HttpUrl + 'Comment/collegroup_list', formData)
+        onLoadWish(this.storeName, HttpUrl + 'Comment/collegroup_list', formData, callback => {
+            alert(JSON.stringify(callback))
+        })
     }
     goAddWishList(){
         NavigatorUtils.goPage({}, 'AddWishList')
@@ -117,14 +119,16 @@ class FavoritePage extends Component{
                     backdropPressToClose={true}
                     coverScreen={true}
                     onClosingState={this.onClosingState}>
-                    <View style={[styles.modal_con,CommonStyle.flexCenter,{justifyContent: 'flex-start'}]}>
-                        <View style={[styles.modal_btn,CommonStyle.flexCenter,{borderBottomWidth:1,borderBottomColor:'#f5f5f5'}]}>
-                            <Text style={styles.modal_txt}>编辑</Text>
+                    <SafeAreaView style={{flex: 1}}>
+                        <View style={[styles.modal_con,CommonStyle.flexCenter,{justifyContent: 'flex-start'}]}>
+                            <View style={[styles.modal_btn,CommonStyle.flexCenter,{borderBottomWidth:1,borderBottomColor:'#f5f5f5'}]}>
+                                <Text style={styles.modal_txt}>编辑</Text>
+                            </View>
+                            <View style={[styles.modal_btn,CommonStyle.flexCenter]}>
+                                <Text style={[styles.modal_txt,{color:'red'}]}>删除</Text>
+                            </View>
                         </View>
-                        <View style={[styles.modal_btn,CommonStyle.flexCenter]}>
-                            <Text style={[styles.modal_txt,{color:'red'}]}>删除</Text>
-                        </View>
-                    </View>
+                    </SafeAreaView>
                 </Modal>
             </View>
         )
@@ -173,6 +177,6 @@ const mapStateToProps = state => ({
     wish: state.wish
 })
 const mapDispatchToProps = dispatch => ({
-    onLoadWish:(storeName, url, data) => dispatch(action.onLoadWish(storeName, url, data))
+    onLoadWish:(storeName, url, data, callBack) => dispatch(action.onLoadWish(storeName, url, data, callBack))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(FavoritePage)

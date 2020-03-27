@@ -1,0 +1,38 @@
+const order = [
+    {
+        title:'待体验',
+        icon:require('../../assets/images/home/dty.png'),
+        router:'',
+        width:20,
+        height:22.5
+    },
+    {
+        title:'进行中',
+        icon:require('../../assets/images/home/jxz.png'),
+        router:'',
+        width:17,
+        height:21
+    },
+    {
+        title:'未完成',
+        icon:require('../../assets/images/home/wwc.png'),
+        router:'',
+        width:22,
+        height:21.5
+    },
+    {
+        title:'已完成',
+        icon:require('../../assets/images/home/ywc.png'),
+        router:'',
+        width:21,
+        height:22
+    },
+    {
+        title:'退款',
+        icon:require('../../assets/images/home/tk.png'),
+        router:'',
+        width:24,
+        height:22
+    }
+]
+export default order

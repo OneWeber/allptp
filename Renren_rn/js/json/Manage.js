@@ -1,0 +1,31 @@
+const manage = [
+    {
+        title:'体验预定',
+        icon:require('../../assets/images/home/tyyd.png'),
+        router:'ActiveReserve',
+        width:18,
+        height:23
+    },
+    {
+        title:'志愿者申请',
+        icon:require('../../assets/images/home/zyzsq.png'),
+        router:'',
+        width:24.5,
+        height:19
+    },
+    {
+        title:'已完成',
+        icon:require('../../assets/images/home/ywc.png'),
+        router:'',
+        width:18,
+        height:23
+    },
+    {
+        title:'退款申请',
+        icon:require('../../assets/images/home/tyyd.png'),
+        router:'',
+        width:24,
+        height:22
+    }
+]
+export default manage

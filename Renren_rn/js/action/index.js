@@ -6,6 +6,19 @@ import {onLoadWish} from './wish'
 import {onLoadWishDetail} from './wishdetail'
 import {initJoin} from './join'
 import {initSlot} from './slot'
+import {onLoadComming} from './comming'
+import {onLoadHotCity} from './hotcity'
+import {onLoadCityItem} from './cityitem'
+import {onLoadSelectStory} from './selectstory'
+import {onLoadHistory} from './histroy'
+import {onLoadActiveList} from './activelist'
+import {onLoadStoryList} from './storylist'
+import {onLoadVolunteer, onLoadMoreVolunteer} from './volunteer'
+import {onLoadCreater, onLoadMoreCreater} from './creater'
+import {onLoadFocus, onLoadMoreFocus} from './focus'
+import {onLoadFans, onLoadMoreFans} from './focus/fans'
+import {onLoadTrading, onLoadMoreTrading} from './trading'
+import {onLoadMyStory} from './info/mystory'
 export default {
     InitUser,
     InitToken,
@@ -16,5 +29,23 @@ export default {
     onLoadWish,
     onLoadWishDetail,
     initJoin,
-    initSlot
+    initSlot,
+    onLoadComming,
+    onLoadHotCity,
+    onLoadCityItem,
+    onLoadSelectStory,
+    onLoadHistory,
+    onLoadActiveList,
+    onLoadStoryList,
+    onLoadVolunteer,
+    onLoadCreater,
+    onLoadMoreCreater,
+    onLoadMoreVolunteer,
+    onLoadFocus,
+    onLoadMoreFocus,
+    onLoadFans,
+    onLoadMoreFans,
+    onLoadTrading,
+    onLoadMoreTrading,
+    onLoadMyStory
 }

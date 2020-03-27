@@ -28,6 +28,9 @@ const CommonStyle = StyleSheet.create({
     },
     commonWidth: {
         width: widthScreen*0.94
-    }
+    },
+    back_icon: {
+        paddingLeft: widthScreen*0.03
+    },
 })
 export default CommonStyle

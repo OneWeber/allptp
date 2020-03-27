@@ -1,0 +1,31 @@
+const create = [
+    {
+        title:'创建体验',
+        icon:require('../../assets/images/home/cjty.png'),
+        router:'',
+        width:19,
+        height:20
+    },
+    {
+        title:'体验日历',
+        icon:require('../../assets/images/home/tyrl.png'),
+        router:'',
+        width:20,
+        height:20.5
+    },
+    {
+        title:'发布故事',
+        icon:require('../../assets/images/home/fbgs.png'),
+        router:'PublishStory',
+        width:26,
+        height:21
+    },
+    {
+        title:'我的故事',
+        icon:require('../../assets/images/home/wdgs.png'),
+        router:'MyStory',
+        width:18,
+        height:22
+    }
+]
+export default create

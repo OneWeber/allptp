@@ -1,4 +1,5 @@
 PODS:
+  - BaiduMapKit (3.4.4)
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.5.6):
     - React
@@ -184,6 +185,9 @@ PODS:
     - React-cxxreact (= 0.61.1)
     - React-jsi (= 0.61.1)
   - React-jsinspector (0.61.1)
+  - react-native-baidumap-sdk (0.6.0):
+    - BaiduMapKit (~> 3.4.0)
+    - React
   - react-native-blur (0.8.0):
     - React
   - react-native-safe-area-context (0.7.3):
@@ -260,6 +264,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-baidumap-sdk (from `../node_modules/react-native-baidumap-sdk/lib/ios`)
   - react-native-blur (from `../node_modules/react-native-blur`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-video (from `../node_modules/react-native-video`)
@@ -284,6 +289,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - BaiduMapKit
     - boost-for-react-native
 
 EXTERNAL SOURCES:
@@ -317,6 +323,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-baidumap-sdk:
+    :path: "../node_modules/react-native-baidumap-sdk/lib/ios"
   react-native-blur:
     :path: "../node_modules/react-native-blur"
   react-native-safe-area-context:
@@ -359,6 +367,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  BaiduMapKit: 4ac88f5a363500760392825b69709f4a0125f81e
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
@@ -375,6 +384,7 @@ SPEC CHECKSUMS:
   React-jsi: 61ff417c95e6c3af50fb96399037e80752fb5ce7
   React-jsiexecutor: ee45274419eb95614bbbadb98e20684c5f29996e
   React-jsinspector: 574d597112f9ea3d1b717f6fb62aef764c70dd6f
+  react-native-baidumap-sdk: 24ca642566d9503ee38d43b5c82f71579774d54a
   react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-safe-area-context: e200d4433aba6b7e60b52da5f37af11f7a0b0392
   react-native-video: d01ed7ff1e38fa7dcc6c15c94cf505e661b7bfd0
@@ -396,6 +406,6 @@ SPEC CHECKSUMS:
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: d8c572ddec8d05b7dba08e4e5f1924004a177078
 
-PODFILE CHECKSUM: 11a5b67eaa211934d1169da8700b930bc4bbddf0
+PODFILE CHECKSUM: 3d84adf31254911b96400e6a5df7a95e3fb1628a
 
 COCOAPODS: 1.8.4

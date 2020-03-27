@@ -18,6 +18,7 @@ export default class Login extends Component{
         this.state = {
 
         }
+        this.redirect = this.props.navigation.state.params.redirect?this.props.navigation.state.params.redirect:null
     }
 
     onAudioBecomingNoisy() {
@@ -48,7 +49,7 @@ export default class Login extends Component{
                     repeat={true}//确定在到达结尾时是否重复播放视频。
                 />
                 <View style={styles.login_bg}>
-                    <LoginContainer />
+                    <LoginContainer redirect={this.redirect} />
                 </View>
 
             </View>
@@ -123,7 +124,7 @@ class LoginContainer extends Component{
                             <Text style={styles.login_prompt}>尽在登录后</Text>
                         </View>
                     </SafeAreaView>
-                    <MapInputContainer />
+                    <MapInputContainer {...this.props}/>
                     <SafeAreaView>
                         <Third />
                     </SafeAreaView>
@@ -154,7 +155,7 @@ class InputContainer extends Component{
     }
     //登录
     login_in() {
-        let {onInitUser} = this.props
+        let {onInitUser, redirect, refresh} = this.props
         let formData = new FormData();
         formData.append("token",this.props.token);
         formData.append("mobile",this.state.tel);
@@ -164,16 +165,23 @@ class InputContainer extends Component{
         Fetch.post(HttpUrl + 'User/login_psw', formData).then(res => {
             if(res.code === 1) {
                 console.log(res)
-                AsyncStorage.setItem('username', JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name))
+                AsyncStorage.setItem('username', JSON.stringify(res.data.family_name||res.data.middle_name||res.data.name?
+                    res.data.family_name+res.data.middle_name+res.data.name:'匿名用户'))
                 AsyncStorage.setItem('avatar', JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url))
                 AsyncStorage.setItem('userid', JSON.stringify(res.data.user_id))
                 console.log('res', res.data)
                 onInitUser({
-                    username: res.data.family_name+res.data.middle_name+res.data.name,
+                    username: res.data.family_name||res.data.middle_name||res.data.name?
+                        res.data.family_name+res.data.middle_name+res.data.name:'匿名用户',
                     avatar: res.data.headimage.domain + res.data.headimage.image_url,
                     userid:res.data.user_id
                 })
-                NavigatorUtils.goPage({}, 'Main')
+                if(redirect){
+                    NavigatorUtils.goPage({...this.props.navigation.state.params}, redirect)
+                } else {
+                    NavigatorUtils.goPage({}, 'ViewPage')
+                }
+
             } else {
                 console.log(res.msg)
             }
