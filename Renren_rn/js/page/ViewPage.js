@@ -7,13 +7,12 @@ import HttpUrl from '../utils/Http';
 import HttpUtils from '../expand/dao/Fetch';
 import AsyncStorage from '@react-native-community/async-storage';
 import InitToken from '../expand/dao/InitToken';
-import Fetch from '../expand/dao/Fetch';
 import actions from '../action'
 import CommonStyle from '../../assets/css/Common_css';
 class ViewPage extends Component{
     constructor(props) {
         super(props);
-        this.InitTokens = new InitToken()
+        this.InitTokens = new InitToken();
         console.disableYellowBox = true;
     }
     componentDidMount(){
@@ -33,24 +32,13 @@ class ViewPage extends Component{
             }
         })
     }
-    //验证用户是否登录
-    UserInfo(token) {
-        const promise = new Promise((resolve, reject) => {
-            let formData=new FormData();
-            formData.append('token',token);
-            Fetch.post(HttpUrl+'User/get_user',formData).then(res => {
-                resolve(res)
-            })
-        })
-        return promise
-    }
     render(){
         NavigatorUtils.navigation = this.props.navigation
         const {theme,comming,hotcity,cityitem,selectstory,history} = this.props
         return <View style={{flex: 1,position:'relative'}}>
             <ViewBotNavigator />
-            {
-                comming.isLoading || hotcity.isLoading || cityitem.isLoading || selectstory.isLoading || history.isLoading
+             {
+                comming['commingactive']&&comming['commingactive'].isLoading || (hotcity['hotcity']&&hotcity['hotcity'].isLoading)
                 ?
                     <View style={[CommonStyle.flexCenter,{
                         position:'absolute',
@@ -60,12 +48,18 @@ class ViewPage extends Component{
                         bottom:0,
                         backgroundColor: '#fff'
                     }]}>
-                        <ActivityIndicator size={'small'} color={theme}/>
-                        <Text style={{color:'#999',marginTop: 10}}>加载中</Text>
+                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                        <Text style={{
+                            color:'#f5f5f5',
+                            fontWeight: 'bold',
+                            marginTop: 20,
+                            fontSize: 25
+                        }}>ALLPTP</Text>
                     </View>
                 :
                     null
             }
+
         </View>
     }
 }

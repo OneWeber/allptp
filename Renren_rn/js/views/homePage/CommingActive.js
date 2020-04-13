@@ -17,11 +17,12 @@ class CommingActive extends Component{
         this.storeName='commingactive'
         let formData=new FormData();
         formData.append('token', token);
-        onLoadComming(this.storeName, NewHttp + 'SoonAct', formData)
+        formData.append('version', '2.0');
+        onLoadComming(this.storeName, NewHttp + 'SoonActTwo', formData)
     }
     renderItem(data){
         const {theme} = this.props
-        return <ActiveItem data_a={data.item} data_index={data.index} {...this.props} style={{
+        return <ActiveItem isComming={true} data_a={data.item} data_index={data.index} {...this.props} style={{
                 marginTop: 0,
                 marginLeft: data.index==0?width*0.03:10,
                 marginRight: data.index===4?width*0.03:0,

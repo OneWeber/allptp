@@ -27,6 +27,24 @@ import ActiveReserve from '../views/info/activemanage/ActiveReserve';
 import Trading from '../views/info/Trading';
 import PublishStory from '../views/info/createcenter/PublishStory';
 import MyStory from '../views/info/createcenter/MyStory';
+import CreateActive from '../views/info/createcenter/CreateActive';
+import Language from '../views/info/createcenter/createActive/CreateStep/Language';
+import Introduce from '../views/info/createcenter/createActive/CreateStep/Introduce';
+import Content from '../views/info/createcenter/createActive/CreateStep/Content';
+import Provide from '../views/info/createcenter/createActive/CreateStep/Provide';
+import Bring from '../views/info/createcenter/createActive/CreateStep/Bring';
+import Title from '../views/info/createcenter/createActive/CreateStep/Title';
+import Photo from '../views/info/createcenter/createActive/CreateStep/Photo';
+import Address from '../views/info/createcenter/createActive/CreateStep/Address';
+import Time from '../views/info/createcenter/createActive/CreateStep/Time';
+import LongTime from '../views/info/createcenter/createActive/CreateStep/LongTime';
+import EditStandard from '../views/info/createcenter/createActive/CreateStep/public/EditStandard';
+import ParentChildPackage from '../views/info/createcenter/createActive/CreateStep/public/ParentChildPackage';
+import CustomPackage from '../views/info/createcenter/createActive/CreateStep/public/CustomPackage';
+import Calendar from '../views/info/createcenter/createActive/CreateStep/common/Calendar';
+import AboutDifference from '../views/info/createcenter/createActive/CreateStep/common/AboutDifference';
+import SettingDifference from '../views/info/createcenter/createActive/CreateStep/common/SettingDifference';
+import Preferential from '../views/homePage/preference/Preferential';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -77,7 +95,7 @@ const MainNavigator = createStackNavigator({
     ActiveDetail: {
         screen: ActiveDetail,
         navigationOptions: {
-            headerShown: false
+            headerShown: false,
         }
     },
     StoryDetail: {
@@ -190,6 +208,114 @@ const MainNavigator = createStackNavigator({
     },
     MyStory: {
         screen: MyStory,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    CreateActive: {
+        screen: CreateActive,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Language: {
+        screen: Language,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Introduce:{
+        screen: Introduce,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Content: {
+        screen: Content,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Provide: {
+        screen: Provide,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Bring: {
+        screen: Bring,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Title: {
+        screen: Title,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Photo: {
+        screen: Photo,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Time: {
+        screen: Time,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    LongTime: {
+        screen: LongTime,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    EditStandard: {
+        screen: EditStandard,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    ParentChildPackage: {
+        screen: ParentChildPackage,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    CustomPackage: {
+        screen: CustomPackage,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Calendar: {
+        screen: Calendar,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AboutDifference: {
+        screen: AboutDifference,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SettingDifference: {
+        screen: SettingDifference,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Preferential: {
+        screen: Preferential,
         navigationOptions: {
             headerShown: false
         }

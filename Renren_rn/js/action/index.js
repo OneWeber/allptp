@@ -19,6 +19,20 @@ import {onLoadFocus, onLoadMoreFocus} from './focus'
 import {onLoadFans, onLoadMoreFans} from './focus/fans'
 import {onLoadTrading, onLoadMoreTrading} from './trading'
 import {onLoadMyStory} from './info/mystory'
+import {onLoadToAudit} from './info/toaudit'
+import {onLoadAlready} from './info/already'
+import {onLoadNotPass} from './info/notpass'
+import {onLoadUncommit} from './info/uncommit';
+import {
+    changeDiscount,
+    changeParentChildPackage,
+    changeAdultStandard,
+    changeChildStandard,
+    changeCustomePackage,
+    changeLongDay,
+    changeDifference
+} from './info/steps'
+
 export default {
     InitUser,
     InitToken,
@@ -47,5 +61,16 @@ export default {
     onLoadMoreFans,
     onLoadTrading,
     onLoadMoreTrading,
-    onLoadMyStory
+    onLoadMyStory,
+    onLoadToAudit,
+    onLoadAlready,
+    onLoadNotPass,
+    onLoadUncommit,
+    changeDiscount,
+    changeParentChildPackage,
+    changeAdultStandard,
+    changeChildStandard,
+    changeCustomePackage,
+    changeLongDay,
+    changeDifference
 }

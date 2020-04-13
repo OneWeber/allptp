@@ -11,9 +11,8 @@ import {
     Dimensions,
     SafeAreaView
 } from 'react-native'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 const widthScreen = Dimensions.get('window').width;
-
-
 export default class CustomTabBar extends Component {
     constructor(props: TabBarProps) {
         super(props);
@@ -58,7 +57,7 @@ export default class CustomTabBar extends Component {
     }
 
     _renderUnderline() {
-        const containerWidth =this.props.isWish?widthScreen*0.92-80:this.props.containerWidth;
+        const containerWidth =this.props.isPreferential?widthScreen-100:this.props.containerWidth;
         const numberOfTabs = this.props.tabs.length;
         const underlineWidth = this.props.tabUnderlineDefaultWidth ? this.props.tabUnderlineDefaultWidth : containerWidth / (numberOfTabs * 2);
         const scale = this.props.tabUnderlineScaleX ? this.props.tabUnderlineScaleX : 3;
@@ -68,7 +67,7 @@ export default class CustomTabBar extends Component {
             width: underlineWidth,
             height: 2,
             borderRadius: 2,
-            backgroundColor: this.props.activeColor,
+            backgroundColor: this.props.lineColor?this.props.lineColor:this.props.activeColor,
             bottom: 3,
             left: deLen
         };
@@ -108,10 +107,29 @@ export default class CustomTabBar extends Component {
 
     render() {
         return (
-            <SafeAreaView style={{backgroundColor: this.props.sabackgroundColor}}>
-                <View style={[styles.tabs, {backgroundColor: this.props.backgroundColor,height:this.props.isWish?50:40}, this.props.style]}>
-
-                    <View style={[styles.tabs, {backgroundColor: this.props.backgroundColor,width:this.props.isWish?widthScreen*0.92-80:"100%",height:this.props.isWish?50:40}, this.props.style]}>
+            <SafeAreaView style={{
+                backgroundColor: this.props.sabackgroundColor,
+                justifyContent:'space-between',
+                alignItems: 'center',
+                flexDirection: 'row'}}>
+                {
+                    this.props.isPreferential
+                    ?
+                        <View style={{width: 40}}>
+                            <AntDesign
+                                name={'left'}
+                                size={20}
+                                style={{color:'#333',marginLeft:widthScreen*0.03}}
+                                onPress={()=>{
+                                    this.props.navigation.goBack()
+                                }}
+                            />
+                        </View>
+                    :
+                        null
+                }
+                <View style={[styles.tabs, {backgroundColor: this.props.backgroundColor,height:this.props.isPreferential?50:40,width:this.props.isPreferential?widthScreen-100:'100%'}, this.props.style]}>
+                    <View style={[styles.tabs, {backgroundColor: this.props.backgroundColor,width:"100%",height:this.props.isPreferential?50:40}, this.props.style]}>
                         {this.props.tabs.map((name, page) => {
                             const isTabActive = this.props.activeTab === page;
                             return this._renderTab(name, page, isTabActive, this.props.goToPage)
@@ -120,6 +138,25 @@ export default class CustomTabBar extends Component {
                     {this._renderUnderline()}
 
                 </View>
+                {
+                    this.props.isPreferential
+                    ?
+                        <View style={{
+                            width: 40,
+                            justifyContent:'flex-end',
+                            alignItems: 'center',
+                            flexDirection: 'row'
+                        }}>
+                            <AntDesign
+                                name={'search1'}
+                                size={20}
+                                style={{color:'#999',marginRight:widthScreen*0.03}}
+                            />
+                        </View>
+                    :
+                        null
+                }
+
             </SafeAreaView>
         );
     };

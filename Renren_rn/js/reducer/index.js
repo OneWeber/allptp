@@ -22,6 +22,11 @@ import fans from './focus/fans'
 import trading from './trading'
 import reverse from './info/reserve'
 import mystory from './info/mystory'
+import toaudit from './info/toaudit';
+import already from './info/already';
+import notpass from './info/notpass';
+import uncommit from './info/uncommit';
+import steps from './info/steps';
 const index = combineReducers({
     theme: theme,
     user: user,
@@ -45,6 +50,11 @@ const index = combineReducers({
     fans: fans,
     trading: trading,
     reverse: reverse,
-    mystory: mystory
+    mystory: mystory,
+    toaudit: toaudit,
+    already: already,
+    notpass: notpass,
+    uncommit: uncommit,
+    steps: steps
 })
 export default index

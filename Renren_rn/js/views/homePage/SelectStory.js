@@ -5,6 +5,7 @@ import {connect} from 'react-redux'
 import action from '../../action'
 import HttpUrl from '../../utils/Http';
 import LazyImage from 'animated-lazy-image';
+import NavigatorUtils from '../../navigator/NavigatorUtils';
 const {width, height } = Dimensions.get('window')
 class SelectStory extends Component{
     componentDidMount() {
@@ -32,6 +33,8 @@ class SelectStory extends Component{
             width: width*0.94*0.95,
             marginLeft:data.index===0?width*0.03:15,
             marginRight:data.index===store.items.data.data.data.length-1?width*0.03:0
+        }} onPress={()=>{
+            NavigatorUtils.goPage({story_id: data.item.story_id}, 'StoryDetail')
         }}>
             <LazyImage
                 source={{uri:data.item.cover.domain + data.item.cover.image_url}}

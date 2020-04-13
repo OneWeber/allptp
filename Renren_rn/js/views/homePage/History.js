@@ -3,10 +3,11 @@ import {StyleSheet, View, Text, FlatList, Dimensions,TouchableOpacity} from 'rea
 import CommonStyle from '../../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import action from '../../action'
-import HttpUrl from '../../utils/Http';
 const {width, height } = Dimensions.get('window')
 import ActiveItem from '../../common/ActiveItem';
 import LazyImage from 'animated-lazy-image';
+import NewHttp from '../../utils/NewHttp';
+import NavigatorUtils from '../../navigator/NavigatorUtils';
 class History extends Component{
     constructor(props) {
         super(props);
@@ -17,16 +18,16 @@ class History extends Component{
     }
     loadData(){
         const {token, onLoadHistory} = this.props;
-
         this.storeName='history'
         let formData=new FormData();
         formData.append('token', token);
         formData.append('page',1);
-        onLoadHistory(this.storeName, HttpUrl + 'Index/visit_lately', formData)
+        formData.append('version','2.0');
+        onLoadHistory(this.storeName, NewHttp + 'VisitListTwo', formData)
     }
     _renderHistory(data){
-        const {history} = this.props
-        let store = history[this.storeName]
+        const {history} = this.props;
+        let store = history[this.storeName];
         return data.item.flag === 1
             ?
             <ActiveItem
@@ -41,7 +42,7 @@ class History extends Component{
                 width: 165,
                 marginLeft:data.index==0?width*0.03:8,
                 marginRight:data.index===store.items.data.data.data.length-1?width*0.03:0
-            }}>
+            }} onPress={()=>{ NavigatorUtils.goPage({story_id: data.item.story_id}, 'StoryDetail')}}>
                 <LazyImage
                     source={{uri:data.item.domain + data.item.image_url}}
                     style={{width:'100%',height: 126,borderRadius: 4}}

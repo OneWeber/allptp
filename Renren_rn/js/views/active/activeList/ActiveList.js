@@ -22,40 +22,39 @@ import HttpUrl from '../../../utils/Http';
 import NoData from '../../../common/NoData';
 import LazyImage from 'animated-lazy-image'
 import Loading from '../../../common/Loading';
-import Screen from '../../../common/Screen';
-const {width} = Dimensions.get('window')
-export default class ActiveList extends Component{
+import Screening from '../../../model/screen';
+import PriceRange from '../../../model/range';
+import RNEasyAddressPicker from 'react-native-easy-address-picker';
+const {width, height} = Dimensions.get('window')
+class ActiveList extends Component{
     constructor(props) {
         super(props);
-        this.tabNames=[
+        this.tabNames = [
             {
                 title:'类型',
-                screenType: 1,
-                data:[
-                    {title:'户外运动',value:1},
-                    {title:'本土文化',value:2},
-                    {title:'少数民族',value:3}
-                ]
+                data:[{title:'户外活动',id: 1},{title:'少数民族',id: 2},{title:'本土文化', id:3}],
+                type: 1
             },
             {
                 title:'排序',
-                screenType: 1,
-                data:[
-                    {title:'价格由低到高',value:1},
-                    {title:'评分优先',value:2},
-                    {title:'评论优先',value:3},
-                    {title:'收藏优先',value:3}
-                ]
+                data:[{title:'价格低到高',},{title:'评分优先'},{title:'评论优先'},{title:'收藏优先'}],
+                type: 1
             },
             {
                 title:'地区',
-                screenType: 2
+                data:[],
+                type: 2
             },
             {
                 title:'筛选',
-                screenType: 3
-            },
+                data:[],
+                type: 3
+            }
         ]
+        this.state = {
+            screenIndex: '',
+            kind_id: ''
+        }
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -83,18 +82,44 @@ export default class ActiveList extends Component{
             />
         </TouchableOpacity>
     }
-    _selectScreen(index){
-
+    getCustom(){
+        return(
+            <CustomContent />
+        )
     }
-    _selectItem(screenIndex, index, val){
-
+    _clickConfirmBtn(data){
+        this.screen.openOrClosePanel(this.state.screenIndex)
     }
-    _closeScreen(){
-        this.screen.closeScreen()
+    _itemOnpress(tIndex, index, data){
+        this.setState({
+            kind_id: data.id
+        },() => {
+            const {onLoadActiveList} = this.props;
+            this.storeName = 'activelist'
+            let formData=new FormData();
+            formData.append('token', this.props.token);
+            formData.append('keywords', '');
+            formData.append('sort', '');
+            formData.append('page', 1);
+            formData.append('price_low', '');
+            formData.append('price_high','');
+            formData.append('country','');
+            formData.append('province', '');
+            formData.append('city', '');
+            formData.append('region', '');
+            formData.append('activ_begin_time', '');
+            formData.append('activ_end_time', '');
+            formData.append('laguage', '');
+            formData.append('kind_id',this.state.kind_id);
+            formData.append('is_volunteen', '');
+            formData.append('max_person_num', '');
+            onLoadActiveList(this.storeName, HttpUrl + 'Activity/activ_list', formData)
+        })
     }
     render(){
+        const {theme} = this.props
         return(
-            <SafeAreaView style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start',backgroundColor:'#fff'}]}>
+            <SafeAreaView style={[{flex: 1,justifyContent:'flex-start',backgroundColor:'#fff',position:'relative'}]}>
                 <RNEasyTopNavBar
                     title={'体验列表'}
                     backgroundTheme={'#fff'}
@@ -102,17 +127,36 @@ export default class ActiveList extends Component{
                     leftButton={this.getLeftButton()}
                     rightButton={this.getRightButton()}
                 />
-                <Screen
-                    ref={screen=>this.screen=screen}
-                    tabNames={this.tabNames}
-                    _selectScreen={(index)=>this._selectScreen(index)}
-                    selectItem={(screenIndex, index, val) => {this._selectItem(screenIndex, index, val)}}
+                <Screening
+                    ref={screen => this.screen = screen}
+                    screenData={this.tabNames}
+                    selectHeader={(data, index) => {
+                        this.setState({
+                            screenIndex: index
+                        })
+                    }}
+                    selectIndex={[0,0,0,0]}
+                    customContent={this.getCustom()}
+                    customData={[]}
+                    customFunc={()=>{
+                        this.picker.showPicker()
+                    }}
+                    itemOnpress={(tIndex, index, data) => {
+                        this._itemOnpress(tIndex, index, data)
+                    }}
                 >
-                    <ScreenContent closeScreen={()=>this._closeScreen()}/>
-                </Screen>
-                <View style={{flex: 1}}>
-                    <ActiveListContentMap />
-                </View>
+                    <View style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start'}]}>
+                        <ActiveListContentMap  {...this.state}/>
+                        <RNEasyAddressPicker
+                            hasCountry={true}
+                            ref={picker => this.picker = picker}
+                            selectCountry={(index) => {}}
+                            selectCity={(index) => {}}
+                            clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                        />
+                    </View>
+                </Screening>
+
             </SafeAreaView>
         )
     }
@@ -141,8 +185,22 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginTop: 20,
         fontWeight: "bold"
+    },
+    addRoll:{
+        width: 34,
+        height:34,
+        borderRadius: 17,
+        borderWidth: 1
     }
 })
+const mapState = state => ({
+    theme: state.theme.theme,
+    token: state.token.token
+})
+const mapDispatch = dispatch => ({
+    onLoadActiveList: (storeName, url, data) => dispatch(action.onLoadActiveList(storeName, url, data))
+})
+export default connect(mapState, mapDispatch)(ActiveList)
 class ActiveListContent extends Component{
     constructor(props) {
         super(props);
@@ -201,7 +259,7 @@ class ActiveListContent extends Component{
                   }]}>{data.item.title}</Text>
             <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 5}]}>
                 {this.tabs.map((item, index) => {
-                    return <View style={[styles.tab_item,{
+                    return <View key={index} style={[styles.tab_item,{
                         backgroundColor:index===0?'#EEFFFF':'#F5F6F8',
                         marginTop: 5
                     }]}>
@@ -257,7 +315,7 @@ class ActiveListContent extends Component{
             }
         }
         return(
-            <View >
+            <View style={CommonStyle.commonWidth}>
                 {
                     store.isLoading
                     ?
@@ -265,7 +323,7 @@ class ActiveListContent extends Component{
                     :
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
                     ?
-                        <View style={{flex: 1}}>
+                        <View>
                             <FlatList
                                 data={store.items.data.data.data}
                                 horizontal={false}
@@ -292,64 +350,104 @@ const mapDispatchToProps = dispatch => ({
     onLoadActiveList: (storeName, url, data) => dispatch(action.onLoadActiveList(storeName, url, data))
 })
 const ActiveListContentMap = connect(mapStateToProps, mapDispatchToProps)(ActiveListContent)
-
-class ScreenContent extends Component{
+class CustomContent extends Component{
     constructor(props) {
         super(props);
-        this.languages = [
-            {
-                title:'中文',
-            },
-            {
-                title:'日本語',
-            },
-            {
-                title:'English',
-            }
-        ]
+        this.languages = ['中文', 'English', '日本語']
+        this.volunteer = ['需要', '不需要']
     }
     render(){
         return(
-            <View style={{position:'relative'}}>
-                <ScrollView>
-                    <View style={[CommonStyle.flexCenter,{width: width,justifyContent:'flex-start'}]}>
-                        <View style={[CommonStyle.commonWidth]}>
-                            <Text style={styles.screen_title}>语言</Text>
-                            <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 5}]}>
-                                {
-                                    this.languages.map((item, index) => {
-                                        return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
-                                            width:70,
-                                            height:36,
-                                            backgroundColor:'#F5F7FA',
-                                            borderRadius: 4,
-                                            marginTop: 15,
-                                            marginRight: 22
-                                        }]}>
-                                            <Text style={{
-                                                color:'#333',
-                                                fontSize:13
-                                            }}>{item.title}</Text>
-                                        </TouchableOpacity>
-                                    })
-                                }
-                            </View>
+            <View style={[CommonStyle.flexCenter,{flex: 1,position:'relative'}]}>
+                <ScrollView
+                    showsHorizontalScrollIndicator = {false}
+                    scrollEventThrottle={16}
+                >
+                    <View style={[CommonStyle.commonWidth]}>
+                        <Text style={styles.screen_title}>语言</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.languages.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}>
+                                        <Text style={{color:'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        <Text style={styles.screen_title}>价格</Text>
+                        <View style={{marginTop: 15}}>
+                            <PriceRange range={1000} startPrice={0} endPrice={500}/>
+                        </View>
+                        <Text style={styles.screen_title}>日期</Text>
+                        <View style={{
+                            width:'100%',
+                            height:49,
+                            backgroundColor:'#f5f7fa',
+                            marginTop: 19
+                        }}>
+
+                        </View>
+                        <Text style={styles.screen_title}>志愿者</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.volunteer.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}>
+                                        <Text style={{color:'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        <Text style={styles.screen_title}>参与人数</Text>
+                        <View style={[CommonStyle.flexStart,{marginTop: 19,marginBottom: 70}]}>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#D6D6D6'
+                            }]}>
+                                <AntDesign
+                                    name={'minus'}
+                                    size={18}
+                                    style={{color:'#BFBFBF'}}
+                                />
+                            </TouchableOpacity>
+                            <Text style={{marginLeft: 25,fontSize: 18,color:'#666'}}>0</Text>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#14c5ca',
+                                marginLeft: 25
+                            }]}>
+                                <AntDesign
+                                    name={'plus'}
+                                    size={18}
+                                    style={{color:'#14c5ca'}}
+                                />
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </ScrollView>
-                <SafeAreaView style={[CommonStyle.flexCenter,{
-                    position:'absolute',
+                <View style={[CommonStyle.flexCenter,{
+                    position: 'absolute',
                     left:0,
                     right:0,
-                    bottom:0,
+                    bottom: 0,
+                    height:50,
+                    backgroundColor: '#fff'
                 }]}>
-                    <TouchableOpacity
-                        style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:40,backgroundColor:'#14c5ca'}]}
-                        onPress={()=>{this.props.closeScreen()}}
-                    >
-                        <Text style={{color:'#fff',fontWeight:'bold',fontSize: 15}}>显示结果</Text>
+                    <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                        height:40,
+                        backgroundColor:'#14c5ca',
+                        borderRadius: 4
+                    }]}>
+                        <Text style={{color:'#fff',fontSize: 15,fontWeight:'bold'}}>显示结果</Text>
                     </TouchableOpacity>
-                </SafeAreaView>
+                </View>
             </View>
         )
     }

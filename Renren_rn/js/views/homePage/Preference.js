@@ -1,9 +1,13 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, Dimensions} from 'react-native'
+import {StyleSheet, View, Text, Dimensions, TouchableOpacity} from 'react-native';
 import CommonStyle from '../../../assets/css/Common_css';
 import LazyImage from 'animated-lazy-image';
+import NavigatorUtils from '../../navigator/NavigatorUtils';
 const {width, height} = Dimensions.get('window')
 export default class Preference extends Component{
+    goPreferential(){
+        NavigatorUtils.goPage({}, 'Preferential')
+    }
     render(){
         return(
             <View style={[CommonStyle.flexCenter,{width:'100%'}]}>
@@ -16,7 +20,10 @@ export default class Preference extends Component{
                     </Text>
                     <Text style={{color:'#333',fontSize:15,marginTop:8}}>超值特价优惠体验</Text>
                     <View style={[CommonStyle.spaceRow,{marginTop: 24.5}]}>
-                        <View style={styles.left_con}>
+                        <TouchableOpacity
+                            style={styles.left_con}
+                            onPress={()=>{this.goPreferential()}}
+                        >
                             <LazyImage
                                 source={require('../../../assets/images/ssmz.jpeg')}
                                 style={styles.left_con}
@@ -24,9 +31,12 @@ export default class Preference extends Component{
                             <View style={styles.con_shadow}>
                                 <Text style={styles.shadow_txt}>节假日特价</Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                         <View style={[styles.left_con, CommonStyle.spaceCol]}>
-                            <View style={styles.right_con}>
+                            <TouchableOpacity
+                                style={styles.right_con}
+                                onPress={()=>{this.goPreferential()}}
+                            >
                                 <LazyImage
                                     source={require('../../../assets/images/bg.jpeg')}
                                     style={styles.right_con}
@@ -34,8 +44,11 @@ export default class Preference extends Component{
                                 <View style={styles.con_shadow}>
                                     <Text style={styles.shadow_txt}>低至3折</Text>
                                 </View>
-                            </View>
-                            <View style={[styles.right_con,{marginTop: 10}]}>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.right_con,{marginTop: 10}]}
+                                onPress={()=>{this.goPreferential()}}
+                            >
                                 <LazyImage
                                     source={require('../../../assets/images/timg.jpeg')}
                                     style={styles.right_con}
@@ -43,7 +56,7 @@ export default class Preference extends Component{
                                 <View style={styles.con_shadow}>
                                     <Text style={styles.shadow_txt}>低至5折</Text>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         </View>
 
 

@@ -362,13 +362,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 20
     },
-    day_one:{
-        marginTop: 10,
-        width:(width*0.94-60)/7,
-        borderRadius:(width*0.94-60)/7/2,
-        position:'relative',
-        height: (width*0.94-60)/7
-    },
+
+
     day_txt:{
         fontWeight: "bold"
     },

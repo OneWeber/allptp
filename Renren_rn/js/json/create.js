@@ -2,7 +2,7 @@ const create = [
     {
         title:'创建体验',
         icon:require('../../assets/images/home/cjty.png'),
-        router:'',
+        router:'CreateActive',
         width:19,
         height:20
     },

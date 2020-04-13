@@ -267,9 +267,16 @@ class ParallaxScrollView extends Component {
                     }
                 ]}
             >
-                <View style={{position:'absolute',left:0,right:0,bottom:0,top:0,backgroundColor:'rgba(0,0,0,.5)',zIndex:5}}>
+                {
+                    this.props.noShadow
+                        ?
+                        null
+                        :
+                        <View style={{position:'absolute',left:0,right:0,bottom:0,top:0,backgroundColor:'rgba(0,0,0,.5)',zIndex:5}}>
 
-                </View>
+                        </View>
+                }
+
                 <View >
                     {renderBackground()}
                 </View>

@@ -18,7 +18,8 @@ class TopScoreActive extends Component{
         this.storeName = 'hotcity';
         let formData=new FormData();
         formData.append('token', token);
-        onLoadHotCity(this.storeName, NewHttp + 'PopularCity', formData)
+        formData.append('version', '2.0');
+        onLoadHotCity(this.storeName, NewHttp + 'ScoreHighCityTwo', formData)
     }
     render(){
         const {hotcity, theme} = this.props
