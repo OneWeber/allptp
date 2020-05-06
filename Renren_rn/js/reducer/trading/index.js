@@ -1,5 +1,7 @@
 import Types from '../../action/Types';
-const defaultState = {}
+const defaultState = {
+
+}
 export default function onAction(state=defaultState, action) {
     switch (action.type) {
         case Types.LOAD_TRADING_SUCCESS:
@@ -8,7 +10,8 @@ export default function onAction(state=defaultState, action) {
                 [action.storeName]: {
                     ...state[action.storeName],
                     items: action.items,
-                    isLoading: false
+                    isLoading: false,
+                    hideMoreshow: true
                 }
             };
         case Types.TRADING_REFRESH:
@@ -16,7 +19,8 @@ export default function onAction(state=defaultState, action) {
                 ...state,
                 [action.storeName]: {
                     ...state[action.storeName],
-                    isLoading: true
+                    isLoading: true,
+                    hideMoreshow: true
                 }
             };
         case Types.LOAD_TRADING_FAIL:
@@ -24,7 +28,8 @@ export default function onAction(state=defaultState, action) {
                 ...state,
                 [action.storeName]: {
                     ...state[action.storeName],
-                    isLoading: false
+                    isLoading: false,
+                    hideMoreshow: true
                 }
             };
         case Types.MORETRADING_REFRESH:

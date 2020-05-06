@@ -1,5 +1,15 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, SafeAreaView, Dimensions, TouchableOpacity, FlatList, Image} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    SafeAreaView,
+    Dimensions,
+    TouchableOpacity,
+    FlatList,
+    Image,
+    ScrollView,
+} from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import CommonStyle from '../../../../assets/css/Common_css';
 import NavigatorUtils from '../../../navigator/NavigatorUtils';
@@ -10,11 +20,27 @@ import HttpUrl from '../../../utils/Http';
 import NoData from '../../../common/NoData';
 import LazyImage from 'animated-lazy-image';
 import Loading from '../../../common/Loading';
+import Screening from '../../../model/screen';
+import RNEasyAddressPicker from 'react-native-easy-address-picker';
 const {width} = Dimensions.get('window')
 export default class StoryList extends Component{
     constructor(props) {
         super(props);
-        this.tabNames=['类型', '排序', '地区', '筛选']
+        this.tabNames = [
+            {
+                title:'排序',
+                data:[{title:'价格低到高',},{title:'评分优先'},{title:'评论优先'},{title:'收藏优先'}],
+                type: 1
+            },
+            {
+                title:'地区',
+                data:[],
+                type: 2
+            },
+        ];
+        this.state = {
+            screenIndex: ''
+        }
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -42,42 +68,81 @@ export default class StoryList extends Component{
             />
         </TouchableOpacity>
     }
+    _clickConfirmBtn() {
+        this.screen.openOrClosePanel(this.state.screenIndex)
+    }
+    getCustom() {
+
+    }
+    _itemOnpress() {
+
+    }
     render(){
         return(
             <SafeAreaView style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start',backgroundColor:'#fff'}]}>
-                <RNEasyTopNavBar
-                    title={'故事列表'}
-                    backgroundTheme={'#fff'}
-                    titleColor={'#333'}
-                    leftButton={this.getLeftButton()}
-                    rightButton={this.getRightButton()}
-                />
-                <View style={[CommonStyle.flexCenter,{
-                    width:width,
-                    borderBottomColor:'#f5f5f5',
-                    borderBottomWidth: 1
+                <View style={[CommonStyle.spaceRow,{
+                    height: 50,
+                    width: width
                 }]}>
-                    <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
-                        marginTop: 18,
-                        paddingBottom: 18,
+                    <TouchableOpacity
+                        style={CommonStyle.back_icon}
+                        onPress={() =>{
+                            NavigatorUtils.backToUp(this.props)
+                        }}
+                    >
+                        <AntDesign
+                            name={'left'}
+                            size={20}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height:36,
+                        width: width*0.94 - 30,
+                        marginRight: width*0.03,
+                        backgroundColor:'#f5f7fa',
+                        flexDirection: 'row',
+                        borderRadius: 4
                     }]}>
-                        {
-                            this.tabNames.map((item, index) => {
-                                return <TouchableOpacity style={CommonStyle.flexStart}>
-                                    <Text style={{color:'3333',fontWeight:'bold',fontSize: 13}}>{item}</Text>
-                                    <AntDesign
-                                        name={'caretdown'}
-                                        size={8}
-                                        style={{color:'#999',marginLeft: 3}}
-                                    />
-                                </TouchableOpacity>
-                            })
-                        }
+                        <AntDesign
+                            name={'search1'}
+                            size={14}
+                            style={{color:'#999'}}
+                        />
+                        <Text style={{
+                            marginLeft:5,
+                            color:'#999'
+                        }}>搜索故事</Text>
+                    </TouchableOpacity>
+                </View>
+                <Screening
+                    ref={screen => this.screen = screen}
+                    screenData={this.tabNames}
+                    selectHeader={(data, index) => {
+                        this.setState({
+                            screenIndex: index
+                        })
+                    }}
+                    selectIndex={[0,0]}
+                    customContent={this.getCustom()}
+                    customData={[]}
+                    customFunc={()=>{
+                        this.picker.showPicker()
+                    }}
+                    itemOnpress={(tIndex, index, data) => {
+                        this._itemOnpress(tIndex, index, data)
+                    }}
+                >
+                    <View style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start'}]}>
+                        <ActiveListContentMap  {...this.state}/>
+                        <RNEasyAddressPicker
+                            hasCountry={true}
+                            ref={picker => this.picker = picker}
+                            selectCountry={(index) => {}}
+                            selectCity={(index) => {}}
+                            clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                        />
                     </View>
-                </View>
-                <View style={{flex: 1}}>
-                    <ActiveListContentMap />
-                </View>
+                </Screening>
             </SafeAreaView>
         )
     }
@@ -126,7 +191,11 @@ class StoryListContent extends Component{
             style={{
                 width: (width*0.94-14) / 2,
                 marginLeft: data.index%2===0?0: 14,
-                marginTop: 25}}
+                marginTop: data.index===1||2?15:25
+            }}
+            onPress={()=>{
+                NavigatorUtils.goPage({story_id: data.item.story_id}, 'StoryDetail')
+            }}
         >
             <LazyImage
                 source={{uri: data.item.cover.domain + data.item.cover.image_url}}

@@ -6,6 +6,17 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import {connect} from 'react-redux'
 const {width, height} = Dimensions.get('window')
 class CommentItem extends Component{
+    showImg(index){
+        const {data_c} = this.props
+        let imgs = data_c.image;
+        let arr=[];
+        for(let i=0;i<imgs.length;i++){
+            arr.push({
+                url:imgs[i].domain + imgs[i].image_url
+            })
+        }
+        this.props.showImg(arr, index)
+    }
     render(){
         const {data_c, theme} = this.props
         return (
@@ -44,16 +55,20 @@ class CommentItem extends Component{
                         <View style={[CommonStyle.flexStart,{flexWrap: 'wrap',marginTop: 5 }]}>
                             {
                                 data_c.image.map((item, index) => {
-                                    return <LazyImage
-                                        key={index}
-                                        source={{uri:item.domain+item.image_url}}
-                                        style={[styles.c_img,{
-                                            width:data_c.image.length===1? (width*0.94)*0.7 :(width*0.94 - 20) / 3,
-                                            height:data_c.image.length===1? (width*0.94)*0.7*0.6 :(width*0.94 - 20) / 3,
-                                            marginLeft:data_c.image.length===1?0:index%3===0?0:10,
-                                            marginTop: 5
-                                        }]}
-                                    />
+                                    return <TouchableOpacity
+                                        onPress={()=>this.showImg(index)}
+                                    >
+                                        <LazyImage
+                                            key={index}
+                                            source={{uri:item.domain+item.image_url}}
+                                            style={[styles.c_img,{
+                                                width:data_c.image.length===1? (width*0.94)*0.7 :(width*0.94 - 20) / 3,
+                                                height:data_c.image.length===1? (width*0.94)*0.7*0.6 :(width*0.94 - 20) / 3,
+                                                marginLeft:data_c.image.length===1?0:index%3===0?0:10,
+                                                marginTop: 5
+                                            }]}
+                                        />
+                                    </TouchableOpacity>
                                 })
                             }
                         </View>

@@ -50,37 +50,11 @@ class ActiveList extends Component{
                 data:[],
                 type: 3
             }
-        ]
+        ];
         this.state = {
             screenIndex: '',
             kind_id: ''
         }
-    }
-    getLeftButton(){
-        return <TouchableOpacity
-            style={styles.back_icon}
-            onPress={() =>{
-                NavigatorUtils.backToUp(this.props)
-            }}
-        >
-            <AntDesign
-                name={'left'}
-                size={20}
-            />
-        </TouchableOpacity>
-    }
-    getRightButton(){
-        return <TouchableOpacity
-            style={{paddingRight:width*0.03}}
-            onPress={() =>{
-
-            }}
-        >
-            <AntDesign
-                name={'search1'}
-                size={20}
-            />
-        </TouchableOpacity>
     }
     getCustom(){
         return(
@@ -120,13 +94,40 @@ class ActiveList extends Component{
         const {theme} = this.props
         return(
             <SafeAreaView style={[{flex: 1,justifyContent:'flex-start',backgroundColor:'#fff',position:'relative'}]}>
-                <RNEasyTopNavBar
-                    title={'体验列表'}
-                    backgroundTheme={'#fff'}
-                    titleColor={'#333'}
-                    leftButton={this.getLeftButton()}
-                    rightButton={this.getRightButton()}
-                />
+                <View style={[CommonStyle.spaceRow,{
+                    height: 50
+                }]}>
+                    <TouchableOpacity
+                        style={CommonStyle.back_icon}
+                        onPress={() =>{
+                            NavigatorUtils.backToUp(this.props)
+                        }}
+                    >
+                        <AntDesign
+                            name={'left'}
+                            size={20}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height:36,
+                        width: width*0.94 - 30,
+                        marginRight: width*0.03,
+                        backgroundColor:'#f5f7fa',
+                        flexDirection: 'row',
+                        borderRadius: 4
+                    }]}>
+                        <AntDesign
+                            name={'search1'}
+                            size={14}
+                            style={{color:'#999'}}
+                        />
+                        <Text style={{
+                            marginLeft:5,
+                            color:'#999'
+                        }}>探索体验</Text>
+                    </TouchableOpacity>
+
+                </View>
                 <Screening
                     ref={screen => this.screen = screen}
                     screenData={this.tabNames}
@@ -231,13 +232,18 @@ class ActiveListContent extends Component{
         formData.append('max_person_num', '');
         onLoadActiveList(this.storeName, HttpUrl + 'Activity/activ_list', formData)
     }
+    goDetail(activity_id) {
+        NavigatorUtils.goPage({table_id: activity_id}, 'ActiveDetail')
+    }
     _renderActivty(data){
         const {theme} = this.props
         return <TouchableOpacity style={{
             width: (width*0.94-14) / 2,
             marginLeft: data.index%2===0?0: 14,
-            marginTop: 25
-        }}>
+            marginTop: data.index===1||2?15:25
+        }}
+        onPress={() => {this.goDetail(data.item.activity_id)}}
+        >
             <LazyImage
                 source={{uri: data.item.domain + data.item.image_url}}
                 style={styles.cityitem_img}

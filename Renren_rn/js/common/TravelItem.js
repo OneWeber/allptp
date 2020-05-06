@@ -1,8 +1,9 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, Dimensions, TouchableHighlight} from 'react-native';
+import {StyleSheet, View, Text, Dimensions, TouchableHighlight, TouchableOpacity} from 'react-native';
 import CommonStyle from '../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import LazyImage from "animated-lazy-image";
+import languageType from '../json/languageType'
 const widthScreen = Dimensions.get('window').width;
 /*
 *       borderColor: '#ddd',
@@ -14,7 +15,7 @@ const widthScreen = Dimensions.get('window').width;
 * */
 class TravelItem extends Component{
     render() {
-        let {data_t, theme, data_index} = this.props
+        let {data_t, theme, data_index,language} = this.props
         return(
             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow, {position:'relative',marginTop:data_index===0?15:0}]}>
                 <View style={[styles.line]}></View>
@@ -23,47 +24,88 @@ class TravelItem extends Component{
                         <Text style={styles.action_time}>{data_t.activ_begin_time}</Text>
                     </View>
                     <View style={[styles.line_con]}>
-                        <Text style={styles.author}>策划人: {
-                            data_t.act_user
-                            ?
-                                data_t.act_user.family_name + data_t.act_user.middle_name + data_t.act_user.name
-                            :
-                                '匿名用户'
-                        }</Text>
-                        <TouchableHighlight
-                            style={{marginTop: 10}}
-                            underlayColor='rgba(0,0,0,0)'
-                            onPress={() =>{}}
-                        >
-                            <View style={[CommonStyle.spaceRow,{alignItems:'flex-start'}]}>
-                                <LazyImage
-                                    source={data_t.cover&&data_t.cover.domain&&data_t.cover.image_url?
-                                        {uri:data_t.cover.domain + data_t.cover.image_url}
-                                        :require('../../assets/images/error.jpeg')
-                                    }
-                                    style={styles.t_img}
-                                />
-                                <View style={[styles.t_con, CommonStyle.spaceCol,{alignItems:'flex-start'}]}>
-                                    <Text
-                                        numberOfLines={2} ellipsizeMode={'tail'}
-                                        style={styles.t_title}
-                                    >{data_t.title}</Text>
-                                    {
-                                        data_t.total_price
+                        <TouchableOpacity>
+                            <LazyImage
+                                source={data_t.cover&&data_t.cover.domain&&data_t.cover.image_url?
+                                    {uri:data_t.cover.domain + data_t.cover.image_url}
+                                    :require('../../assets/images/error.png')
+                                }
+                                style={styles.t_img}
+                            />
+                            <Text
+                                numberOfLines={2} ellipsizeMode={'tail'}
+                                style={styles.t_title}
+                            >{data_t.title}</Text>
+                            <Text style={styles.author}>{
+                                language===1
+                                    ?
+                                    languageType.CH.journey.planner
+                                    :
+                                    language===2
                                         ?
-                                            <Text style={{color: '#333',fontSize: 12, fontWeight: 'bold'}}>¥ {data_t.total_price}/人</Text>
+                                        languageType.EN.journey.planner
                                         :
-                                            <Text style={{color: '#999',fontSize: 12, fontWeight: 'bold'}}>已过期</Text>
+                                        languageType.JA.journey.planner
+                            }: {
+                                data_t.act_user
+                                    ?
+                                    data_t.act_user.family_name + data_t.act_user.middle_name + data_t.act_user.name
+                                    :
+                                    '匿名用户'
+                            }</Text>
+                        </TouchableOpacity>
+                        <View style={[CommonStyle.flexEnd,{marginTop: 20}]}>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                paddingLeft: 10,
+                                paddingRight: 10,
+                                height:30,
+                                borderWidth: 1,
+                                borderColor:'#dfe1e4',
+                                borderRadius: 4,
+                            }]}>
+                                <Text style={styles.do_t}>
+                                    {
+                                        language===1
+                                        ?
+                                            languageType.CH.journey.check_detail
+                                        :
+                                        language===2
+                                        ?
+                                            languageType.EN.journey.check_detail
+                                        :
+                                            languageType.JA.journey.check_detail
                                     }
-
-                                </View>
-
-                            </View>
-                        </TouchableHighlight>
-                        <View style={[CommonStyle.flexEnd,{marginTop: 20,marginBottom: 10}]}>
-                            <Text style={styles.do_t}>取消活动</Text>
-                            <Text style={styles.do_t}>查看详情</Text>
-                            <Text style={[styles.do_t, {color: theme}]}>联系策划人</Text>
+                                </Text>
+                            </TouchableOpacity>
+                            {
+                                this.props.storeName!='已参加'
+                                    ?
+                                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                        paddingLeft: 10,
+                                        paddingRight: 10,
+                                        height:30,
+                                        borderWidth: 1,
+                                        borderColor:'#dfe1e4',
+                                        borderRadius: 4,
+                                        marginLeft: 30
+                                    }]}>
+                                        <Text style={styles.do_t}>
+                                            {
+                                                language===1
+                                                    ?
+                                                    languageType.CH.journey.contact
+                                                    :
+                                                    language===2
+                                                        ?
+                                                        languageType.EN.journey.contact
+                                                        :
+                                                        languageType.JA.journey.contact
+                                            }
+                                        </Text>
+                                    </TouchableOpacity>
+                                    :
+                                    null
+                            }
                         </View>
                     </View>
                 </View>
@@ -82,16 +124,13 @@ const styles = StyleSheet.create({
         width: 20
     },
     line_con: {
-        backgroundColor: '#fff',
-        padding: 10,
-        marginVertical: 3,
+        backgroundColor: '#f3f5f7',
+        padding: 15,
         borderRadius: 2,
-        marginRight:3,
-        elevation: 2,
+        marginRight:4,
         width: widthScreen*0.94 - 25,
         marginTop:15,
         marginBottom: 25,
-        margin:4
     },
     line_ab:{
       position: 'absolute',
@@ -126,13 +165,14 @@ const styles = StyleSheet.create({
         height: 16
     },
     author:{
-        fontWeight:'bold',
-        color: '#333'
+        color: '#333',
+        fontSize: 12,
+        marginTop: 10
     },
     t_img:{
-        width: 90,
-        height: 67.5,
-        borderRadius: 3
+        width: '100%',
+        height: 155,
+        borderRadius: 4
     },
     t_con:{
         width: widthScreen*0.94 - 25 - 120,
@@ -143,15 +183,16 @@ const styles = StyleSheet.create({
     },
     t_title:{
         color: '#333',
-        fontWeight: "bold"
+        fontWeight: "bold",
+        marginTop: 13
     },
     do_t:{
         fontSize: 13,
-        marginLeft: 8,
         color: '#666'
     }
 })
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    language: state.language.language
 })
 export default connect(mapStateToProps)(TravelItem)

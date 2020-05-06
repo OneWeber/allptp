@@ -27,6 +27,16 @@ import already from './info/already';
 import notpass from './info/notpass';
 import uncommit from './info/uncommit';
 import steps from './info/steps';
+import netconnect from './netconnect/index'
+import colwish from './wish/colwish'
+import banner from './banner'
+import msg from './msg'
+import contact from './msg/contact';
+import language from './language'
+import bank from './info/bank';
+import systemmsg from './info/systemmsg';
+import noread from './info/noread';
+import userinfo from './info/userinfo';
 const index = combineReducers({
     theme: theme,
     user: user,
@@ -55,6 +65,16 @@ const index = combineReducers({
     already: already,
     notpass: notpass,
     uncommit: uncommit,
-    steps: steps
+    steps: steps,
+    netconnect: netconnect,
+    colwish: colwish,
+    banner: banner,
+    msg: msg,
+    contact: contact,
+    language: language,
+    bank: bank,
+    systemmsg: systemmsg,
+    noread: noread,
+    userinfo: userinfo
 })
 export default index

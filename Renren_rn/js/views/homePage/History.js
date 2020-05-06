@@ -3,11 +3,12 @@ import {StyleSheet, View, Text, FlatList, Dimensions,TouchableOpacity} from 'rea
 import CommonStyle from '../../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import action from '../../action'
-const {width, height } = Dimensions.get('window')
 import ActiveItem from '../../common/ActiveItem';
 import LazyImage from 'animated-lazy-image';
 import NewHttp from '../../utils/NewHttp';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
+import languageType from '../../json/languageType'
+const {width, height } = Dimensions.get('window')
 class History extends Component{
     constructor(props) {
         super(props);
@@ -28,34 +29,39 @@ class History extends Component{
     _renderHistory(data){
         const {history} = this.props;
         let store = history[this.storeName];
-        return data.item.flag === 1
-            ?
-            <ActiveItem
-                data_a={data.item}
-                data_index={data.index}
-                {...this.props}
-                style={{marginTop: 0}}
-                history={true}
-            />
-            :
-            <TouchableOpacity style={{
-                width: 165,
-                marginLeft:data.index==0?width*0.03:8,
-                marginRight:data.index===store.items.data.data.data.length-1?width*0.03:0
-            }} onPress={()=>{ NavigatorUtils.goPage({story_id: data.item.story_id}, 'StoryDetail')}}>
-                <LazyImage
-                    source={{uri:data.item.domain + data.item.image_url}}
-                    style={{width:'100%',height: 126,borderRadius: 4}}
-                />
-                <Text numberOfLines={2} ellipsizeMode={'tail'}
-                      style={[styles.common_weight,styles.common_color,{
-                          marginTop: 4.5
-                      }]}>{data.item.title}</Text>
-            </TouchableOpacity>
+        return <View style={{
+            marginRight: data.index === store.items.data.data.data.length - 1?width*0.03:0
+        }}>
+            {
+                data.item.flag === 1
+                    ?
+                    <ActiveItem
+                        data_a={data.item}
+                        data_index={data.index}
+                        {...this.props}
+                        style={{marginTop: 0}}
+                        history={true}
+                    />
+                    :
+                    <TouchableOpacity style={{
+                        width: 165,
+                        marginLeft:data.index==0?width*0.03:8,
+                    }} onPress={()=>{ NavigatorUtils.goPage({story_id: data.item.table_id}, 'StoryDetail')}}>
+                        <LazyImage
+                            source={{uri:data.item.domain + data.item.image_url}}
+                            style={{width:'100%',height: 126,borderRadius: 4}}
+                        />
+                        <Text numberOfLines={2} ellipsizeMode={'tail'}
+                              style={[styles.common_weight,styles.common_color,{
+                                  marginTop: 4.5
+                              }]}>{data.item.title}</Text>
+                    </TouchableOpacity>
+            }
+        </View>
 
     }
     render(){
-        const {history} = this.props
+        const {history, language} = this.props
         let store = history[this.storeName]
         if(!store){
             store={
@@ -70,7 +76,9 @@ class History extends Component{
                         styles.common_color,
                         styles.common_weight,
                     ]}>
-                        历史记录
+                        {
+                            language===1?languageType.CH.home.history:language===2?languageType.EN.home.history:languageType.JA.home.history
+                        }
                     </Text>
                 </View>
                 {

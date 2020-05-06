@@ -113,9 +113,13 @@ class AddPCPackage extends Component{
         const {changeParentChildPackage, parenChildPackage} = this.props;
         let list = parenChildPackage;
         let data = {
-            adultNum: this.state.adultNum,
-            childNum: this.state.childNum,
-            totalPrice: this.state.totalPrice
+            adult: this.state.adultNum,
+            kids: this.state.childNum,
+            price: this.state.totalPrice,
+            name: '',
+            type: 1,
+            flag: 1,
+            date: []
         };
         list.push(data);
         changeParentChildPackage(list);

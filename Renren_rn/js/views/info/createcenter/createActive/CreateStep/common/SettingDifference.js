@@ -6,13 +6,15 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import NavigatorUtils from '../../../../../../navigator/NavigatorUtils';
 import {connect} from 'react-redux'
 import action from '../../../../../../action'
+import Fetch from '../../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../../utils/NewHttp';
 const {width} = Dimensions.get('window')
 class SettingDifference extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            people: '',
-            returnNum: ''
+            num:this.props.navigation.state.params?this.props.navigation.state.params.data?JSON.stringify(this.props.navigation.state.params.data.num):'':'',
+            refund_rate:this.props.navigation.state.params?this.props.navigation.state.params.data?this.props.navigation.state.params.data.refund_rate:'':'',
         }
     }
     getLeftButton(){
@@ -39,15 +41,38 @@ class SettingDifference extends Component{
         </View>
     }
     confirmDifference(){
-        const {changeDifference, difference} = this.props;
-        let list = difference;
-        let data = {
-            people: this.state.people,
-            returnNum: this.state.returnNum
+        const {changeDifference, difference, token, activity_id} = this.props;
+        let formData=new FormData();
+        formData.append('token',token);
+        formData.append('version','2.0');
+        formData.append('activity_id',activity_id);
+        formData.append('num',this.state.num);
+        formData.append('refund_rate',this.state.refund_rate);
+        if(this.props.navigation.state.params&&this.props.navigation.state.params.data) {
+            formData.append('differ_id',this.props.navigation.state.params.data.differ_id);
         }
-        list.push(data);
-        changeDifference(list);
-        NavigatorUtils.goPage({}, 'Time')
+        Fetch.post(NewHttp+'DifferAddTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.getDiffer();
+                NavigatorUtils.goPage({}, 'Time')
+            }
+        })
+    }
+    getDiffer() {
+        const {activity_id, token, changeDifference} = this.props;
+        let formData = new FormData();
+        formData.append("token",token);
+        formData.append("version",'2.0');
+        formData.append("activity_id",activity_id);
+        Fetch.post(NewHttp + 'DifferListTwo',formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    differ: res.data
+                },() => {
+                    changeDifference(this.state.differ)
+                });
+            }
+        })
     }
     render(){
         return(
@@ -81,7 +106,8 @@ class SettingDifference extends Component{
                                     }}>满人数</Text>
                                     <View style={CommonStyle.flexEnd}>
                                         <TextInput
-                                            onChangeText={(text)=>this.setState({people:text})}
+                                            onChangeText={(text)=>this.setState({num:text})}
+                                            defaultValue={this.state.num}
                                             style={{
                                                 width:170,
                                                 height:60,
@@ -106,7 +132,8 @@ class SettingDifference extends Component{
                                     }}>返还比例</Text>
                                     <View style={CommonStyle.flexEnd}>
                                         <TextInput
-                                            onChangeText={(text)=>this.setState({returnNum:text})}
+                                            onChangeText={(text)=>this.setState({refund_rate:text})}
+                                            defaultValue={this.state.refund_rate}
                                             style={{
                                                 width:170,
                                                 height:60,
@@ -122,7 +149,7 @@ class SettingDifference extends Component{
                                 </View>
                             </View>
                             {
-                                this.state.people && this.state.returnNum
+                                this.state.num && this.state.refund_rate
                                     ?
                                     <TouchableOpacity style={[CommonStyle.flexCenter,{
                                         height:40,
@@ -155,13 +182,16 @@ class SettingDifference extends Component{
                     </View>
 
                 </ScrollView>
+
             </View>
         )
     }
 }
 const mapStateToProps = state => ({
     theme: state.theme.theme,
-    difference: state.steps.difference
+    difference: state.steps.difference,
+    token: state.token.token,
+    activity_id: state.steps.activity_id,
 });
 const mapDispatchToProps = dispatch => ({
     changeDifference: data => dispatch(action.changeDifference(data))

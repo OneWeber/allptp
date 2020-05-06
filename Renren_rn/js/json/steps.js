@@ -1,11 +1,15 @@
 const stepsList = [
     {
-        title: '语言/类型',
-        router: 'Language'
+        title: '语言',
+        router: 'Language',
+    },
+    {
+        title: '类型',
+        router: 'Type',
     },
     {
         title: '介绍您自己',
-        router: 'Introduce'
+        router: 'Introduce',
     },
     {
         title: '体验内容',

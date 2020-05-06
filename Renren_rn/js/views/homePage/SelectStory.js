@@ -6,6 +6,7 @@ import action from '../../action'
 import HttpUrl from '../../utils/Http';
 import LazyImage from 'animated-lazy-image';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
+import languageType from '../../json/languageType'
 const {width, height } = Dimensions.get('window')
 class SelectStory extends Component{
     componentDidMount() {
@@ -77,7 +78,7 @@ class SelectStory extends Component{
         </TouchableOpacity>
     }
     render(){
-        const {selectstory} = this.props
+        const {selectstory, language} = this.props
         let store = selectstory[this.storeName]
         if(!store){
             store={
@@ -92,9 +93,15 @@ class SelectStory extends Component{
                         styles.common_color,
                         styles.common_weight,
                     ]}>
-                        精选体验故事
+                        {
+                            language===1?languageType.CH.home.story:language===2?languageType.EN.home.story:languageType.JA.home.story
+                        }
                     </Text>
-                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>关于体验的随心随记</Text>
+                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>
+                        {
+                            language===1?languageType.CH.home.story_propmt:language===2?languageType.EN.home.story_propmt:languageType.JA.home.story_propmt
+                        }
+                    </Text>
                 </View>
                 {
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0

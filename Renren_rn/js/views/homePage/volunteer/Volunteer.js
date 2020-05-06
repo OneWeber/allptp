@@ -22,11 +22,32 @@ import Loading from '../../../common/Loading';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
 import NewHttp from '../../../utils/NewHttp';
+import Screening from '../../../model/screen';
+import RNEasyAddressPicker from 'react-native-easy-address-picker';
 const {width} = Dimensions.get('window')
 export default class Volunteer extends Component{
     constructor(props) {
         super(props);
-        this.tabNames=['排序', '评分', '语言', '地区']
+        this.tabNames = [
+            {
+                title:'排序',
+                data:[{title:'评分优先'},{title:'点赞优先'},{title:'留言优先'},{title:'粉丝优先'}],
+                type: 1
+            },
+            {
+                title:'语言',
+                data:[{title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
+                type: 1
+            },
+            {
+                title:'地区',
+                data:[],
+                type: 2
+            },
+        ];
+        this.state = {
+            screenIndex: ''
+        }
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -41,59 +62,57 @@ export default class Volunteer extends Component{
             />
         </TouchableOpacity>
     }
-    getRightButton(){
-        return <TouchableOpacity
-            style={{paddingRight:width*0.03}}
-            onPress={() =>{
-
-            }}
-        >
-            <AntDesign
-                name={'search1'}
-                size={20}
-            />
-        </TouchableOpacity>
-    }
     _showFlash(data) {
         showMessage(data);
+    }
+    getCustom() {
+
+    }
+    _itemOnpress() {
+
+    }
+    _clickConfirmBtn() {
+
     }
     render(){
         return(
             <SafeAreaView style={{flex: 1,backgroundColor: '#fff'}}>
                 <RNEasyTopNavBar
-                    title={'志愿者列表'}
+                    title={'志愿者'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
-                    rightButton={this.getRightButton()}
                 />
-                <View style={[CommonStyle.flexCenter,{
-                    width:width,
-                    borderBottomColor:'#f5f5f5',
-                    borderBottomWidth: 1
-                }]}>
-                    <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
-                        marginTop: 18,
-                        paddingBottom: 18,
-                    }]}>
-                        {
-                            this.tabNames.map((item, index) => {
-                                return <TouchableOpacity key={index} style={CommonStyle.flexStart}>
-                                    <Text style={{color:'#333',fontWeight:'bold',fontSize: 13}}>{item}</Text>
-                                    <AntDesign
-                                        name={'caretdown'}
-                                        size={8}
-                                        style={{color:'#999',marginLeft: 3}}
-                                    />
-                                </TouchableOpacity>
-                            })
-                        }
+                <Screening
+                    ref={screen => this.screen = screen}
+                    screenData={this.tabNames}
+                    selectHeader={(data, index) => {
+                        this.setState({
+                            screenIndex: index
+                        })
+                    }}
+                    selectIndex={[0,0,0]}
+                    customContent={this.getCustom()}
+                    customData={[]}
+                    customFunc={()=>{
+                        this.picker.showPicker()
+                    }}
+                    itemOnpress={(tIndex, index, data) => {
+                        this._itemOnpress(tIndex, index, data)
+                    }}
+                >
+                    <View style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start'}]}>
+                        <VolunteerContentMap  showFlash={(data)=>this._showFlash(data)}/>
+                        <RNEasyAddressPicker
+                            hasCountry={true}
+                            ref={picker => this.picker = picker}
+                            selectCountry={(index) => {}}
+                            selectCity={(index) => {}}
+                            clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                        />
+                        <FlashMessage position="top" />
                     </View>
-                </View>
-                <View style={{flex: 1}}>
-                    <VolunteerContentMap  showFlash={(data)=>this._showFlash(data)}/>
-                </View>
-                <FlashMessage position="top" />
+                </Screening>
             </SafeAreaView>
         )
     }
@@ -141,19 +160,7 @@ class VolunteerContent extends Component{
         formData.append('score', "");
         if(val){
             onLoadVolunteer(this.storeName, HttpUrl + 'User/user_list', formData, refreshType, store.items.data.data.total, callback => {
-                if(callback) {
-                    this.props.showFlash({
-                        message: '已为您更新'+callback+'个体验',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                } else {
-                    this.props.showFlash({
-                        message: '当前体验没有新增',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                }
+
             })
             return
         }
@@ -175,11 +182,7 @@ class VolunteerContent extends Component{
         formData.append('language', "");
         formData.append('score', "");
         onLoadMoreVolunteer(this.storeName, HttpUrl + 'User/user_list', formData , store.items, callback => {
-            this.props.showFlash({
-                message: '暂无更多志愿者',
-                type: 'info',
-                backgroundColor: '#999'
-            })
+
 
         })
     }
@@ -193,57 +196,36 @@ class VolunteerContent extends Component{
     }
     renderItem(data){
         const {theme} = this.props
-        return <View style={[CommonStyle.flexCenter,{
-            width:'100%',
-            paddingBottom: 15,
-            paddingTop: 15,
-            borderBottomWidth: 1,
-            borderBottomColor: '#f5f5f5'
-        }]}>
-            <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                <View style={CommonStyle.flexStart}>
-                    <LazyImage
-                        source={data.item.headimage?{uri:data.item.headimage.domain + data.item.headimage.image_url}:
-                            require('../../../../assets/images/touxiang.png')}
-                        style={{width:60,height:60,borderRadius: 30}}
-                    />
-                    <View style={[CommonStyle.spaceCol,{
-                        height:60,
-                        marginLeft: 15,
-                        maxWidth: 180,
-                        alignItems:'flex-start'
-                    }]}>
-                        <Text style={{color:'#333',fontWeight:'bold',fontSize:15}}>{
-                            data.item.family_name||data.item.middle_name||data.item.name
-                            ?
-                                data.item.family_name+' '+data.item.middle_name+' '+data.item.name
-                            :
-                                '匿名用户'
-                        }</Text>
-                        <View style={CommonStyle.flexStart}>
-                            <Text style={{color:'#999',fontSize: 12}}>粉丝数:{data.item.fans_num}</Text>
-                        </View>
-                        <Text numberOfLines={1} ellipsizeMode={'tail'}
-                            style={{color:'#999',fontSize: 12}}>{data.item.introduce?data.item.introduce:'这个人很懒,什么都没有说'}</Text>
-                    </View>
-                </View>
-                <TouchableOpacity style={[CommonStyle.flexCenter,{
-                    width:65,
-                    height:25,
-                    borderWidth: 1,
-                    borderColor:theme,
-                    borderRadius: 15,
-                    flexDirection:'row'
-                }]}>
-                    <AntDesign
-                        name={'plus'}
-                        size={14}
-                        style={{color: theme}}
-                    />
-                    <Text style={{color: theme}}>关注</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+        return <TouchableOpacity style={[CommonStyle.flexCenter,{
+                width: (width*0.94-15) /2,
+                marginLeft: data.index%2===0?0:15,
+                marginTop: 15
+            }]} onPress={()=>{
+            NavigatorUtils.goPage({user_id: data.item.user_id},'UserInfo')
+        }}>
+                <LazyImage
+                    source={data.item.headimage?{uri:data.item.headimage.domain + data.item.headimage.image_url}:
+                        require('../../../../assets/images/touxiang.png')}
+                    style={{
+                        width:(width*0.94-15) /2,
+                        height:180,
+                        borderRadius: 5,
+                    }}
+                />
+                <Text style={{color:'#333',fontWeight:'bold',fontSize:15,width:'100%',marginTop: 8.5}}>{
+                    data.item.family_name||data.item.middle_name||data.item.name
+                        ?
+                        data.item.family_name+data.item.middle_name+data.item.name
+                        :
+                        '匿名用户'
+                }</Text>
+                <Text style={{
+                    width:'100%',
+                    marginTop: 10,
+                    color:'#333',
+                    fontSize: 12
+                }}>志愿{data.item.volun_num}个活动</Text>
+            </TouchableOpacity>
     }
     render(){
         const {volunteer, theme} = this.props
@@ -255,13 +237,15 @@ class VolunteerContent extends Component{
             }
         }
         return(
-            <View style={{flex: 1}}>
+            <View >
                 {
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
                     ?
-                        <View style={{flex: 1}}>
+                        <View>
                             <FlatList
                                 data={store.items.data.data.data}
+                                horizontal={false}
+                                numColumns={2}
                                 showsVerticalScrollIndicator = {false}
                                 renderItem={data=>this.renderItem(data)}
                                 keyExtractor={(item, index) => index.toString()}

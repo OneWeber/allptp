@@ -3,12 +3,14 @@ import {StyleSheet, View, Text, Dimensions, TouchableOpacity} from 'react-native
 import CommonStyle from '../../../assets/css/Common_css';
 import LazyImage from 'animated-lazy-image';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
+import languageType from '../../json/languageType'
 const {width, height} = Dimensions.get('window')
 export default class Preference extends Component{
     goPreferential(){
         NavigatorUtils.goPage({}, 'Preferential')
     }
     render(){
+        const {language} = this.props
         return(
             <View style={[CommonStyle.flexCenter,{width:'100%'}]}>
                 <View style={CommonStyle.commonWidth}>
@@ -16,9 +18,15 @@ export default class Preference extends Component{
                         styles.common_color,
                         styles.common_weight,
                         ]}>
-                        特惠体验
+                        {
+                            language===1?languageType.CH.home.special:language===2?languageType.EN.home.special:languageType.JA.home.special
+                        }
                     </Text>
-                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>超值特价优惠体验</Text>
+                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>
+                        {
+                            language===1?languageType.CH.home.special_propmt:language===2?languageType.EN.home.special_propmt:languageType.JA.home.special_propmt
+                        }
+                    </Text>
                     <View style={[CommonStyle.spaceRow,{marginTop: 24.5}]}>
                         <TouchableOpacity
                             style={styles.left_con}

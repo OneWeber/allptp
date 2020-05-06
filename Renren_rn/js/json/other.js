@@ -27,5 +27,5 @@ const other = [
         width:21,
         height:21
     }
-]
+];
 export default other

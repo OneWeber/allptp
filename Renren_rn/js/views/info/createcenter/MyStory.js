@@ -9,6 +9,7 @@ import action from '../../../action'
 import NewHttp from '../../../utils/NewHttp';
 import NoData from '../../../common/NoData';
 import LazyImage from 'animated-lazy-image';
+import Modal from 'react-native-modalbox';
 const {width, height} = Dimensions.get('window')
 class MyStory extends Component{
     componentDidMount(){
@@ -39,8 +40,11 @@ class MyStory extends Component{
             />
         </TouchableOpacity>
     }
+    _showModal() {
+        this.refs.story.open()
+    }
     renderItem(data){
-        return <MyStoryItem data_m={data.item} data_index={data.index} />
+        return <MyStoryItem showModal={()=>this._showModal()} data_m={data.item} data_index={data.index} />
     }
     render(){
         const {mystory} = this.props;
@@ -58,7 +62,6 @@ class MyStory extends Component{
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
-                    style={{borderBottomWidth: 1,borderBottomColor: '#f5f5f5'}}
                 />
                 {
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
@@ -74,6 +77,64 @@ class MyStory extends Component{
                         :
                         <NoData></NoData>
                 }
+                <Modal
+                    style={{height:170,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"story"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.7)'}
+                    swipeToClose={true}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={[CommonStyle.flexCenter,{
+                        height: 170
+                    }]}>
+                        <View style={[CommonStyle.commonWidth,{
+                            height: 170
+                        }]}>
+                            <View style={[{
+                                height: 100,
+                                backgroundColor: '#fff',
+                                borderRadius: 10,
+
+                            }]}>
+                                <TouchableOpacity
+                                    style={[CommonStyle.flexCenter,{
+                                        width: '100%',
+                                        height: 50,
+                                        borderBottomColor: '#f5f5f5',
+                                        borderBottomWidth: 1
+                                    }]}
+                                >
+                                    <Text style={{color:'#333',fontWeight: 'bold'}}>编辑故事</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[CommonStyle.flexCenter,{
+                                        width: '100%',
+                                        height: 50,
+                                    }]}
+                                >
+                                    <Text style={{color:'#333',fontWeight: 'bold'}}>删除故事</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <TouchableOpacity
+                                style={[CommonStyle.flexCenter,{
+                                    width: '100%',
+                                    height: 50,
+                                    borderRadius: 10,
+                                    backgroundColor: '#fff',
+                                    marginTop: 10
+                                }]}
+                                onPress={()=>{this.refs.story.close()}}
+                            >
+                                <Text style={{color:'#999',fontWeight: 'bold'}}>取消</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+                    </View>
+                </Modal>
+
             </View>
         )
     }
@@ -81,6 +142,7 @@ class MyStory extends Component{
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#fff'
     }
 })
 const mapStateToProps = state => ({
@@ -93,53 +155,61 @@ const mapDispatchToProps = dispatch => ({
 export default connect(mapStateToProps, mapDispatchToProps)(MyStory)
 
 class MyStoryItem extends Component{
+    _showModal(){
+        this.props.showModal()
+    }
     render(){
         const {data_m} = this.props
         return(
             <TouchableOpacity style={[CommonStyle.commonWidth,{
-                padding: 10,
                 backgroundColor: '#fff',
                 marginLeft: width*0.03,
-                marginTop: 10,
-                borderRadius: 4
+                paddingTop: 22,
+                paddingBottom: 20.5,
+                borderBottomWidth: 1,
+                borderBottomColor: '#f5f5f5'
             }]}>
-                <LazyImage
-                    source={{uri:data_m.cover.domain+data_m.cover.image_url}}
-                    style={{width: '100%',height: 140,borderRadius: 4}}
-                />
                 <Text style={{
-                    color:'#127D80',
-                    fontSize: 10,
-                    marginTop: 8,
-                    fontWeight:'bold'
-                }}>{data_m.country}{data_m.province}{data_m.city==='直辖市'?null:data_m.city}{data_m.region}</Text>
-                <Text numberOfLines={2} ellipsizeMode={'tail'}
-                      style={{
-                          marginTop: 10,
-                          fontWeight:'bold',
-                          color:'#333'
-                      }}>{data_m.title}</Text>
-                <View style={[CommonStyle.spaceRow,{marginTop:10}]}>
-                    <View style={[CommonStyle.flexCenter,{width:60,height:18,backgroundColor:'#14c5ca',borderRadius:5}]}>
-                        <Text style={{color:'#fff',fontSize: 11}}>{data_m.kind[0].kind_name}</Text>
-                    </View>
-                    <View style={CommonStyle.flexStart}>
-                        <TouchableOpacity style={[CommonStyle.flexStart]}>
-                            <Text style={[styles.common_color,{fontSize:12}]}>{data_m.praise_num}</Text>
-                            <Image source={require('../../../../assets/images/home/xqdz.png')} style={{
-                                width:11,
-                                height:13,
-                                marginLeft: 3
-                            }}/>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[CommonStyle.flexStart,{marginLeft: 24}]}>
-                            <Text style={[styles.common_color,{fontSize:12}]}>{data_m.leaving_num}</Text>
-                            <Image source={require('../../../../assets/images/home/pinglun.png')} style={{
-                                width:14,
-                                height:14,
-                                marginLeft: 3
-                            }}/>
-                        </TouchableOpacity>
+                    color:'#666',
+                    fontSize: 12
+                }}>{data_m.create_time}</Text>
+                <View style={[CommonStyle.spaceRow,{
+                    marginTop: 10
+                }]}>
+                    <LazyImage
+                        source={{uri:data_m.cover.domain+data_m.cover.image_url}}
+                        style={{
+                            width: 120,
+                            height: 90,
+                            borderRadius: 2
+                        }}
+                    />
+                    <View style={[CommonStyle.spaceCol,{
+                        height: 90,
+                        width: width*0.94-130,
+                        alignItems: 'flex-start'
+                    }]}>
+                        <Text numberOfLines={2} ellipsizeMode={'tail'}
+                              style={{
+                                  fontWeight:'bold',
+                                  color:'#333'
+                              }}>{data_m.title}</Text>
+                        <View style={[CommonStyle.spaceRow,{
+                            width: '100%'
+                        }]}>
+                            <View style={[CommonStyle.flexStart]}>
+                                <Text style={{color:'#999',fontSize: 12}}>留言 {data_m.leaving_num}</Text>
+                                <Text style={{color:'#999',fontSize: 12,marginLeft: 10}}>收藏 {data_m.collection_num}</Text>
+                                <Text style={{color:'#999',fontSize: 12,marginLeft: 10}}>赞 {data_m.praise_num}</Text>
+                            </View>
+                            <AntDesign
+                                name={'ellipsis1'}
+                                size={16}
+                                style={{color:'#BBBBBB'}}
+                                onPress={()=>{this._showModal()}}
+                            />
+                        </View>
+
                     </View>
                 </View>
             </TouchableOpacity>

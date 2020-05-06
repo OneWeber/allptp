@@ -6,6 +6,7 @@ import action from '../../action'
 import NewHttp from '../../utils/NewHttp';
 import LazyImage from 'animated-lazy-image';
 import ActiveItem from '../../common/ActiveItem';
+import languageType from '../../json/languageType'
 const {width, height} = Dimensions.get('window')
 class CommingActive extends Component{
     componentDidMount(){
@@ -21,11 +22,12 @@ class CommingActive extends Component{
         onLoadComming(this.storeName, NewHttp + 'SoonActTwo', formData)
     }
     renderItem(data){
-        const {theme} = this.props
+        const {theme, comming} = this.props;
+        let store = comming[this.storeName]
         return <ActiveItem isComming={true} data_a={data.item} data_index={data.index} {...this.props} style={{
                 marginTop: 0,
                 marginLeft: data.index==0?width*0.03:10,
-                marginRight: data.index===4?width*0.03:0,
+                marginRight: data.index===store.items.data.data.data.slice(0,5).length-1?width*0.03:0,
                 width: 165}}/>
     }
     render(){
@@ -37,6 +39,7 @@ class CommingActive extends Component{
                 isLoading: false
             }
         }
+        const {language} = this.props;
         return(
             <View style={{width: '100%'}}>
                 {
@@ -49,13 +52,16 @@ class CommingActive extends Component{
                                 CommonStyle.commonWidth,{
                                 marginLeft:width*0.03
                             }]}>
-                                即将开展的体验
+                                {
+                                    language===1?languageType.CH.home.comming:language===2?languageType.EN.home.comming:languageType.JA.home.comming
+                                }
                             </Text>
                             <View style={{marginTop: 25}}>
                                 <FlatList
                                     data={store.items.data.data.data.slice(0,5)}
                                     horizontal={true}
                                     showsVerticalScrollIndicator = {false}
+                                    showsHorizontalScrollIndicator = {false}
                                     renderItem={data=>this.renderItem(data)}
                                     keyExtractor={(item, index) => index.toString()}
                                 />

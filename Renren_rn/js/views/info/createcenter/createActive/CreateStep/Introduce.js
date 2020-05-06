@@ -1,5 +1,15 @@
 import React,{Component} from 'react';
-import {View, Text, StyleSheet, ScrollView, TextInput, Dimensions, TouchableOpacity, SafeAreaView} from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TextInput,
+    Dimensions,
+    TouchableOpacity,
+    SafeAreaView,
+    ActivityIndicator,
+} from 'react-native';
 import CreateHeader from '../../../../../common/CreateHeader';
 import SiderMenu from '../../../../../common/SiderMenu';
 import CommonStyle from '../../../../../../assets/css/Common_css';
@@ -10,6 +20,10 @@ import Interval from '../../../../../common/Interval';
 import SideMenu from 'react-native-side-menu';
 import MenuContent from '../../../../../common/MenuContent';
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
+import Toast, {DURATION} from 'react-native-easy-toast';
+import Fetch from '../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../utils/NewHttp';
+import action from '../../../../../action';
 const {width, height} = Dimensions.get('window')
 class Introduce extends Component{
     constructor(props) {
@@ -24,11 +38,75 @@ class Introduce extends Component{
             link_1: '',
             link_2: '',
             link_3: '',
-            isOpenning: false
+            isOpenning: false,
+            introduce: '',
+            isLoading: false,
+            isInit: false
         }
     }
+    componentDidMount() {
+        const {activity_id} = this.props;
+        if(activity_id === '') {
+            return
+        } else {
+            this.initData()
+        }
+    }
+    initData() {
+        const {changeStatus} = this.props;
+        this.setState({
+            isInit: true
+        });
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("activity_id",this.props.activity_id);
+        Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    introduce: res.data.introduce,
+                    link_1: res.data.link_1,
+                    link_2: res.data.link_2,
+                    link_3: res.data.link_3,
+                    isInit: false,
+                }, () => {
+                    changeStatus(res.data.step.split(','))
+                })
+            }
+        })
+    }
     goNext(){
-        NavigatorUtils.goPage({},'Content')
+        if(!this.state.isLoading) {
+            this.saveIntroduce()
+        }
+        //NavigatorUtils.goPage({},'Content')
+    }
+    saveIntroduce() {
+        const {activity_id} = this.props;
+        if(!this.state.introduce) {
+            this.refs.toast.show('请介绍您和这个主题之间的故事')
+        } else {
+            this.setState({
+                isLoading: true
+            });
+            let formData = new FormData();
+            formData.append("token",this.props.token);
+            formData.append("activity_id",activity_id);
+            formData.append("step",3);
+            formData.append("introduce",this.state.introduce);
+            formData.append("link_1",this.state.link_1);
+            formData.append("link_2",this.state.link_2);
+            formData.append("link_3",this.state.link_3);
+            formData.append("question",JSON.stringify([]));
+            formData.append("isapp",1);
+            Fetch.post(NewHttp+'ActivitSaveTwo', formData).then(res => {
+                if(res.code === 1) {
+                    this.setState({
+                        isLoading: false
+                    });
+                    NavigatorUtils.goPage({},'Content')
+                }
+            })
+        }
     }
     render(){
         const {theme} = this.props;
@@ -58,6 +136,7 @@ class Introduce extends Component{
                 autoClosing={true}         //默认为true 如果为true 一有事件发生抽屉就会关闭
             >
                 <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+                    <Toast ref="toast" position='center' positionValue={0}/>
                     <CreateHeader title={'自我介绍'} navigation={this.props.navigation}/>
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
@@ -84,7 +163,10 @@ class Introduce extends Component{
                                         placeholder='请输入内容'
                                         editable={true}
                                         multiline={true}
+                                        onChangeText ={(text)=>this.setState({introduce:text})}
+                                        defaultValue={this.state.introduce}
                                         style={CommonStyle.long_input}/>
+
                                     <Text style={[styles.main_title,{marginTop:25}]}>
                                         如果您有围绕该主题的社交媒体账号或相关网站，如微信公众号，博客，微博或报道您的文章，请告诉我们。
                                     </Text>
@@ -122,7 +204,13 @@ class Introduce extends Component{
                             }]}
                                   onPress={()=>this.goNext()}
                             >
-                                <Text style={{color:'#fff'}}>保存并继续</Text>
+                                {
+                                    this.state.isLoading
+                                        ?
+                                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                        :
+                                        <Text style={{color:'#fff'}}>保存并继续</Text>
+                                }
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
@@ -152,6 +240,11 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    activity_id: state.steps.activity_id,
+    token: state.token.token
+});
+const mapDispatchToProps = dispatch => ({
+    changeStatus: arr => dispatch(action.changeStatus(arr))
 })
-export default connect(mapStateToProps)(Introduce)
+export default connect(mapStateToProps, mapDispatchToProps)(Introduce)

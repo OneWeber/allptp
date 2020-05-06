@@ -11,12 +11,19 @@ import ToAudit from './createActive/ToAudit';
 import Already from './createActive/Already';
 import NotPass from './createActive/NotPass';
 import Uncommitted from './createActive/Uncommitted';
+import action from '../../../action'
+import HttpUrl from '../../../utils/Http';
+import { Tooltip } from 'react-native-elements';
 const {width, height} = Dimensions.get('window')
 class CreateActive extends Component{
     constructor(props) {
         super(props);
         this.tabNames = ['待审核', '已通过', '未通过', '未提交']
     }
+    componentDidMount() {
+        console.log(this.props.userinfo)
+    }
+
     getLeftButton() {
         return <TouchableOpacity
             style={CommonStyle.back_icon}
@@ -31,14 +38,52 @@ class CreateActive extends Component{
         </TouchableOpacity>
     }
     getRightButton(){
-        return <Text style={{
-            marginRight: width*0.03,
-            fontWeight:'bold',
-            color:'#ff5673'
-        }}>验证身份</Text>
+        const {userinfo} = this.props;
+        let userStore = userinfo['userinfo'];
+        if(!userStore) {
+            userStore={
+                items: [],
+                isLoading: false
+            }
+        }
+        let userInfo = userStore.items.data.data[0]
+        return <View>
+            {
+                userInfo.refuse_reason
+                ?
+                    <View style={CommonStyle.flexStart}>
+                        <Tooltip
+                            backgroundColor={'#fff'}
+                            overlayColor={'rgba(0,0,0,.4)'}
+                            popover={<Text style={{color:'#333'}}>{userInfo.refuse_reason}</Text>}>
+                            <AntDesign
+                                name={'questioncircleo'}
+                                size={16}
+                                style={{color:'#ff5673'}}
+                            />
+                        </Tooltip>
+
+                        <Text style={{
+                            marginRight: width*0.03,
+                            fontWeight:'bold',
+                            color:'#ff5673',
+                            marginLeft:3
+                        }}>身份验证</Text>
+                    </View>
+                :
+                    null
+            }
+
+        </View>
+    }
+    createActive() {
+        const {changeActivityId} = this.props
+        changeActivityId('')
+        NavigatorUtils.goPage({},'Language')
     }
     render(){
-        const {theme} = this.props
+        const {theme} = this.props;
+
         return(
             <SafeAreaView style={styles.container}>
                 <RNEasyTopNavBar
@@ -59,7 +104,7 @@ class CreateActive extends Component{
                         tabUnderlineScaleX={6} // default 3
                         activeColor={theme}
                         isWishLarge={true}
-                        inactiveColor={theme}
+                        inactiveColor={'#999'}
                     />)}>
                     <View tabLabel={'待审核'} style={{flex: 1}}>
                         <ToAudit {...this.props} {...this.state} />
@@ -79,7 +124,7 @@ class CreateActive extends Component{
                         backgroundColor: theme,
                         flexDirection: 'row'
                     }]}
-                    onPress={()=>{NavigatorUtils.goPage({},'Language')}}
+                    onPress={()=>{this.createActive()}}
                     >
                         <AntDesign
                             name={'plus'}
@@ -120,7 +165,12 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    token: state.token.token,
+    userinfo: state.userinfo
+});
+const mapDispatchToProps = dispatch => ({
+    changeActivityId: id => dispatch(action.changeActivityId(id)),
 })
-export default connect(mapStateToProps)(CreateActive)
+export default connect(mapStateToProps, mapDispatchToProps)(CreateActive)
 

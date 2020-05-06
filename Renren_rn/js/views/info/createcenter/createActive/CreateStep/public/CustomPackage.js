@@ -20,12 +20,15 @@ class CustomPackage extends Component{
         let list = customePackage;
         let data = {
             name: this.state.customePackageName,
-            people: this.state.customePackagePeople,
-            totalPrice: this.state.customePackageTotalPrice
+            adult: this.state.customePackagePeople,
+            price: this.state.customePackageTotalPrice,
+            type: 2,
+            flag: 1,
+            date: []
         }
         list.push(data);
         changeCustomePackage(list);
-        NavigatorUtils.backToUp(this.props)
+        NavigatorUtils.goPage({}, 'LongTime')
     }
     render(){
         return(

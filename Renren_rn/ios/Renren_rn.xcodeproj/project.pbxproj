@@ -8,17 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* Renren_rnTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* Renren_rnTests.m */; };
+		1162765120D3497797386F92 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E858932B06844B6B799F375 /* CoreGraphics.framework */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		18E37A622457DD8F00BDA857 /* libsqlite3.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E37A612457DD8F00BDA857 /* libsqlite3.0.tbd */; };
+		18E37A642457DD9800BDA857 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E37A632457DD9800BDA857 /* libc++.tbd */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* Renren_rnTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* Renren_rnTests.m */; };
+		48C17B8A104144DA826F4D7C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 145DE471BB9449FD9C9950D7 /* CFNetwork.framework */; };
 		586C89BAD60B838590341C6E /* libPods-Renren_rn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D39C151E605985F9991A2F25 /* libPods-Renren_rn.a */; };
+		5B1AF6A97E874B0CB10C11AE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FCCADE115374E15AC73EF10 /* libz.tbd */; };
 		5B70563CA7521BABDFF72EFD /* libPods-Renren_rn-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D9DD2AF951D9696138373406 /* libPods-Renren_rn-tvOSTests.a */; };
+		73D0C4E270D14F8DB3ED2F20 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0934061CCADB49A69A933FFC /* UIKit.framework */; };
+		884E36124B164EB69A1799F3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44AE97F06FB4F18B396AF19 /* Foundation.framework */; };
+		B0F1973B782C44E78885D584 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14EE75C0319549C59E8BD7FC /* CoreTelephony.framework */; };
 		D42BE92FFF9F82421948F3E3 /* libPods-Renren_rn-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD2592865261A36B0DDCA7F2 /* libPods-Renren_rn-tvOS.a */; };
+		D780C8A1A03545939D56B756 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB537B93FF7543DA93053011 /* CoreFoundation.framework */; };
+		E1668DEAADE0479B8F96A35B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90ED45BA8A394E14A01C3EA8 /* SystemConfiguration.framework */; };
 		EA72A15369B71A320EA2A1FA /* libPods-Renren_rnTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B25B175AB8D14A0AF6B618A /* libPods-Renren_rnTests.a */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +39,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = Renren_rn;
+		};
+		18994D02244FE269003EDD66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18994CFE244FE269003EDD66 /* PPTMapView.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = PPTMapView;
+		};
+		18F6E64B244EF43500A18336 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18F6E647244EF43500A18336 /* AirMaps.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 11FA5C511C4A1296003AC2EE;
+			remoteInfo = AirMaps;
 		};
 		2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -44,6 +68,7 @@
 		00E356EE1AD99517003FC87E /* Renren_rnTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Renren_rnTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* Renren_rnTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Renren_rnTests.m; sourceTree = "<group>"; };
+		0934061CCADB49A69A933FFC /* UIKit.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		13B07F961A680F5B00A75B9A /* Renren_rn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Renren_rn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Renren_rn/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Renren_rn/AppDelegate.m; sourceTree = "<group>"; };
@@ -51,18 +76,35 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Renren_rn/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Renren_rn/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Renren_rn/main.m; sourceTree = "<group>"; };
+		145DE471BB9449FD9C9950D7 /* CFNetwork.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		14EE75C0319549C59E8BD7FC /* CoreTelephony.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		18994CFE244FE269003EDD66 /* PPTMapView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PPTMapView.xcodeproj; path = "../node_modules/react-native-maps-google/ios/PPTMapView.xcodeproj"; sourceTree = "<group>"; };
+		18994D08244FE370003EDD66 /* libGoogle-Maps-iOS-Utils.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libGoogle-Maps-iOS-Utils.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18994D10244FE5D1003EDD66 /* libreact-native-google-maps.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-google-maps.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18E37A612457DD8F00BDA857 /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
+		18E37A632457DD9800BDA857 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		18F6E647244EF43500A18336 /* AirMaps.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AirMaps.xcodeproj; path = "../node_modules/react-native-maps/lib/ios/AirMaps.xcodeproj"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* Renren_rn-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Renren_rn-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* Renren_rn-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Renren_rn-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F36F94CF029AECDF7C06152 /* Pods-Renren_rn-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-Renren_rn-tvOSTests/Pods-Renren_rn-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		36B0809B3C3EC81DBB55FCA7 /* Pods-Renren_rn-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn-tvOS.release.xcconfig"; path = "Target Support Files/Pods-Renren_rn-tvOS/Pods-Renren_rn-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		39A862C7A5A1FD07F3CE0987 /* Pods-Renren_rnTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rnTests.debug.xcconfig"; path = "Target Support Files/Pods-Renren_rnTests/Pods-Renren_rnTests.debug.xcconfig"; sourceTree = "<group>"; };
+		55A7FF1EFA964D88AD7B964B /* RCTAuroraIMUI.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = RCTAuroraIMUI.framework; path = System/Library/Frameworks/RCTAuroraIMUI.framework; sourceTree = SDKROOT; };
+		6FCCADE115374E15AC73EF10 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		885913DB4E172BC3593BF5B0 /* Pods-Renren_rn-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-Renren_rn-tvOSTests/Pods-Renren_rn-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8BF19D56F7B3B0F6160E6211 /* Pods-Renren_rnTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rnTests.release.xcconfig"; path = "Target Support Files/Pods-Renren_rnTests/Pods-Renren_rnTests.release.xcconfig"; sourceTree = "<group>"; };
+		90ED45BA8A394E14A01C3EA8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		9B25B175AB8D14A0AF6B618A /* libPods-Renren_rnTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Renren_rnTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E858932B06844B6B799F375 /* CoreGraphics.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B4EC9D7FF8EB448892242028 /* libPPTMapView.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libPPTMapView.a; sourceTree = "<group>"; };
+		BB537B93FF7543DA93053011 /* CoreFoundation.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		BD9C8500EF05859A03D9ECF4 /* Pods-Renren_rn.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn.release.xcconfig"; path = "Target Support Files/Pods-Renren_rn/Pods-Renren_rn.release.xcconfig"; sourceTree = "<group>"; };
+		C016CE41A4E544C8B3C37B62 /* RCTAuroraIMUITests.xctest */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RCTAuroraIMUITests.xctest; sourceTree = "<group>"; };
 		D39C151E605985F9991A2F25 /* libPods-Renren_rn.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Renren_rn.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D44AE97F06FB4F18B396AF19 /* Foundation.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D4DE5E5702CB7830536DFA4B /* Pods-Renren_rn-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-Renren_rn-tvOS/Pods-Renren_rn-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		D66EEB44593918499573F197 /* Pods-Renren_rn.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Renren_rn.debug.xcconfig"; path = "Target Support Files/Pods-Renren_rn/Pods-Renren_rn.debug.xcconfig"; sourceTree = "<group>"; };
+		D67C686EE2B74973A5E9B0E2 /* libAuroraIMUI.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libAuroraIMUI.a; sourceTree = "<group>"; };
 		D9DD2AF951D9696138373406 /* libPods-Renren_rn-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Renren_rn-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
@@ -82,7 +124,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18E37A642457DD9800BDA857 /* libc++.tbd in Frameworks */,
+				18E37A622457DD8F00BDA857 /* libsqlite3.0.tbd in Frameworks */,
 				586C89BAD60B838590341C6E /* libPods-Renren_rn.a in Frameworks */,
+				5B1AF6A97E874B0CB10C11AE /* libz.tbd in Frameworks */,
+				B0F1973B782C44E78885D584 /* CoreTelephony.framework in Frameworks */,
+				48C17B8A104144DA826F4D7C /* CFNetwork.framework in Frameworks */,
+				D780C8A1A03545939D56B756 /* CoreFoundation.framework in Frameworks */,
+				E1668DEAADE0479B8F96A35B /* SystemConfiguration.framework in Frameworks */,
+				884E36124B164EB69A1799F3 /* Foundation.framework in Frameworks */,
+				73D0C4E270D14F8DB3ED2F20 /* UIKit.framework in Frameworks */,
+				1162765120D3497797386F92 /* CoreGraphics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,15 +203,54 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		185135122448346800D6D1D1 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				D67C686EE2B74973A5E9B0E2 /* libAuroraIMUI.a */,
+				55A7FF1EFA964D88AD7B964B /* RCTAuroraIMUI.framework */,
+				C016CE41A4E544C8B3C37B62 /* RCTAuroraIMUITests.xctest */,
+				B4EC9D7FF8EB448892242028 /* libPPTMapView.a */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		18994CFF244FE269003EDD66 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				18994D03244FE269003EDD66 /* libPPTMapView.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		18F6E648244EF43500A18336 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				18F6E64C244EF43500A18336 /* libAirMaps.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18E37A632457DD9800BDA857 /* libc++.tbd */,
+				18E37A612457DD8F00BDA857 /* libsqlite3.0.tbd */,
+				18994D10244FE5D1003EDD66 /* libreact-native-google-maps.a */,
+				18994D08244FE370003EDD66 /* libGoogle-Maps-iOS-Utils.a */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				D39C151E605985F9991A2F25 /* libPods-Renren_rn.a */,
 				FD2592865261A36B0DDCA7F2 /* libPods-Renren_rn-tvOS.a */,
 				D9DD2AF951D9696138373406 /* libPods-Renren_rn-tvOSTests.a */,
 				9B25B175AB8D14A0AF6B618A /* libPods-Renren_rnTests.a */,
+				6FCCADE115374E15AC73EF10 /* libz.tbd */,
+				14EE75C0319549C59E8BD7FC /* CoreTelephony.framework */,
+				145DE471BB9449FD9C9950D7 /* CFNetwork.framework */,
+				BB537B93FF7543DA93053011 /* CoreFoundation.framework */,
+				90ED45BA8A394E14A01C3EA8 /* SystemConfiguration.framework */,
+				D44AE97F06FB4F18B396AF19 /* Foundation.framework */,
+				0934061CCADB49A69A933FFC /* UIKit.framework */,
+				9E858932B06844B6B799F375 /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -167,6 +258,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				18994CFE244FE269003EDD66 /* PPTMapView.xcodeproj */,
+				18F6E647244EF43500A18336 /* AirMaps.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -180,6 +273,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				14C1C11AA92951BF6B5A66EC /* Pods */,
+				185135122448346800D6D1D1 /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -285,7 +379,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 940;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
@@ -320,6 +414,16 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 18F6E648244EF43500A18336 /* Products */;
+					ProjectRef = 18F6E647244EF43500A18336 /* AirMaps.xcodeproj */;
+				},
+				{
+					ProductGroup = 18994CFF244FE269003EDD66 /* Products */;
+					ProjectRef = 18994CFE244FE269003EDD66 /* PPTMapView.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* Renren_rn */,
@@ -329,6 +433,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		18994D03244FE269003EDD66 /* libPPTMapView.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libPPTMapView.a;
+			remoteRef = 18994D02244FE269003EDD66 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		18F6E64C244EF43500A18336 /* libAirMaps.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libAirMaps.a;
+			remoteRef = 18F6E64B244EF43500A18336 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		00E356EC1AD99517003FC87E /* Resources */ = {
@@ -467,6 +588,8 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Renren_rn/Pods-Renren_rn-resources.sh",
 				"${PODS_ROOT}/BaiduMapKit/BaiduMapKit/BaiduMapAPI_Map.framework/Resources/mapapi.bundle",
+				"${PODS_ROOT}/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNImageCropPicker/QBImagePicker.bundle",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -483,11 +606,14 @@
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Octicons.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Zocial.ttf",
+				"${PODS_ROOT}/RSKImageCropper/RSKImageCropper/RSKImageCropperStrings.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/react-native-baidumap-sdk/react-native-baidumap-sdk.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/mapapi.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleMaps.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/QBImagePicker.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Entypo.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EvilIcons.ttf",
@@ -504,6 +630,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Octicons.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SimpleLineIcons.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Zocial.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RSKImageCropperStrings.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/react-native-baidumap-sdk.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -646,9 +773,21 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = Renren_rnTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -667,9 +806,21 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 2T9TM97DAK;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = Renren_rnTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -689,6 +840,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 2T9TM97DAK;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = Renren_rn/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -709,6 +865,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2T9TM97DAK;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = Renren_rn/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -735,8 +896,20 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = "Renren_rn-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -763,8 +936,20 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = "Renren_rn-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -791,8 +976,20 @@
 				DEVELOPMENT_TEAM = 2T9TM97DAK;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = "Renren_rn-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -819,8 +1016,20 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 2T9TM97DAK;
 				GCC_NO_COMMON_BLOCKS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/aurora-imui-react-native/iOS/IMUIMessageCollectionView/**",
+					"$(SRCROOT)/../node_modules/react-native-maps-google/ios/**",
+				);
 				INFOPLIST_FILE = "Renren_rn-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)/System/Library/Frameworks\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

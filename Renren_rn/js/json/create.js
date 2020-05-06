@@ -27,5 +27,5 @@ const create = [
         width:18,
         height:22
     }
-]
+];
 export default create

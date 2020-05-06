@@ -1,5 +1,15 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, ScrollView, Dimensions, TouchableOpacity, SafeAreaView, FlatList} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    ScrollView,
+    Dimensions,
+    TouchableOpacity,
+    SafeAreaView,
+    FlatList,
+    TextInput, ActivityIndicator,
+} from 'react-native';
 import CreateHeader from '../../../../../common/CreateHeader';
 import SiderMenu from '../../../../../common/SiderMenu';
 import CommonStyle from '../../../../../../assets/css/Common_css';
@@ -9,6 +19,11 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
 import MenuContent from '../../../../../common/MenuContent';
 import SideMenu from 'react-native-side-menu';
+import Fetch from '../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../utils/NewHttp';
+import action from '../../../../../action'
+import Modal from 'react-native-modalbox';
+import Toast, {DURATION} from 'react-native-easy-toast';
 const {width, height} = Dimensions.get('window')
 class Time extends Component{
     constructor(props) {
@@ -24,8 +39,77 @@ class Time extends Component{
         this.state = {
             isOpenning: false,
             timeIndex: 0,
-            dateIndex: -1
+            dateIndex: -1,
+            slot: this.props.longDay,
+            differ: this.props.difference,
+            minAge: '',
+            maxAge: '',
+            isChild: false,
+            ageLimit: '',
+            isLoading: false
         }
+    }
+    componentDidMount() {
+        this.getSlot();
+        this.getDiffer();
+        const {activity_id} = this.props;
+        if(activity_id === '') {
+            return
+        } else {
+            this.initData()
+        }
+    }
+    initData() {
+        const {changeStatus} = this.props;
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("activity_id",this.props.activity_id);
+        Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    minAge: res.data.kids_stand_low,
+                    maxAge: res.data.kids_stand_high,
+                    timeIndex: res.data.long_day,
+                    ageLimit: res.data.age_limit
+                }, () => {
+                    changeStatus(res.data.step.split(','))
+                })
+            }
+        })
+    }
+    getSlot() {
+        const {activity_id, token, changeLongDay} = this.props;
+        let formData = new FormData();
+        formData.append("token",token);
+        formData.append("version",'2.0');
+        formData.append("activity_id",activity_id);
+        Fetch.post(NewHttp+'ActivitySlotUserTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    slot: res.data
+                },() => {
+                    changeLongDay(this.state.slot)
+                })
+            } else {
+                changeLongDay([])
+            }
+        })
+    }
+    getDiffer() {
+        const {activity_id, token, changeDifference} = this.props;
+        let formData = new FormData();
+        formData.append("token",token);
+        formData.append("version",'2.0');
+        formData.append("activity_id",activity_id);
+        Fetch.post(NewHttp + 'DifferListTwo',formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    differ: res.data
+                },() => {
+                    changeDifference(this.state.differ)
+                });
+            }
+        })
     }
     changeIndex(index, id){
         if(index === this.state.timeIndex) {
@@ -39,35 +123,72 @@ class Time extends Component{
         }
     }
     goLongTime(){
-        NavigatorUtils.goPage({},'LongTime')
+        let _this = this;
+        NavigatorUtils.goPage({
+            refresh: function () {
+                _this.getSlot()
+            }
+        },'LongTime')
     }
     goNext(){
-
+        if(!this.state.isLoading) {
+            this.saveTime()
+        }
+    }
+    saveTime() {
+        const {activity_id, token} = this.props;
+        if(!this.state.slot) {
+            this.refs.toast.show('请选择举办体验时间段')
+        }else if(!this.state.ageLimit) {
+            this.refs.toast.show('请填写参与者年龄下限')
+        }else {
+            this.setState({
+                isLoading: true
+            });
+            let formData = new FormData();
+            formData.append("token",this.props.token);
+            formData.append("age_limit",this.state.ageLimit);
+            formData.append("kids_stand_low",this.state.minAge);
+            formData.append("kids_stand_high",this.state.maxAge);
+            formData.append("long_day",this.state.timeIndex);
+            formData.append("activity_id",activity_id);
+            formData.append("step",11);
+            formData.append("isapp",1);
+            Fetch.post(NewHttp+'ActivitSaveTwo', formData).then(res => {
+                this.setState({
+                    isLoading: false
+                })
+                if(res.code === 1) {
+                    NavigatorUtils.goPage({},'Accommodation')
+                }
+            })
+        }
     }
     getWeekDay(date) {
         let weekDay = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
         let myDate = new Date(Date.parse(date));
         return weekDay[myDate.getDay()]
     }
-    clickDateItem(index){
+    clickDateItem(index, data){
         this.setState({
             dateIndex: index
         },() => {
-            NavigatorUtils.goPage({}, 'Calendar')
+            NavigatorUtils.goPage({slot: data, isSingle: true}, 'Calendar')
         })
     }
     renderItem(data){
         const {dateIndex} = this.state;
         const {theme} = this.props
-        let begin = data.item.longDayTime.beginTime.split('-');
-        let end = data.item.longDayTime.endTime.split('-');
+        let begin = data.item.begin_date.split('-');
+        let end = data.item.end_date.split('-');
         return <TouchableOpacity style={[CommonStyle.flexCenter,{
             width: 90,
             height: 50,
             backgroundColor: dateIndex===data.index?'#ECFEFF':'#F5F7FA',
             borderRadius: 5,
-            marginLeft: data.index===0?width*0.03:5
-        }]} onPress={() => {this.clickDateItem(data.index)}}>
+            marginLeft: data.index===0?width*0.03:5,
+            marginRight: data.index===this.state.slot.length-1?65.5:0
+        }]} onPress={() => {this.clickDateItem(data.index, data.item)}}>
             <Text style={{
                 color:dateIndex===data.index?theme:'#333',
                 fontSize: 13
@@ -79,12 +200,35 @@ class Time extends Component{
             }}>{this.getWeekDay(begin.join('/'))}开始</Text>
         </TouchableOpacity>
     }
-    goDifference(){
-        NavigatorUtils.goPage({}, 'SettingDifference')
+    goDifference(data, differ_id){
+        NavigatorUtils.goPage({data: data, differ_id: differ_id}, 'SettingDifference')
+    }
+    _changeAge(text, val) {
+        if(val === 'min') {
+            this.setState({minAge:text})
+        }else {
+            this.setState({maxAge:text})
+        }
+    }
+    _ageLimitChange(text) {
+        this.setState({
+            ageLimit: text
+        })
+    }
+    delDiffer(differ_id) {
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("version", '2.0');
+        formData.append("differ_id", differ_id);
+        Fetch.post(NewHttp+'DifferDelTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.getDiffer()
+            }
+        })
     }
     render(){
         const {theme} = this.props;
-        const {timeIndex, isOpenning} = this.state;
+        const {timeIndex, isOpenning, minAge, maxAge} = this.state;
         const menu = <MenuContent navigation={this.props.navigation}/>;
         return(
             <SideMenu
@@ -110,6 +254,7 @@ class Time extends Component{
                 autoClosing={true}         //默认为true 如果为true 一有事件发生抽屉就会关闭
             >
                 <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+                    <Toast ref="toast" position='center' positionValue={0}/>
                     <CreateHeader title={'体验时间'} navigation={this.props.navigation}/>
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
@@ -189,17 +334,47 @@ class Time extends Component{
                                 </TouchableOpacity>
                             </View>
                             {
-                                this.props.longDay.length > 0
+                                this.state.slot.length > 0
                                 ?
-                                    <View style={[CommonStyle.flexStart,{marginTop: 15,flexDirection:'row'}]}>
+                                    <View style={[CommonStyle.flexStart,{marginTop: 15,flexDirection:'row',position:'relative'}]}>
                                         <FlatList
-                                            data={this.props.longDay}
+                                            data={this.state.slot}
                                             horizontal={true}
                                             showsVerticalScrollIndicator = {false}
+                                            showsHorizontalScrollIndicator = {false}
                                             renderItem={data=>this.renderItem(data)}
                                             keyExtractor={(item, index) => index.toString()}
                                         />
-
+                                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                            position:'absolute',
+                                            right:0,
+                                            top:0,
+                                            bottom:0,
+                                            width:60.5,
+                                            backgroundColor:'rgba(245,247,250,1)',
+                                            borderRadius: 3,
+                                            flexDirection:'row',
+                                            shadowColor:'#333',
+                                            shadowOffset:{width:0.5, height:0.5},
+                                            shadowOpacity: 0.4,
+                                            shadowRadius: 1,
+                                        }]} onPress={()=>{
+                                            this.setState({
+                                                dateIndex: -1
+                                            },()=>{
+                                                NavigatorUtils.goPage({slot: this.state.slot}, 'Calendar')
+                                            })
+                                        }}>
+                                            <View style={CommonStyle.flexCenter}>
+                                                <Text style={{color:'#333',fontSize: 13}}>查看</Text>
+                                                <Text style={{color:'#333',fontSize: 13}}>日期</Text>
+                                            </View>
+                                            <AntDesign
+                                                name={'right'}
+                                                size={14}
+                                                style={{color:'#666'}}
+                                            />
+                                        </TouchableOpacity>
                                     </View>
                                 :
                                     null
@@ -249,10 +424,16 @@ class Time extends Component{
                                     }]}>
                                         <Text style={{
                                             color:'#333'
-                                        }}>满{item.people}人退{item.returnNum}%</Text>
+                                        }}>满{item.num}人退{parseFloat(item.refund_rate)}%</Text>
                                         <View style={[CommonStyle.flexEnd]}>
-                                            <Text style={{color:'#a4a4a4',fontSize: 13,marginRight: 20}}>编辑</Text>
-                                            <Text style={{color:'#a4a4a4',fontSize: 13}}>删除</Text>
+                                            <Text
+                                                style={{color:'#a4a4a4',fontSize: 13,marginRight: 20}}
+                                                onPress={()=>{this.goDifference(item, item.differ_id)}}
+                                            >编辑</Text>
+                                            <Text
+                                                style={{color:'#a4a4a4',fontSize: 13}}
+                                                onPress={()=>{this.delDiffer(item.differ_id)}}
+                                            >删除</Text>
                                         </View>
                                     </View>
                                 })
@@ -265,16 +446,34 @@ class Time extends Component{
                             backgroundColor:'#fff',
                             height:64,
                             marginTop:10
-                        }]}>
+                        }]} onPress={()=>{
+                            this.setState({
+                                isChild: true
+                            },()=>{
+                                this.refs.child.open()
+                            })
+                        }}>
                             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
                                 height:64
                             }]}>
                                 <Text style={[styles.main_title]}>儿童价标准</Text>
-                                <AntDesign
-                                    name={'right'}
-                                    size={16}
-                                    style={{color:'#666'}}
-                                />
+                                <View style={CommonStyle.flexEnd}>
+                                    {
+                                        minAge || maxAge
+                                        ?
+                                            <Text style={{color:'#333'}}>
+                                                {minAge?minAge:'~'}到{maxAge?maxAge:'~'}周岁
+                                            </Text>
+                                        :
+                                            null
+                                    }
+                                    <AntDesign
+                                        name={'right'}
+                                        size={16}
+                                        style={{color:'#666'}}
+                                    />
+                                </View>
+
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity style={[CommonStyle.flexCenter,{
@@ -282,16 +481,32 @@ class Time extends Component{
                             height:64,
                             marginTop:10,
                             marginBottom: 100
-                        }]}>
+                        }]} onPress={()=>{
+                            this.setState({
+                                isChild: false
+                            },()=>{
+                                this.refs.child.open()
+                            })
+                        }}>
                             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
                                 height:64
                             }]}>
                                 <Text style={[styles.main_title]}>参与者年龄下限</Text>
-                                <AntDesign
-                                    name={'right'}
-                                    size={16}
-                                    style={{color:'#666'}}
-                                />
+                                <View style={CommonStyle.flexEnd}>
+                                    {
+                                        this.state.ageLimit
+                                        ?
+                                            <Text style={{color:'#333'}}>{this.state.ageLimit}岁</Text>
+                                        :
+                                            null
+                                    }
+                                    <AntDesign
+                                        name={'right'}
+                                        size={16}
+                                        style={{color:'#666'}}
+                                    />
+                                </View>
+
                             </View>
                         </TouchableOpacity>
                     </ScrollView>
@@ -302,10 +517,44 @@ class Time extends Component{
                             }]}
                                onPress={()=>this.goNext()}
                             >
-                                <Text style={{color:'#fff'}}>保存并继续</Text>
+                                {
+                                    this.state.isLoading
+                                        ?
+                                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                        :
+                                        <Text style={{color:'#fff'}}>保存并继续</Text>
+                                }
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
+                    <Modal
+                        style={{height:this.state.isChild?150:100,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                        ref={"child"}
+                        animationDuration={200}
+                        position={"center"}
+                        backdropColor={'rgba(0,0,0,0.5)'}
+                        swipeToClose={true}
+                        backdropPressToClose={true}
+                        coverScreen={true}>
+                        <View style={[CommonStyle.flexCenter]}>
+                            <View style={[CommonStyle.commonWidth,{
+                                height:this.state.isChild?150:100,
+                                backgroundColor:'#fff',
+                                borderRadius: 5,
+                                padding: 10
+                            }]}>
+                                {
+                                    this.state.isChild
+                                    ?
+                                        <ChildModal changeAge={(text, val)=>this._changeAge(text, val)} {...this.state}/>
+                                    :
+                                        <UserModal ageLimitChange={(text)=>this._ageLimitChange(text)} {...this.state}/>
+                                }
+
+                            </View>
+                        </View>
+                    </Modal>
+
                 </View>
             </SideMenu>
         )
@@ -360,6 +609,114 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     theme: state.theme.theme,
     longDay: state.steps.longDay,
-    difference: state.steps.difference
+    difference: state.steps.difference,
+    activity_id: state.steps.activity_id,
+    token: state.token.token
+});
+const mapDispatchToProps = dispatch => ({
+    changeLongDay: longday => dispatch(action.changeLongDay(longday)),
+    changeDifference: arr => dispatch(action.changeDifference(arr)),
+    changeStatus: arr => dispatch(action.changeStatus(arr))
 })
-export default connect(mapStateToProps)(Time)
+export default connect(mapStateToProps, mapDispatchToProps)(Time)
+class ChildModal extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            minAge: this.props.minAge,
+            maxAge: this.props.maxAge
+        }
+    }
+    changeAge(text, val) {
+        if(val === 'min') {
+            this.setState({minAge:text})
+        }else {
+            this.setState({maxAge:text})
+        }
+        this.props.changeAge(text, val)
+    }
+    render(){
+        return(
+            <View style={[CommonStyle.flexCenter,{
+                flex: 1
+            }]}>
+                <View style={[CommonStyle.spaceRow,{
+                    width:'100%',
+                }]}>
+                    <Text style={{
+                        color:'#333'
+                    }}>儿童最低年龄:</Text>
+                    <TextInput
+                        placeholder="请输入最低年龄"
+                        onChangeText={(text)=>this.changeAge(text, 'min')}
+                        defaultValue={this.state.minAge}
+                        style={{
+                        height:40,
+                        borderBottomWidth: 1,
+                        borderBottomColor:'#f5f5f5',
+                        width:width*0.94-120
+                    }}/>
+                </View>
+                <View style={[CommonStyle.spaceRow,{
+                    width:'100%',
+                    marginTop: 15
+                }]}>
+                    <Text style={{
+                        color:'#333'
+                    }}>儿童最大年龄:</Text>
+                    <TextInput
+                        placeholder="请输入最大年龄"
+                        onChangeText={(text)=>this.changeAge(text, 'max')}
+                        defaultValue={this.state.maxAge}
+                        style={{
+                            height:40,
+                            borderBottomWidth: 1,
+                            borderBottomColor:'#f5f5f5',
+                            width:width*0.94-120
+                        }}/>
+                </View>
+            </View>
+        )
+    }
+}
+
+class UserModal extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            ageLimit: this.props.ageLimit
+        }
+    }
+    changeAge(text) {
+        this.setState({
+            ageLimit: text
+        },() => {
+            this.props.ageLimitChange(text)
+        })
+    }
+    render(){
+        return(
+            <View style={[CommonStyle.flexCenter,{
+                flex: 1
+            }]}>
+                <View style={[CommonStyle.spaceRow,{
+                    width:'100%',
+                }]}>
+                    <Text style={{
+                        color:'#333'
+                    }}>参与者年龄下限:</Text>
+                    <TextInput
+                        placeholder="参与者年龄下限"
+                        onChangeText={(text)=>this.changeAge(text)}
+                        defaultValue={this.state.ageLimit}
+                        style={{
+                            height:40,
+                            borderBottomWidth: 1,
+                            borderBottomColor:'#f5f5f5',
+                            width:width*0.94-135
+                        }}/>
+                </View>
+            </View>
+        )
+    }
+}

@@ -27,3 +27,24 @@ export function changeLongDay(longDay) {
 export function changeDifference(data) {
     return {type:Types.CHANGE_DIFFERENCE, data}
 }
+export function changeLanguage(data) {
+    return {type:Types.CHANGE_MAINLANGUAGE, data}
+}
+export function changeOtherLanguage(data) {
+    return {type:Types.CHANGE_OTHERLANGUAGE, data}
+}
+export function changeActivityId(id) {
+    return {type:Types.CHANGE_ACTIVITYID, id}
+}
+export function changeStatus(arr) {
+    return {type:Types.CHANGE_STATUS, arr}
+}
+export function changeFull(arr) {
+    return {type:Types.CHANGE_FULL, arr}
+}
+export function changeAccommodation(arr) {
+    return {type:Types.CHANGE_ACCOMMODATION, arr}
+}
+export function changeAccImageId(arr) {
+    return {type:Types.CHANGE_ACCIMAGEID, arr}
+}

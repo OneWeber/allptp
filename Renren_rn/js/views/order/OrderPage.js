@@ -66,7 +66,7 @@ class OrderPage extends Component{
                         tabUnderlineScaleX={6} // default 3
                         activeColor={theme}
                         isWishLarge={true}
-                        inactiveColor={theme}
+                        inactiveColor={'#999'}
                     />)}>
                     {
                         this.tabNames.map((item, index) => {

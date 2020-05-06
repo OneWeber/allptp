@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, FlatList, RefreshControl, ActivityIndicator} from 'react-native';
+import {StyleSheet, View, Text, FlatList, RefreshControl, ActivityIndicator, Image} from 'react-native';
 import ScrollableTabView , { DefaultTabBar } from 'react-native-scrollable-tab-view';
 import CustomeTabBar from '../../model/CustomeTabBar';
 import {connect} from 'react-redux'
@@ -9,19 +9,39 @@ import CommonStyle from '../../../assets/css/Common_css';
 import TravelItem from '../../common/TravelItem';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
+import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import NoData from '../../common/NoData';
+import languageType from '../../json/languageType'
 class TravelPage extends Component{
     constructor(props) {
         super(props);
-        this.tabNames = ['未开始', '进行中', '已参加']
+        this.tabNames = [
+            this.props.language===1?'未开始':this.props.language===2?"Not started":'未開始',
+            this.props.language===1?'进行中':this.props.language===2?"ongoing":'進行中',
+            this.props.language===1?'已参加':this.props.language===2?"Have to attend":'参加した',
+        ];
+        this.state = {
+            viewIndex: 0
+        }
     }
     _showFlash(data) {
         showMessage(data);
     }
+    _onChangeTab(i) {
+        this.setState({
+            viewIndex: i.i
+        })
+    }
     render(){
-        let {theme} = this.props
-        return <View style={{flex: 1}}>
+        let {theme,language} = this.props
+        return <View style={{flex: 1,backgroundColor:'#fff'}}>
+                    <RNEasyTopNavBar
+                        title={language===1?languageType.CH.journey.title:language===2?languageType.EN.journey.title:languageType.JA.journey.title}
+                        backgroundTheme={'#fff'}
+                        titleColor={'#333'}
+                    />
                     <ScrollableTabView
+                        onChangeTab={(i)=>this._onChangeTab(i)}
                         renderTabBar={() => (<CustomeTabBar
                             backgroundColor={'rgba(0,0,0,0)'}
                             locked={true}
@@ -32,10 +52,16 @@ class TravelPage extends Component{
                             activeColor={theme}
                             isWishLarge={true}
                             inactiveColor={'#999'}
+                            style={{borderBottomColor:'#f5f5f5',borderBottomWidth: 1}}
                         />)}>
                         {
                             this.tabNames.map((item, index) => {
-                                return <TravelComMap showFlash={(data)=>this._showFlash(data)} tabLabel={item} key={index}/>
+                                return <TravelComMap
+                                    showFlash={(data)=>this._showFlash(data)}
+                                    name={index===0?'未开始':index===1?'进行中':'已参加'}
+                                    {...this.state}
+                                    tabLabel={item}
+                                    key={index}/>
                             })
                         }
                     </ScrollableTabView>
@@ -44,13 +70,15 @@ class TravelPage extends Component{
     }
 }
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    language: state.language.language
 })
 export default connect(mapStateToProps)(TravelPage)
 class TravelComponent extends Component{
     constructor(props) {
         super(props);
-        this.storeName = this.props.tabLabel
+        this.storeName = this.props.name;
+        this.viewIndex = this.props.viewIndex;
         this.step = 1
     }
     componentDidMount(){
@@ -78,26 +106,14 @@ class TravelComponent extends Component{
         formData.append('page', 1);
         if(val) {
             onLoadTravel(this.storeName, NewHttp + 'vipact', formData, refreshType, store.items.data.data.total, callback => {
-                if(callback) {
-                    this.props.showFlash({
-                        message: '已为您更新'+callback+'个体验',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                } else {
-                    this.props.showFlash({
-                        message: '当前体验没有新增',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                }
+
             })
             return
         }
         onLoadTravel(this.storeName, NewHttp + 'vipact', formData, refreshType, 0)
     }
     renderItem(data) {
-        return <TravelItem data_t={data.item} data_index={data.index}/>
+        return <TravelItem storeName={this.storeName} data_t={data.item} data_index={data.index}/>
     }
     onLoadMore() {
         const {token} = this.props
@@ -111,11 +127,6 @@ class TravelComponent extends Component{
         formData.append('iscomplete',this.storeName==='未开始'?0:this.storeName==='进行中'?1:2);
         formData.append('page',this.step);
         onLoadMoreTravelData(this.storeName, NewHttp + 'vipact', formData , store.items, callback => {
-            this.props.showFlash({
-                message: '暂无更多体验',
-                type: 'info',
-                backgroundColor: '#999'
-            })
 
         })
     }
@@ -170,8 +181,11 @@ class TravelComponent extends Component{
                             }}
                         />
                     :
-                        <View style={{flex: 1}}>
-                            <NoData></NoData>
+                        <View style={[CommonStyle.flexCenter,{flex: 1}]}>
+                            <Image
+                                source={require('../../../assets/images/que/wlt.png')}
+                                style={{width:180,height:180}}
+                            />
                         </View>
                 }
             </View>

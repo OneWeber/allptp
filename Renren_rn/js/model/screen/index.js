@@ -67,10 +67,12 @@ export default class Screening extends Component{
         this.openOrClosePanel(index);
         this.props.selectHeader(data, index)
     }
-    openOrClosePanel(index) {
+    openOrClosePanel(index, val) {
         const {screenData} = this.props
         if(screenData[index].type===2){
-            this.props.customFunc(index)
+            if(!val) {
+                this.props.customFunc(index)
+            }
         }
         if (this.state.activityIndex == index) {
             this.closePanel(index);
@@ -135,7 +137,6 @@ export default class Screening extends Component{
                         :
                         screenData[activityIndex].type === 1
                             ?
-
                             <TouchableOpacity
                                 style={styles.conBg}
                                 onPress={()=>this.openOrClosePanel(activityIndex)}
@@ -150,7 +151,7 @@ export default class Screening extends Component{
                                             paddingLeft: this.props.siderPadding,
                                             paddingRight: this.props.siderPadding,
                                         }]}
-                                                                  onPress={()=>this.itemOnpress(index)}
+                                              onPress={()=>this.itemOnpress(index)}
                                         >
                                             <Text style={{
                                                 color:index === selectData[activityIndex].index?activeTintColor:'#333',
@@ -205,6 +206,10 @@ export default class Screening extends Component{
                         this.props.screenData.map((item, index) => {
                             return <TouchableOpacity key={index} style={[styles.flexCenter,{
                                 height: this.props.barHeight,
+                                width:this.props.selectIndex.length===4?null:width*0.94/(this.props.selectIndex.length),
+                                justifyContent:this.props.selectIndex.length===4?'space-between':'center',
+                                alignItems:'center',
+                                flexDirection:'row'
                             }]}
                                 onPress={()=>this._selectHeader(item, index)}
                             >

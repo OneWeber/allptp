@@ -1,5 +1,15 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, ScrollView, Dimensions, TouchableOpacity, SafeAreaView, Platform} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    ScrollView,
+    Dimensions,
+    TouchableOpacity,
+    SafeAreaView,
+    Platform,
+    ActivityIndicator,
+} from 'react-native';
 import CreateHeader from '../../../../../common/CreateHeader';
 import SiderMenu from '../../../../../common/SiderMenu';
 import CommonStyle from '../../../../../../assets/css/Common_css';
@@ -12,6 +22,11 @@ import HttpUrl from '../../../../../utils/Http';
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
 import SideMenu from 'react-native-side-menu';
 import MenuContent from '../../../../../common/MenuContent';
+import LazyImage from 'animated-lazy-image';
+import ImagePickers from 'react-native-image-crop-picker';
+import Toast, {DURATION} from 'react-native-easy-toast';
+import NewHttp from '../../../../../utils/NewHttp';
+import action from '../../../../../action';
 const {width, height} = Dimensions.get('window');
 const photoOptions={
     title: '选择图片',
@@ -32,17 +47,6 @@ const photoOptions={
         skipBackup: true
     }
 };
-const options = {
-    imageCount: 6,          // 最大选择图片数目，默认6
-    isCamera: false,         // 是否允许用户在内部拍照，默认true
-    isCrop: false,          // 是否允许裁剪，默认false
-    CropW: ~~(width * 0.6), // 裁剪宽度，默认屏幕宽度60%
-    CropH: ~~(width * 0.6), // 裁剪高度，默认屏幕宽度60%
-    isGif: false,           // 是否允许选择GIF，默认false，暂无回调GIF数据
-    showCropCircle: false,  // 是否显示圆形裁剪区域，默认false
-    showCropFrame: true,    // 是否显示裁剪区域，默认true
-    showCropGrid: false     // 是否隐藏裁剪区域网格，默认false
-};
 class Photo extends Component{
     constructor(props) {
         super(props);
@@ -58,14 +62,69 @@ class Photo extends Component{
             isOpenning: false,
             coverId: '',
             coverUri: '',
-            showImage: [],
-            image: [],
+            imageList: [],
+            imageId: [],
             isIphone: false,
-            isPhotoLoading: false
+            lodingImages: false,
+            isLoading: false,
+            initImage: []
         }
     }
     componentDidMount(){
         this.isIphoneX();
+        const {activity_id} = this.props;
+        if(activity_id === '') {
+            return
+        } else {
+            this.initData()
+        }
+    }
+    initData() {
+        this.setState({
+            lodingImages: true
+        })
+        const {changeStatus} = this.props;
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("activity_id",this.props.activity_id);
+        Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
+            this.setState({
+                lodingImages: false
+            })
+            if(res.code === 1) {
+                this.setState({
+                    coverUri:res.data.cover&&res.data.cover.domain&&res.data.cover.image_url?res.data.cover.domain+res.data.cover.image_url:null,
+                    coverId:res.data.cover.image_id,
+                    initImage:res.data.image,
+
+                }, () => {
+                    let list = [];
+                    const {initImage} = this.state;
+                    if(initImage.length>0) {
+                        for(let i=0;i<initImage.length; i++) {
+                            list.push({
+                                send: {image_id:initImage[i].image_id,img:initImage[i].domain+initImage[i].image_url}
+                            });
+                        }
+                    }
+                    this.setState({
+                        imageList: list
+                    },() => {
+                        if(list.length>0) {
+                            let image_id = [];
+                            for(let i=0;i<list.length; i++) {
+                                image_id.push({image_id:list[i].send.image_id})
+                            }
+                            this.setState({
+                                imageId: image_id,
+                            })
+                        }
+
+                    })
+                    changeStatus(res.data.step.split(','))
+                })
+            }
+        })
     }
     isIphoneX(){
         if(Platform.OS === 'ios'){
@@ -95,7 +154,7 @@ class Photo extends Component{
         //alert(uri)
         let formData=new FormData();
         let file={uri:uri,type:'multipart/form-data',name:'image.png'};
-        formData.append('token',this.state.token);
+        formData.append('token',this.props.token);
         formData.append('file',file);
         //alert(JSON.stringify(formData))
         Fetch.post(HttpUrl+'Upload/upload',formData).then(
@@ -110,62 +169,175 @@ class Photo extends Component{
         )
     }
     detailImg(){
-        /*
-        SyanImagePicker.asyncShowImagePicker(options)
-            .then(photos => {
-                if(this.state.isIphone){
-                    for(let i=0;i<photos.length;i++){
-                        this.uploadImageMore(photos[i].uri)
-                    }
-                }else{
-                    for(let i=0;i<photos.length;i++){
-                        this.uploadImageMore(photos[i].original_uri)
-                    }
+        if(!this.state.lodingImages) {
+            ImagePickers.openPicker({
+                multiple: true
+            }).then(images => {
+                for(let i=0;i<images.length;i++) {
+                    this.uploadImageMore(images[i], i)
                 }
+            });
+        }
 
-            })*/
     }
-    uploadImageMore(uri){
-        console.log(uri)
+    uploadImageMore(images, i){
+        //let arr=this.state.showImage;
+        //let img=[];
         this.setState({
-            isPhotoLoading:true
+            lodingImages: true
         })
-        let arr=this.state.showImage;
-        let img=[];
+        let list = this.state.imageList;
+        let image_id = this.state.imageId;
         let formData=new FormData();
-        let file={uri:uri,type:'multipart/form-data',name:'image.png'};
-        formData.append('token',this.state.token);
+        let file={uri:images.path,type:images.mime,name:images.filename,size:images.size};
+        formData.append('token',this.props.token);
         formData.append('file',file);
-        //alert(JSON.stringify(formData))
         Fetch.post(HttpUrl+'Upload/upload',formData).then(
-            result=>{
-                this.setState({
-                    isPhotoLoading:false
-                })
-                if(result.code==1){
-                    arr.push({image_id:result.data.image_id,img:result.data.domain+result.data.image_url});
-                    this.setState({
-                        showImage:arr
-                    },()=>{
-                        for(let i=0;i<arr.length;i++){
-                            img.push({image_id:arr[i].image_id})
-                        }
-                        this.setState({
-                            image:img,
-                        })
-
+            res=>{
+                if(res.code === 1) {
+                    list.push({
+                        imageDetail: images,
+                        send: {image_id:res.data.image_id,img:res.data.domain+res.data.image_url}
                     })
+                    for(let i=0;i<list.length;i++) {
+                        image_id.push({image_id:list[i].send.image_id})
+                    }
+                    this.setState({
+                        imageList: list,
+                        imageId: image_id,
+                        lodingImages: false
+                    })
+                }else {
+                    this.setState({
+                        lodingImages: false
+                    })
+                    this.refs.toast.show('第'+(i+1)+'张图片上传失败')
                 }
             }
         )
     }
     goNext(){
-        NavigatorUtils.goPage({},'Address')
+        if(!this.state.isLoading && !this.state.lodingImages) {
+            this.savePhoto()
+        }
+    }
+    savePhoto() {
+        const {activity_id} = this.props;
+        if(!this.state.coverUri) {
+            this.refs.toast.show('请上传封面照片')
+        } else if(this.state.imageId.length === 0) {
+            this.refs.toast.show('请上传封体验内容的图片或视频')
+        } else {
+            this.setState({
+                isLoading: true
+            });
+            let formData = new FormData();
+            formData.append("token",this.props.token);
+            formData.append("activity_id",activity_id);
+            formData.append("step",8);
+            formData.append("isapp",1);
+            formData.append("cover_image",this.state.coverId);
+            formData.append("image",JSON.stringify(this.state.imageId));
+            Fetch.post(NewHttp+'ActivitSaveTwo', formData).then(res => {
+                if(res.code === 1) {
+                    this.setState({
+                        isLoading: false
+                    });
+                    this.initUncommitted();
+                    NavigatorUtils.goPage({}, 'Address')
+                }
+            })
+        }
+    }
+    initUncommitted() {
+        const {onLoadUncommit} = this.props;
+        this.storeName = 'uncommit';
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('flag',1);
+        onLoadUncommit(this.storeName, HttpUrl + 'Activity/complete', formData)
+    }
+    dropImage(data) {
+        if(data.imageDetail) {
+            ImagePickers.openCropper({
+                path: data.imageDetail.path,
+                width: 300,
+                height: 400
+            }).then(image => {
+                console.log(image);
+            });
+        }
+    }
+    delImage(i) {
+        let list = this.state.imageList;
+        let image_id = this.state.imageId;
+        list.splice(i, 1);
+        image_id.splice(i, 1);
+        this.setState({
+            imageList: list,
+            imageId: image_id
+        })
     }
     render(){
         const {theme} = this.props;
-        const {isOpenning} = this.state;
-        const menu = <MenuContent navigation={this.props.navigation}/>
+        const {isOpenning, coverUri, imageList, lodingImages} = this.state;
+        const menu = <MenuContent navigation={this.props.navigation}/>;
+        let Images = [];
+        for(let i=0;i<imageList.length;i++) {
+            Images.push(
+                <TouchableOpacity key={i} style={[styles.detail_imgs_btn,{
+                    marginLeft: i!=0&&(i+1)%3===0?0:15,
+                    borderWidth: 0,
+                    position:'relative',
+                    backgroundColor:'#f5f5f5',
+                    borderRadius: 3
+                }]} onPress={()=>{
+                    this.dropImage(imageList[i])
+                }}>
+                    <LazyImage
+                        source={{uri: imageList[i].send.img}}
+                        style={{
+                            width:(width*0.94-30)/3,
+                            height: (width*0.94-30)/3,
+                            borderRadius: 3
+                        }}
+                    />
+                    <TouchableOpacity style={{
+                        position:'absolute',
+                        top:0,
+                        right:0,
+                        padding: 5
+                    }} onPress={()=>{
+                        this.delImage(i)
+                    }}>
+                        <AntDesign
+                            name={'close'}
+                            size={14}
+                            style={{color:'#fff'}}
+                        />
+                    </TouchableOpacity>
+                    {
+                        imageList[i].imageDetail
+                        ?
+                            <View style={[CommonStyle.flexCenter,{
+                                paddingLeft:3,
+                                height:15,
+                                backgroundColor:'rgba(0,0,0,.3)',
+                                position:'absolute',
+                                left:0,
+                                right:0,
+                                bottom:0,
+                                borderBottomRightRadius: 3,
+                                borderBottomLeftRadius: 3,
+                            }]}>
+                                <Text style={{color:'#fff',fontSize: 12}}>可裁剪</Text>
+                            </View>
+                        :
+                            null
+                    }
+                </TouchableOpacity>
+            )
+        }
         return(
             <SideMenu
                 menu={menu}                    //抽屉内的组件
@@ -190,6 +362,7 @@ class Photo extends Component{
                 autoClosing={true}         //默认为true 如果为true 一有事件发生抽屉就会关闭
             >
                 <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+                    <Toast ref="toast" position='center' positionValue={0}/>
                     <CreateHeader title={'图片'} navigation={this.props.navigation}/>
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
@@ -215,11 +388,33 @@ class Photo extends Component{
                                     style={[styles.cover_img_btn,CommonStyle.flexCenter]}
                                     onPress={()=>{this.coverImg()}}
                                 >
-                                    <AntDesign
-                                        name={'plus'}
-                                        size={20}
-                                        style={{color:'#666'}}
-                                    />
+                                    {
+                                        coverUri
+                                        ?
+                                            <LazyImage
+                                                source={{uri:coverUri}}
+                                                style={{
+                                                    width:120,
+                                                    height:120,
+                                                    borderRadius: 3
+                                                }}
+                                            />
+                                        :
+                                            null
+                                    }
+                                    <View style={[CommonStyle.flexCenter,{
+                                        position:'absolute',
+                                        left:0,
+                                        right:0,
+                                        top:0,
+                                        bottom:0
+                                    }]}>
+                                        <AntDesign
+                                            name={'plus'}
+                                            size={20}
+                                            style={{color:coverUri?'#fff':'#666'}}
+                                        />
+                                    </View>
                                 </TouchableOpacity>
                                 <Text style={[styles.main_title,{marginTop:25}]}>
                                     更多活动内容照片或视频
@@ -230,14 +425,22 @@ class Photo extends Component{
                                 <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginBottom: 100}]}>
                                     <TouchableOpacity
                                         style={[styles.detail_imgs_btn, CommonStyle.flexCenter]}
-                                        //onPress={()=>{this.detailImg()}}
+                                        onPress={()=>{this.detailImg()}}
                                     >
-                                        <AntDesign
-                                            name={'plus'}
-                                            size={20}
-                                            style={{color:'#666'}}
-                                        />
+                                        {
+                                            lodingImages
+                                            ?
+                                                <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                            :
+                                                <AntDesign
+                                                    name={'plus'}
+                                                    size={20}
+                                                    style={{color:'#666'}}
+                                                />
+                                        }
+
                                     </TouchableOpacity>
+                                    {Images}
                                 </View>
                             </View>
                         </View>
@@ -249,7 +452,13 @@ class Photo extends Component{
                             }]}
                                onPress={()=>this.goNext()}
                             >
-                                <Text style={{color:'#fff'}}>保存并继续</Text>
+                                {
+                                    this.state.isLoading
+                                        ?
+                                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                        :
+                                        <Text style={{color:'#fff'}}>保存并继续</Text>
+                                }
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
@@ -288,11 +497,12 @@ const styles = StyleSheet.create({
         borderWidth:2,
         borderColor:'#dcdcdc',
         borderStyle:'dashed',
-        marginTop:15
+        marginTop:15,
+        position:'relative'
     },
     detail_imgs_btn: {
-        width:(width*0.94-20)/3,
-        height: (width*0.94-20)/3,
+        width:(width*0.94-30)/3,
+        height: (width*0.94-30)/3,
         borderWidth: 2,
         borderColor: "#dcdcdc",
         borderStyle:'dashed',
@@ -300,6 +510,12 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateProps = state => ({
-    theme: state.theme.theme
-})
-export default connect(mapStateProps)(Photo)
+    theme: state.theme.theme,
+    token: state.token.token,
+    activity_id: state.steps.activity_id
+});
+const mapDispatchToProps = dispatch => ({
+    onLoadUncommit:(storeName, url, data) => dispatch(action.onLoadUncommit(storeName, url, data)),
+    changeStatus: arr => dispatch(action.changeStatus(arr))
+});
+export default connect(mapStateProps, mapDispatchToProps)(Photo)

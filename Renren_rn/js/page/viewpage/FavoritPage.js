@@ -1,15 +1,23 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Dimensions, FlatList, RefreshControl,SafeAreaView} from 'react-native';
-import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import {
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    Dimensions,
+    FlatList,
+    RefreshControl,
+    SafeAreaView,
+    Image,
+} from 'react-native';
 import CommonStyle from '../../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import action from '../../action'
 import HttpUrl from '../../utils/Http';
 import WishItem from '../../common/WishItem';
-import Modal from 'react-native-modalbox';
 import NoData from '../../common/NoData';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
+import languageType from '../../json/languageType'
 const widthScreen = Dimensions.get('window').width;
 class FavoritePage extends Component{
     constructor(props) {
@@ -30,33 +38,14 @@ class FavoritePage extends Component{
         formData.append('token', token);
         formData.append('flag',1);
         onLoadWish(this.storeName, HttpUrl + 'Comment/collegroup_list', formData, callback => {
-            alert(JSON.stringify(callback))
+
         })
     }
     goAddWishList(){
         NavigatorUtils.goPage({}, 'AddWishList')
     }
-    getRightButton() {
-        const {theme} = this.props
-        return <TouchableOpacity
-            style={[styles.back_icon,CommonStyle.flexStart]}
-            onPress={() =>{
-                this.goAddWishList()
-            }}
-        >
-            <AntDesign
-                name={'plus'}
-                size={18}
-                style={{color:theme}}
-            />
-            <Text style={[styles.add_txt,{color:theme}]}>添加心愿单</Text>
-        </TouchableOpacity>
-    }
-    _showModal(){
-        this.refs.wish.open()
-    }
     renderItem(data){
-        return <WishItem showModal={() => this._showModal()} data_w={data.item} data_index={data.index} />
+        return <WishItem data_w={data.item} data_index={data.index} {...this.props}/>
     }
     onClose() {
 
@@ -68,7 +57,7 @@ class FavoritePage extends Component{
 
     }
     render(){
-        const {wish, theme} = this.props;
+        const {wish, theme, language} = this.props;
         let store = wish[this.storeName]
         if(!store) {
             store = {
@@ -77,60 +66,62 @@ class FavoritePage extends Component{
             }
         }
         return (
-            <View style={styles.container}>
-                <RNEasyTopNavBar
-                    title={''}
-                    backgroundTheme={'#fff'}
-                    titleColor={'#333'}
-                    rightButton={this.getRightButton()}
-                />
+            <SafeAreaView style={styles.container}>
+                <View style={[CommonStyle.spaceRow,CommonStyle.commonWidth,{
+                    height:50
+                }]}>
+                    <Text style={{
+                        color:'#333',
+                        fontWeight:'bold',
+                        fontSize: 18
+                    }}>
+                        {
+                            language===1?languageType.CH.favorites.title:language===2?languageType.EN.favorites.title:languageType.JA.favorites.title
+                        }
+                    </Text>
+                    <TouchableOpacity
+                        onPress={()=>this.goAddWishList()}
+                    >
+                        <Image
+                            source={require('../../../assets/images/collection/tjscj.png')}
+                            style={{width:18,height:18}}
+                        />
+                    </TouchableOpacity>
+                </View>
                 {
                     store.items && store.items.data && store.items.data.data && store.items.data.data.length > 0
-                    ?
-                    <FlatList
-                        data={store.items.data.data}
-                        showsVerticalScrollIndicator = {false}
-                        renderItem={data=>this.renderItem(data)}
-                        keyExtractor={(item, index) => index.toString()}
-                        refreshControl={
-                            <RefreshControl
-                                title={'loading'}
-                                titleColor={theme}
-                                colors={[theme]}
-                                refreshing={store.isLoading}
-                                onRefresh={() => {this.loadData(true)}}
-                                tintColor={theme}
-                            />
-                        }
-                    />
+                        ?
+                        <FlatList
+                            data={store.items.data.data}
+                            showsVerticalScrollIndicator = {false}
+                            renderItem={data=>this.renderItem(data)}
+                            keyExtractor={(item, index) => index.toString()}
+                            refreshControl={
+                                <RefreshControl
+                                    title={'loading'}
+                                    titleColor={theme}
+                                    colors={[theme]}
+                                    refreshing={store.isLoading}
+                                    onRefresh={() => {this.loadData(true)}}
+                                    tintColor={theme}
+                                />
+                            }
+                        />
 
-                    :
-                        <NoData></NoData>
-                }
-                <Modal
-                    style={styles.modal_con}
-                    ref={"wish"}
-                    animationDuration={200}
-                    position={"bottom"}
-                    backdropColor={'rgba(0,0,0,0.1)'}
-                    swipeToClose={false}
-                    onClosed={this.onClose}
-                    onOpened={this.onOpen}
-                    backdropPressToClose={true}
-                    coverScreen={true}
-                    onClosingState={this.onClosingState}>
-                    <SafeAreaView style={{flex: 1}}>
-                        <View style={[styles.modal_con,CommonStyle.flexCenter,{justifyContent: 'flex-start'}]}>
-                            <View style={[styles.modal_btn,CommonStyle.flexCenter,{borderBottomWidth:1,borderBottomColor:'#f5f5f5'}]}>
-                                <Text style={styles.modal_txt}>编辑</Text>
-                            </View>
-                            <View style={[styles.modal_btn,CommonStyle.flexCenter]}>
-                                <Text style={[styles.modal_txt,{color:'red'}]}>删除</Text>
-                            </View>
+                        :
+                        <View style={[CommonStyle.flexCenter,{
+                            flex: 1
+                        }]}>
+                            <Image
+                                source={require('../../../assets/images/que/wxyd.png')}
+                                style={{
+                                    width: 180,
+                                    height: 180
+                                }}
+                            />
                         </View>
-                    </SafeAreaView>
-                </Modal>
-            </View>
+                }
+            </SafeAreaView>
         )
     }
 }
@@ -139,7 +130,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        position: 'relative'
+        position: 'relative',
+        backgroundColor: '#fff'
     },
     back_icon: {
         paddingRight: widthScreen*0.03
@@ -174,7 +166,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     theme: state.theme.theme,
     token: state.token.token,
-    wish: state.wish
+    wish: state.wish,
+    language: state.language.language
 })
 const mapDispatchToProps = dispatch => ({
     onLoadWish:(storeName, url, data, callBack) => dispatch(action.onLoadWish(storeName, url, data, callBack))

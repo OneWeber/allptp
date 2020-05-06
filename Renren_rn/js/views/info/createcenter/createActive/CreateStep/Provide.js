@@ -1,5 +1,15 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, ScrollView, TextInput, Dimensions, TouchableOpacity, SafeAreaView} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    ScrollView,
+    TextInput,
+    Dimensions,
+    TouchableOpacity,
+    SafeAreaView,
+    ActivityIndicator,
+} from 'react-native';
 import CreateHeader from '../../../../../common/CreateHeader';
 import SiderMenu from '../../../../../common/SiderMenu';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -9,6 +19,10 @@ import Prompt from './common/Prompt';
 import MenuContent from '../../../../../common/MenuContent';
 import SideMenu from 'react-native-side-menu';
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
+import Toast, {DURATION} from 'react-native-easy-toast';
+import action from '../../../../../action';
+import Fetch from '../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../utils/NewHttp';
 const {width, height} = Dimensions.get('window')
 class Provide extends Component{
     constructor(props) {
@@ -18,11 +32,64 @@ class Provide extends Component{
             '了解参与者在饮食方面的特殊需求，考虑活动对参与者身体素质对要求，同时列出您将为参与者提供对所有物品',
         ]
         this.state = {
-            isOpenning: false
+            isOpenning: false,
+            activ_provite: '',
+            isLoading: false
         }
     }
+    componentDidMount(){
+        const {activity_id} = this.props;
+        if(activity_id === '') {
+            return
+        } else {
+            this.initData()
+        }
+    }
+    initData() {
+        const {changeStatus} = this.props;
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("activity_id",this.props.activity_id);
+        Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    activ_provite: res.data.activ_provite,
+                }, () => {
+                    changeStatus(res.data.step.split(','))
+                })
+            }
+        })
+    }
     goNext(){
-        NavigatorUtils.goPage({},'Bring')
+        if(!this.state.isLoading) {
+            this.saveProvide()
+        }
+        //NavigatorUtils.goPage({},'Bring')
+    }
+    saveProvide() {
+        const {activity_id} = this.props;
+        if(!this.state.activ_provite) {
+            this.refs.toast.show('请说一说关于体验您将提供什么东西')
+        } else {
+            this.setState({
+                isLoading: true
+            });
+            let formData = new FormData();
+            formData.append("token",this.props.token);
+            formData.append("activity_id",activity_id);
+            formData.append("step",5);
+            formData.append("isapp",1);
+            formData.append("question",JSON.stringify([]));
+            formData.append("activ_provite",this.state.activ_provite);
+            Fetch.post(NewHttp+'ActivitSaveTwo', formData).then(res => {
+                if(res.code === 1) {
+                    this.setState({
+                        isLoading: false
+                    })
+                    NavigatorUtils.goPage({}, 'Bring')
+                }
+            })
+        }
     }
     render(){
         const {theme} = this.props;
@@ -52,6 +119,7 @@ class Provide extends Component{
                 autoClosing={true}         //默认为true 如果为true 一有事件发生抽屉就会关闭
             >
                 <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+                    <Toast ref="toast" position='center' positionValue={0}/>
                     <CreateHeader title={'我会提供什么'} navigation={this.props.navigation}/>
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
@@ -71,12 +139,14 @@ class Provide extends Component{
                                     }}>小贴士</Text>
                                     <Prompt data={this.prompts}/>
                                     <Text style={[styles.main_title,{marginTop:25}]}>
-                                        关于活动您将提供什么东西
+                                        关于体验您将提供什么东西
                                     </Text>
                                     <TextInput
                                         placeholder='请输入内容'
                                         editable={true}
                                         multiline={true}
+                                        onChangeText ={(text)=>this.setState({activ_provite:text})}
+                                        defaultValue={this.state.activ_provite}
                                         style={CommonStyle.long_input}/>
                                 </View>
                             </View>
@@ -89,7 +159,13 @@ class Provide extends Component{
                             }]}
                               onPress={()=>this.goNext()}
                             >
-                                <Text style={{color:'#fff'}}>保存并继续</Text>
+                                {
+                                    this.state.isLoading
+                                        ?
+                                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                        :
+                                        <Text style={{color:'#fff'}}>保存并继续</Text>
+                                }
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
@@ -119,6 +195,11 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = state => ({
-    theme: state.theme.theme
-})
-export default connect(mapStateToProps)(Provide)
+    theme: state.theme.theme,
+    activity_id: state.steps.activity_id,
+    token: state.token.token
+});
+const mapDispatchToProps = dispatch => ({
+    changeStatus: arr => dispatch(action.changeStatus(arr))
+});
+export default connect(mapStateToProps, mapDispatchToProps)(Provide)

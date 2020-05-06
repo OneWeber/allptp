@@ -30,7 +30,7 @@ export default class ActiveItem extends Component{
                 marginLeft: data_index%2===0?width*0.03: 14,
                 marginTop: 25
             },this.props.style]}
-            onPress={() => {this.goDetail(data_a.activity_id)}}
+            onPress={() => {this.goDetail(data_a.activity_id || data_a.activity_id==0?data_a.activity_id:data_a.table_id)}}
             >
                 <View style={[styles.cityitem_img,{position:'relative'}]}>
                     <LazyImage

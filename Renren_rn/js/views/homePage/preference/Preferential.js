@@ -13,7 +13,7 @@ class Preferential extends Component{
         this.tabNames = ['节假日特惠','低至3折','低至5折']
     }
     render(){
-        const {theme} = this.props
+        const {theme} = this.props;
         return(
             <View style={{flex: 1,backgroundColor:'#fff'}}>
                 <ScrollableTabView

@@ -34,5 +34,5 @@ const order = [
         width:24,
         height:22
     }
-]
+];
 export default order

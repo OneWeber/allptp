@@ -2,20 +2,26 @@ import Types from '../../action/Types';
 
 const defaultState = {
     step: 0,
-    status:[0,0,0,0,0,0,0,0,0,0,0,0,0],
+    status:[],
     hasDiscount: false,
     parenChildPackage: [],
     adultStandard: {
-        standard: 0,
-        originalPrice: 0
+        standard: 10,
+        originalPrice: ''
     },
     childStandard: {
-        standard: 0,
-        originalPrice: 0
+        standard: 10,
+        originalPrice: ''
     },
     customePackage: [],
     longDay: [],
-    difference: []
+    difference: [],
+    mainLanguage: -1,
+    otherLanguage: [],
+    activity_id: '',
+    full:[],//满减
+    accommodation: [], //住宿,
+    acc_imageId: []
 }
 export default function (state=defaultState, action) {
     switch (action.type) {
@@ -42,13 +48,53 @@ export default function (state=defaultState, action) {
         case Types.CHANGE_CUSTOMEPACKAGE:
             return {
               ...state,
-              customePackage: action.longDay
+              customePackage: action.data
             };
         case Types.CHANGE_DIFFERENCE:
             return {
               ...state,
               difference: action.data
             };
+        case Types.CHANGE_MAINLANGUAGE:
+            return {
+              ...state,
+              mainLanguage:action.data
+            };
+        case Types.CHANGE_OTHERLANGUAGE:
+            return {
+              ...state,
+              otherLanguage: action.data
+            };
+        case Types.CHANGE_ACTIVITYID:
+            return {
+              ...state,
+              activity_id: action.id
+            };
+        case Types.CHANGE_STATUS:
+            return {
+              ...state,
+              status: action.arr
+            };
+        case Types.CHANGE_LONGDAY:
+            return {
+                ...state,
+                longDay: action.longDay
+            };
+        case Types.CHANGE_FULL:
+            return {
+              ...state,
+              full: action.arr
+            };
+        case Types.CHANGE_ACCOMMODATION:
+            return {
+                ...state,
+                accommodation: action.arr
+            };
+        case Types.CHANGE_ACCIMAGEID:
+            return {
+                ...state,
+                acc_imageId: action.arr
+            }
         default:
             return state
     }

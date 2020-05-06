@@ -26,30 +26,59 @@ class MenuContent extends Component{
                     <View>
                         {
                             stepsList.map((item, index) => {
-                                return <TouchableOpacity key={index} style={[CommonStyle.spaceRow,{
+                                return <View key={index} style={{
                                     height: 40,
-                                    paddingLeft: 10,
-                                    paddingRight: 10,
-                                    marginTop: 10
-                                }]}
-                                   onPress={()=>{this.goPage(item.router)}}
-                                >
-                                    <Text style={{
-                                        color:router==item.router?theme:'#333',
-                                        fontWeight: router==item.router?'bold':'normal'
-                                    }}>{item.title}</Text>
+                                    marginTop: 10,
+                                    position: 'relative'
+                                }}>
+                                    <TouchableOpacity style={[CommonStyle.spaceRow,{
+                                        height: 40,
+                                        paddingLeft: 10,
+                                        paddingRight: 10,
+                                    }]}
+                                                      onPress={()=>{this.goPage(item.router)}}
+                                    >
+                                        <Text style={{
+                                            color:router==item.router?theme:'#333',
+                                            fontWeight: router==item.router?'bold':'normal'
+                                        }}>{item.title}</Text>
+                                        {
+                                            router==item.router
+                                                ?
+                                                <AntDesign
+                                                    name={status[index]?'check':'loading1'}
+                                                    size={18}
+                                                    style={{color:theme}}
+                                                />
+                                                :
+                                                null
+                                        }
+                                    </TouchableOpacity>
                                     {
-                                        router==item.router
+                                        (status.length === 0 && index === 0)
                                         ?
-                                            <AntDesign
-                                                name={status[index]?'check':'loading1'}
-                                                size={18}
-                                                style={{color:theme}}
-                                            />
+                                            null
+                                        :
+                                            index > (status.length)
+                                            ?
+                                            <View style={{
+                                                position:'absolute',
+                                                left:0,
+                                                right:0,
+                                                top:0,
+                                                bottom:0,
+                                                backgroundColor:'rgba(245,245,245,.4)',
+                                                zIndex: 999
+                                            }}>
+
+                                            </View>
                                         :
                                             null
                                     }
-                                </TouchableOpacity>
+
+                                </View>
+
+
                             })
                         }
                     </View>
@@ -60,6 +89,7 @@ class MenuContent extends Component{
 }
 const mapStateToProps = state => ({
     theme: state.theme.theme,
-    status: state.steps.status
+    status: state.steps.status,
+
 })
 export default connect(mapStateToProps)(MenuContent)

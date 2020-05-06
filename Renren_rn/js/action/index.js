@@ -3,6 +3,7 @@ import {InitToken} from './token'
 import {onLoadTravel, onLoadMoreTravel} from './travel'
 import {onLoadOrder,onLoadMoreOrder} from './order'
 import {onLoadWish} from './wish'
+import {onLoadColWish} from './wish/colwish'
 import {onLoadWishDetail} from './wishdetail'
 import {initJoin} from './join'
 import {initSlot} from './slot'
@@ -30,8 +31,24 @@ import {
     changeChildStandard,
     changeCustomePackage,
     changeLongDay,
-    changeDifference
+    changeDifference,
+    changeLanguage,
+    changeOtherLanguage,
+    changeActivityId,
+    changeStatus,
+    changeFull,
+    changeAccommodation,
+    changeAccImageId
 } from './info/steps'
+import {onLoadBank} from './info/bank'
+import {changeNet} from "./netinfo"
+import {onLoadBanner} from './banner'
+import {onLoadMsg} from './msg'
+import {onLoadContact} from './msg/contact'
+import {changeTheme} from './theme'
+import {onLoadSystemMsg,onLoadMoreSystemMsg} from './info/systemmsg'
+import {onLoadNoRead} from './info/noread'
+import {onLoadUserInfo} from './info/userinfo'
 
 export default {
     InitUser,
@@ -41,7 +58,6 @@ export default {
     onLoadOrder,
     onLoadMoreOrder,
     onLoadWish,
-    onLoadWishDetail,
     initJoin,
     initSlot,
     onLoadComming,
@@ -72,5 +88,22 @@ export default {
     changeChildStandard,
     changeCustomePackage,
     changeLongDay,
-    changeDifference
+    changeDifference,
+    changeNet,
+    onLoadColWish,
+    onLoadBanner,
+    onLoadMsg,
+    onLoadContact,
+    changeTheme,
+    changeLanguage,
+    changeOtherLanguage,
+    changeActivityId,
+    changeStatus,
+    onLoadBank,
+    onLoadSystemMsg,
+    onLoadMoreSystemMsg,
+    onLoadNoRead,
+    onLoadUserInfo,
+    changeAccommodation,
+    changeAccImageId
 }

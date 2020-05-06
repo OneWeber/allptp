@@ -18,7 +18,10 @@ import TimePicker from '../../../../../../model/TimePicker';
 import TimePeriodPicker from '../../../../../../model/TimePeriodPicker';
 import NavigatorUtils from '../../../../../../navigator/NavigatorUtils';
 import action from '../../../../../../action'
+import Toast, {DURATION} from 'react-native-easy-toast';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import Fetch from '../../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../../utils/NewHttp';
 class LongTime extends Component{
     constructor(props) {
         super(props);
@@ -45,25 +48,7 @@ class LongTime extends Component{
             people: ''
         }
     }
-    confirmAdd(){
-        const {longDay, changeLongDay} = this.props
-        let list = longDay;
-        let data = {
-            longDayTime: {
-                beginTime: this.state.beginTime,
-                endTime: this.state.endTime,
-            },
-            longDayPeriod: {
-                beginTime: this.state.beginPeriodTime,
-                endTime: this.state.endPeriodTime,
-            },
-            people: this.state.people,
-        };
-        list.push(data)
-        changeLongDay(list)
-       // NavigatorUtils.backToUp(this.props);
-        NavigatorUtils.goPage({}, 'Time')
-    }
+
     clickBegin(){
         const {beginTime} = this.state;
         this.setState({
@@ -156,13 +141,82 @@ class LongTime extends Component{
         },() => {
             changeDiscount(val)
         });
+    }
+    confirmAdd(){
+        /*
+        * const {longDay, changeLongDay} = this.props
+        let list = longDay;
+        let data = {
+            longDayTime: {
+                beginTime: this.state.beginTime,
+                endTime: this.state.endTime,
+            },
+            longDayPeriod: {
+                beginTime: this.state.beginPeriodTime,
+                endTime: this.state.endPeriodTime,
+            },
+            people: this.state.people,
+        };
+        list.push(data)
+        changeLongDay(list)
+       // NavigatorUtils.backToUp(this.props);
+        NavigatorUtils.goPage({}, 'Time')
+        * */
+        const {beginTime, endTime, beginPeriodTime, endPeriodTime, people} = this.state;
+        if(!beginTime || !endTime || !beginPeriodTime || !endPeriodTime) {
+            this.refs.toast.show('请选择完整的体验日期和起止时间');
+        }else if(!people) {
+            this.refs.toast.show('请填写体验人数');
+        }else if(this.props.adultStandard.originalPrice===null||this.props.adultStandard.originalPrice==='') {
+            this.refs.toast.show('请填写体验的标准价格');
+        }else if(this.props.childStandard.originalPrice===null||this.props.childStandard.originalPrice==='') {
+            this.refs.toast.show('请填写体验的儿童价格');
+        }else {
+            this.saveLongTime();
+        }
+    }
+    saveLongTime() {
+        const {activity_id, token, changeAdultStandard, changeChildStandard, changeParentChildPackage,changeCustomePackage} = this.props;
+        const {beginTime, endTime, beginPeriodTime, endPeriodTime, people, trueSwitchIsOn} = this.state;
+        let formData = new FormData();
+        formData.append("token",token);
+        formData.append("version",'2.0');
+        formData.append("activity_id",activity_id);
+        formData.append("begin_date",beginTime);
+        formData.append("end_date",endTime);
+        formData.append("time",JSON.stringify([{begin_time:beginPeriodTime, end_time:endPeriodTime}]));
+        formData.append("max_person_num",people);
+        formData.append("is_discount",trueSwitchIsOn);
+        formData.append("price_origin",this.props.adultStandard.originalPrice);
+        formData.append("price_discount",this.props.adultStandard.standard);
+        formData.append("price",this.props.adultStandard.standard*(this.props.adultStandard.standard/10));
+        formData.append("kids_price_origin",this.props.childStandard.originalPrice);
+        formData.append("kids_price_discount",this.props.childStandard.standard);
+        formData.append("kids_price",this.props.childStandard.standard*(this.props.childStandard.standard/10));
+        formData.append("combine",JSON.stringify(this.props.parenChildPackage.concat(this.props.customePackage)));
+        Fetch.post(NewHttp+'SlotAddAllTwo', formData).then(res => {
+            if(res.code === 1) {
+                changeAdultStandard({
+                    standard: 0,
+                    originalPrice: ''
+                });
+                changeChildStandard({
+                    standard: 0,
+                    originalPrice: ''
+                });
+                changeParentChildPackage([]);
+                changeCustomePackage([]);
+                NavigatorUtils.backToUp(this.props, true)
+            }
+        })
 
     }
     render(){
-        const {theme, parenChildPackage} = this.props;
+        const {theme, parenChildPackage, customePackage} = this.props;
         const {beginTime, endTime} = this.state;
         return (
             <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+                <Toast ref="toast" position='center' positionValue={0}/>
                 <CreateHeader title={'添加多天体验'} navigation={this.props.navigation}/>
                 <KeyboardAwareScrollView>
                     <ScrollView>
@@ -249,6 +303,7 @@ class LongTime extends Component{
                                     <TextInput
                                         onChangeText={(text)=>this.setState({people:text})}
                                         keyboardType={"number-pad"}
+                                        defaultValue={this.state.people}
                                         style={{
                                             width:170,
                                             height:64,
@@ -291,7 +346,7 @@ class LongTime extends Component{
                                     fontSize: 16
                                 }}>体验价格</Text>
                                 {
-                                    this.props.adultStandard.standard
+                                    this.props.adultStandard.standard!=10 && this.props.adultStandard.standard!=0
                                     ?
                                         <View>
                                             <Text style={{color:'#333',fontWeight: "bold",marginTop: 20}}>标准</Text>
@@ -326,13 +381,9 @@ class LongTime extends Component{
                                             <Text style={styles.title_text}>标准</Text>
                                             <View style={CommonStyle.flexEnd}>
                                                 {
-                                                    !this.props.adultStandard.standard
+                                                    this.props.adultStandard.originalPrice
                                                         ?
-                                                        this.props.adultStandard.originalPrice
-                                                            ?
-                                                            <Text style={{color:theme, marginRight: 3}}>¥{this.props.adultStandard.originalPrice}</Text>
-                                                            :
-                                                            null
+                                                        <Text style={{color:theme, marginRight: 3}}>¥{this.props.adultStandard.originalPrice}</Text>
                                                         :
                                                         null
                                                 }
@@ -345,7 +396,7 @@ class LongTime extends Component{
                                         </TouchableOpacity>
                                 }
                                 {
-                                    this.props.childStandard.standard
+                                    this.props.childStandard.standard!=10&&this.props.childStandard.standard!=0
                                     ?
                                         <View>
                                             <Text style={{color:'#333',fontWeight: "bold",marginTop: 20}}>儿童</Text>
@@ -381,13 +432,9 @@ class LongTime extends Component{
                                             <Text style={styles.title_text}>儿童</Text>
                                             <View style={CommonStyle.flexEnd}>
                                                 {
-                                                    !this.props.childStandard.standard
+                                                    this.props.childStandard.originalPrice
                                                         ?
-                                                        this.props.childStandard.originalPrice
-                                                            ?
-                                                            <Text style={{color:theme, marginRight: 3}}>¥{this.props.childStandard.originalPrice}</Text>
-                                                            :
-                                                            null
+                                                        <Text style={{color:theme, marginRight: 3}}>¥{this.props.childStandard.originalPrice}</Text>
                                                         :
                                                         null
                                                 }
@@ -407,7 +454,7 @@ class LongTime extends Component{
                             paddingTop:20,
                             paddingBottom: 20,
                             marginTop: 10,
-                            marginBottom:100,
+                            marginBottom: 100,
                             justifyContent:'flex-start'}]}>
                             <View style={CommonStyle.commonWidth}>
                                 <Text style={{
@@ -447,8 +494,8 @@ class LongTime extends Component{
                                             }]}>
                                                 <View style={CommonStyle.flexStart}>
                                                     <Text style={{color:'#333',fontWeight: "bold"}}>亲子</Text>
-                                                    <Text style={{marginLeft:5,color:'#333'}}>{item.adultNum}成人{item.childNum}儿童</Text>
-                                                    <Text style={{color:theme,marginLeft: 20}}>¥{item.totalPrice}</Text>
+                                                    <Text style={{marginLeft:5,color:'#333'}}>{item.adult}成人{item.kids}儿童</Text>
+                                                    <Text style={{color:theme,marginLeft: 20}}>¥{item.price}</Text>
                                                 </View>
                                                 <View style={CommonStyle.flexEnd}>
                                                     <Text style={{color:'#A4A4A4'}}>编辑</Text>
@@ -473,6 +520,31 @@ class LongTime extends Component{
                                         }}>添加</Text>
                                     </TouchableOpacity>
                                 </View>
+                                {
+                                    customePackage.length > 0
+                                        ?
+                                        customePackage.map((item, index) => {
+                                            return <View key={index} style={[CommonStyle.spaceRow,{
+                                                height: 40,
+                                                marginTop: index===0?15:10,
+                                                backgroundColor: '#f5f7fa',
+                                                borderRadius: 3,
+                                                paddingLeft:11,
+                                                paddingRight: 11
+                                            }]}>
+                                                <View style={CommonStyle.flexStart}>
+                                                    <Text style={{color:'#333',fontWeight: "bold"}}>{item.name+item.adult}人</Text>
+                                                    <Text style={{color:theme,marginLeft: 20}}>¥{item.price}</Text>
+                                                </View>
+                                                <View style={CommonStyle.flexEnd}>
+                                                    <Text style={{color:'#A4A4A4'}}>编辑</Text>
+                                                    <Text style={{color:'#A4A4A4',marginLeft: 15}}>删除</Text>
+                                                </View>
+                                            </View>
+                                        })
+                                        :
+                                        null
+                                }
                             </View>
                         </View>
                     </ScrollView>
@@ -536,10 +608,16 @@ const mapStateToProps = state => ({
     customePackage: state.steps.customePackage,
     hasDiscount: state.steps.hasDiscount,
     longDay: state.steps.longDay,
+    activity_id: state.steps.activity_id,
+    token: state.token.token
 })
 const mapDispatchToProps = dispatch => ({
     changeDiscount: status => dispatch(action.changeDiscount(status)),
-    changeLongDay: data => dispatch(action.changeLongDay(data))
+    changeLongDay: data => dispatch(action.changeLongDay(data)),
+    changeAdultStandard: data => dispatch(action.changeAdultStandard(data)),
+    changeChildStandard: data => dispatch(action.changeChildStandard(data)),
+    changeParentChildPackage: data => dispatch(action.changeParentChildPackage(data)),
+    changeCustomePackage: data => dispatch(action.changeCustomePackage(data))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(LongTime)
 

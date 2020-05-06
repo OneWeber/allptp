@@ -1,5 +1,16 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, Dimensions,TouchableOpacity, SafeAreaView, ActivityIndicator,FlatList,ImageBackground} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    Dimensions,
+    TouchableOpacity,
+    SafeAreaView,
+    ActivityIndicator,
+    FlatList,
+    ImageBackground,
+    Image,
+} from 'react-native';
 import Fetch from '../../expand/dao/Fetch';
 import HttpUrl from '../../utils/Http';
 import {connect} from 'react-redux'
@@ -18,7 +29,14 @@ import NoData from '../../common/NoData';
 import Loading from '../../common/Loading';
 import action from '../../action'
 import Toast from 'react-native-easy-toast';
-const {width, height} = Dimensions.get('window')
+import Share from '../../common/Share';
+import MapView, {
+    Marker,
+    Callout,
+    AnimatedRegion,} from 'react-native-maps';
+import Modal from 'react-native-modalbox';
+const {width, height} = Dimensions.get('window');
+const screen = Dimensions.get('window');
 class ActiveDetail extends Component{
     constructor(props) {
         super(props);
@@ -38,7 +56,8 @@ class ActiveDetail extends Component{
         this.setState({
             isLoading:true
         }, () => {
-            this.loadData()
+            this.loadData();
+            this.getWishList();
         })
 
     }
@@ -66,9 +85,16 @@ class ActiveDetail extends Component{
                     })
                 })
             }
-        }).catch(error => {
-            console.log(error)
         })
+    }
+    getWishList(){
+        const {onLoadColWish} = this.props;
+        this.storeName = 'colwish';
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('flag',1);
+        formData.append('table_id',this.table_id);
+        onLoadColWish(this.storeName, HttpUrl+'Comment/collegroup_list', formData)
     }
     bannerImg(data){ //遍历banner图
         let  totalImg=[];
@@ -167,9 +193,35 @@ class ActiveDetail extends Component{
     _onSliderChange(index){
 
     }
+    goAddWishList(){
+        this.refs.wishList.close()
+        NavigatorUtils.goPage({table_id:this.table_id, flag: 1}, 'AddWishList')
+    }
+    _showToast(data) {
+        this.refs.toast.show(data)
+    }
+    chanegCollection(group_id, is_this_colle){
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('flag',1);
+        formData.append('table_id',this.table_id);
+        formData.append('group_id',group_id);
+        formData.append('type',is_this_colle===1?2:1);
+        Fetch.post(HttpUrl+'Comment/collection', formData).then(res => {
+            if(res.code === 1) {
+                this.getWishList();
+                this.loadData()
+            }else{
+                console.log(res.msg)
+            }
+        })
+    }
+    _closeModal() {
+        this.refs.share.close()
+    }
     render(){
         const {data, onTouchEnd, isLoading, opacity, isOverdue, isFull} = this.state
-        const {theme, user} = this.props
+        const {theme, user, netconnect} = this.props
         const nav = <View style={styles.nav_con}>
             <SafeAreaView style={{
                 backgroundColor:'rgba(255,255,255,'+opacity+')',
@@ -186,21 +238,44 @@ class ActiveDetail extends Component{
                             onPress={()=>{NavigatorUtils.backToUp(this.props)}}
                         />
                         <View style={[CommonStyle.flexEnd]}>
-                            <AntDesign
-                                name={'staro'}
-                                size={24}
-                                style={{color:'#333',marginRight: 10}}
-                            />
+                            {
+                                data.is_collection
+                                    ?
+                                    <AntDesign
+                                        name={'heart'}
+                                        size={20}
+                                        style={{color: this.props.theme,marginRight: 20}}
+                                        onPress={()=>{this.refs.wishList.open()}}
+                                    />
+                                    :
+                                    <AntDesign
+                                        name={'hearto'}
+                                        size={20}
+                                        style={{color: '#333',marginRight: 20}}
+                                        onPress={()=>{this.refs.wishList.open()}}
+                                    />
+                            }
                             <AntDesign
                                 name={'export'}
                                 size={24}
                                 style={{color:'#333'}}
+                                onPress={()=>{
+                                    this.refs.share.open()
+                                }}
                             />
                         </View>
                     </View>
                 </View>
             </SafeAreaView>
         </View>
+        const {colwish} = this.props;
+        let store = colwish[this.storeName];
+        if(!store) {
+            store={
+                items:[],
+                isLoading: false
+            }
+        }
         return(
             <View style={{flex: 1,position:'relative'}}>
                 {nav}
@@ -250,7 +325,95 @@ class ActiveDetail extends Component{
                                 <View style={{marginTop: data.is_volunteen === 1?0:10}}>
                                     <Preferential />
                                 </View>
-                                <ActiveContent {...this.state} {...this.props}/>
+                                <View style={[aboutStyles.content_con,CommonStyle.flexCenter]}>
+                                    <View style={CommonStyle.commonWidth}>
+                                        <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>
+                                            策划者{data.user && (data.user.family_name || data.user.middle_name || data.user.name)?
+                                            data.user.family_name+' '+data.user.middle_name+' '+data.user.name
+                                            :'匿名用户'
+                                        }
+                                        </Text>
+                                        <LazyImage
+                                            source={data.user&&data.user.headimage?
+                                                {uri:data.user.headimage.domain+data.user.headimage.image_url}:
+                                                require('../../../assets/images/touxiang.png')}
+                                            style={aboutStyles.headimage}
+                                        />
+                                        <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.introduce}</Text>
+                                        <Text style={aboutStyles.translate_btn}>查看翻译</Text>
+                                        <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:35}}>体验内容</Text>
+                                        <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.descripte}</Text>
+                                        <Text style={aboutStyles.translate_btn}>查看翻译</Text>
+                                        <TouchableOpacity style={[aboutStyles.apply_btn,CommonStyle.flexCenter,{height:50,marginTop:10}]}>
+                                            <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
+                                                <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>志愿者翻译</Text>
+                                                <AntDesign
+                                                    name={'right'}
+                                                    size={16}
+                                                    style={{color:'#333'}}
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                        <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:10}}>体验地点</Text>
+                                        <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>
+                                            体验地点是{data.country}{data.province}{data.city==='市辖区'?null:data.city}{data.region},
+                                            另外在活动中我们还将去到{data.go_place}
+                                        </Text>
+                                        <View style={aboutStyles.active_map}>
+                                            {
+                                                data.set_address_lat && data.set_address_lng
+                                                ?
+                                                    <MapView
+                                                        initialRegion={{
+                                                            latitude: data.set_address_lat?JSON.parse(data.set_address_lat):0,
+                                                            longitude: data.set_address_lng?JSON.parse(data.set_address_lng):0,
+                                                            latitudeDelta: 0.0922,
+                                                            longitudeDelta: 0.0922 * (screen.width / screen.height),
+                                                        }}
+                                                        style={{
+                                                            width:'100%',
+                                                            height: 180
+                                                        }}
+                                                    >
+                                                        <Marker
+                                                            coordinate={{
+                                                                latitude: data.set_address_lat?JSON.parse(data.set_address_lat):0,
+                                                                longitude: data.set_address_lng?JSON.parse(data.set_address_lng):0,
+                                                            }}
+                                                            tracksViewChanges={true}
+                                                            ref={markerRef => this.markerRef = markerRef}
+                                                            stopPropagation={true}
+                                                            onPress={()=>{}}
+                                                        >
+                                                            <AntDesign
+                                                                name={'enviroment'}
+                                                                size={32}
+                                                                style={{color:'#14c5ca'}}
+                                                            />
+                                                        </Marker>
+                                                    </MapView>
+                                                :
+                                                    null
+                                            }
+
+                                            <TouchableOpacity style={{
+                                                position:'absolute',
+                                                left:0,
+                                                right:0,
+                                                bottom:0,
+                                                top:0,
+                                            }} onPress={()=>{
+                                                NavigatorUtils.goPage({
+                                                    set_address_lat: data.set_address_lat,
+                                                    set_address_lng: data.set_address_lng,
+                                                    set_address: data.set_address,
+                                                },'Map')
+                                            }}></TouchableOpacity>
+                                        </View>
+
+                                    </View>
+                                </View>
+
                                 <Comments {...this.state} {...this.props} table_id={this.table_id}/>
                                 <AboutOther {...this.state} {...this.props}/>
                                 <SameActiveMap {...this.state} {...this.props} table_id={this.table_id}/>
@@ -260,6 +423,8 @@ class ActiveDetail extends Component{
                 </ScrollView>
                 <SafeAreaView style={[CommonStyle.flexCenter,styles.active_bot]}>
                     {
+                        netconnect.isConnected
+                        ?
                         isLoading
                         ?
                             <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:60}]}>
@@ -324,9 +489,143 @@ class ActiveDetail extends Component{
                                 }
 
                             </View>
+                        :
+                            <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:60}]}>
+                                <Text style={{color: '#ff5673'}}>当前无网络连接，请连接后重试</Text>
+                            </View>
                     }
 
                 </SafeAreaView>
+                <Modal
+                    style={{height:180,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"share"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        height: 180,
+                        backgroundColor:'#F3F5F8'
+                    }}>
+                        <Share closeModal={()=>this._closeModal()} flag={1} showToast={(data)=>this._showToast(data)} {...this.state}/>
+                    </View>
+                </Modal>
+                <Modal
+                    style={{height:height*0.5,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"wishList"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={styles.wishModal}>
+                        <View style={[CommonStyle.flexCenter]}>
+                            <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
+                                height: 50,
+                                borderBottomWidth: 1,
+                                borderBottomColor: '#f3f5f8'
+                            }]}>
+                                <TouchableOpacity
+                                    onPress={()=>this.refs.wishList.close()}
+                                >
+                                    <Image
+                                        source={require('../../../assets/images/collection/sc.png')}
+                                        style={{width:15.5,height:15.5}}
+                                    />
+                                </TouchableOpacity>
+                                <Text style={{
+                                    color:'#333',
+                                    fontSize: 15,
+                                    fontWeight:'bold'
+                                }}>选择收藏夹</Text>
+                            </View>
+                            <ScrollView style={{height:height*0.5-50,width:'100%'}}>
+                                <View style={CommonStyle.flexCenter}>
+                                    <TouchableOpacity style={[CommonStyle.flexStart,CommonStyle.commonWidth,{
+                                        height: 50,
+                                        borderBottomWidth: 1,
+                                        borderBottomColor: '#f3f5f8'
+                                    }]} onPress={()=>{this.goAddWishList()}}>
+                                        <Image
+                                            source={require('../../../assets/images/collection/tccjsc.png')}
+                                            style={{width:14,height:14}}
+                                        />
+                                        <Text style={{
+                                            color:this.props.theme,
+                                            fontSize: 15,
+                                            marginLeft: 5,
+                                            fontWeight:'bold'
+                                        }}>创建新的收藏夹</Text>
+                                    </TouchableOpacity>
+                                    {
+                                        store.items && store.items.data && store.items.data.data && store.items.data.data.length > 0
+                                            ?
+                                            <View style={CommonStyle.commonWidth}>
+                                                {
+                                                    store.items.data.data.map((item, index) => {
+                                                        return <TouchableOpacity key={index} style={[CommonStyle.spaceRow,{
+                                                            paddingTop:19,
+                                                            paddingBottom:19,
+                                                            borderBottomWidth: 1,
+                                                            borderBottomColor: '#f3f5f8'
+                                                        }]} onPress={()=>this.chanegCollection(item.group_id, item.is_this_colle)}>
+                                                            <View style={CommonStyle.flexStart}>
+                                                                <View style={[CommonStyle.spaceCol,{
+                                                                    maxWidth: 200,
+                                                                    alignItems: 'flex-start'
+                                                                }]}>
+                                                                    <Text style={{color:'#333',fontWeight: 'bold',fontSize: 15}}>
+                                                                        {item.group_name}
+                                                                    </Text>
+                                                                    <Text style={{
+                                                                        color:'#999',
+                                                                        fontSize: 13,
+                                                                        marginTop: 10
+                                                                    }}>{item.count}个收藏</Text>
+                                                                </View>
+                                                            </View>
+                                                            {
+                                                                item.is_this_colle === 1
+                                                                    ?
+                                                                    <AntDesign
+                                                                        name={'checkcircle'}
+                                                                        size={15}
+                                                                        style={{color:this.props.theme}}
+                                                                    />
+                                                                    :
+                                                                    <AntDesign
+                                                                        name={'checkcircle'}
+                                                                        size={15}
+                                                                        style={{color:'#f3f5f8'}}
+                                                                    />
+                                                            }
+
+
+                                                        </TouchableOpacity>
+                                                    })
+                                                }
+                                            </View>
+                                            :
+                                            <View style={[CommonStyle.flexCenter,{
+                                                height: height*0.5 - 50
+                                            }]}>
+                                                <Image
+                                                    source={require('../../../assets/images/que/wxyd.png')}
+                                                    style={{width:160,height:160}}
+                                                />
+                                            </View>
+                                    }
+                                </View>
+                            </ScrollView>
+
+
+                        </View>
+                    </View>
+
+                </Modal>
             </View>
         )
     }
@@ -369,17 +668,31 @@ const styles = StyleSheet.create({
         width:100,
         height: 40,
         borderRadius: 5
+    },
+    wishModal:{
+        width:"100%",
+        height:height*0.5,
+        backgroundColor:"#ffffff",
+        borderTopLeftRadius:5,
+        borderTopRightRadius:5,
+        shadowColor: '#000000',
+        shadowOffset: {h: 10, w: 10},
+        shadowRadius: 5,
+        shadowOpacity: 0.1
     }
 })
 const mapStateToProps = state => ({
     token: state.token.token,
     theme: state.theme.theme,
     user: state.user.user,
-    join: state.join.join
+    join: state.join.join,
+    netconnect: state.netconnect.netInfo,
+    colwish: state.colwish,
 })
 const mapDispatchTopProps = dispatch => ({
     initJoin: join => dispatch(action.initJoin(join)),
-    initSlot: slot => dispatch(action.initSlot(slot))
+    initSlot: slot => dispatch(action.initSlot(slot)),
+    onLoadColWish: (storeName, url, data) => dispatch(action.onLoadColWish(storeName, url, data))
 })
 export default connect(mapStateToProps, mapDispatchTopProps)(ActiveDetail)
 class AboutActive extends Component{
@@ -541,7 +854,8 @@ const aboutStyles = StyleSheet.create({
     active_map:{
         marginTop:10,
         height:180,
-        backgroundColor:'#999'
+        backgroundColor:'#f5f5f5',
+        position:'relative'
     },
     other_item_btn:{
         height: 55,
@@ -659,6 +973,14 @@ class Preferential extends Component{
 }
 //体验内容
 class ActiveContent extends Component{
+    constructor(props) {
+        super(props);
+        this.ASPECT_RATIO = screen.width / screen.height;
+        this.LATITUDE =0;
+        this.LONGITUDE = 0;
+        this.LATITUDE_DELTA = 0.0922;
+        this.LONGITUDE_DELTA = this.LATITUDE_DELTA * this.ASPECT_RATIO;
+    }
     render(){
         const {data} = this.props
         return(
@@ -696,7 +1018,35 @@ class ActiveContent extends Component{
                         体验地点是{data.country}{data.province}{data.city==='市辖区'?null:data.city}{data.region},
                         另外在活动中我们还将去到{data.go_place}
                     </Text>
-                    <View style={aboutStyles.active_map}></View>
+                    <View style={aboutStyles.active_map}>
+                        <MapView
+                            initialRegion={{
+                                latitude: this.LATITUDE,
+                                longitude: this.LONGITUDE,
+                                latitudeDelta: this.LATITUDE_DELTA,
+                                longitudeDelta: this.LONGITUDE_DELTA,
+                            }}
+                            style={{
+                                width:'100%',
+                                height: 180
+                            }}
+                        >
+
+                        </MapView>
+                        <TouchableOpacity style={{
+                            position:'absolute',
+                            left:0,
+                            right:0,
+                            bottom:0,
+                            top:0,
+                        }} onPress={()=>{
+                            NavigatorUtils.goPage({
+                                set_address_lat: data.set_address_lat,
+                                set_address_lng: data.set_address_lng,
+                                set_address: data.set_address,
+                            },'Map')
+                        }}></TouchableOpacity>
+                    </View>
 
                 </View>
             </View>
@@ -848,7 +1198,6 @@ class SameActive extends Component{
         formData.append('token', token);
         formData.append('activity_id',table_id);
         Fetch.post(NewHttp + 'actls', formData).then(res => {
-            console.log(res)
             this.setState({
                 isLoading: false
             })

@@ -1,5 +1,15 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, SafeAreaView, TextInput, Dimensions, TouchableHighlight} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    SafeAreaView,
+    TextInput,
+    Dimensions,
+    TouchableHighlight,
+    Image,
+    TouchableOpacity, Alert, Platform,
+} from 'react-native';
 import Video from 'react-native-video'
 import CommonStyle from '../../../assets/css/Common_css'
 import { VibrancyView } from 'react-native-blur';
@@ -49,7 +59,7 @@ export default class Login extends Component{
                     repeat={true}//确定在到达结尾时是否重复播放视频。
                 />
                 <View style={styles.login_bg}>
-                    <LoginContainer redirect={this.redirect} />
+                    <LoginContainerMap redirect={this.redirect} />
                 </View>
 
             </View>
@@ -126,13 +136,21 @@ class LoginContainer extends Component{
                     </SafeAreaView>
                     <MapInputContainer {...this.props}/>
                     <SafeAreaView>
-                        <Third />
+                        <Third {...this.props}/>
                     </SafeAreaView>
                 </View>
             </KeyboardAwareScrollView>
         )
     }
 }
+const mapStateToPropss = state => ({
+    theme: state.theme.theme,
+    token: state.token.token
+})
+const mapDispatchToPropss= dispatch => ({
+    onInitUser: user => dispatch(action.InitUser(user))
+})
+const LoginContainerMap = connect(mapStateToPropss, mapDispatchToPropss)(LoginContainer)
 //输入账号密码区域
 class InputContainer extends Component{
     constructor(props) {
@@ -161,29 +179,24 @@ class InputContainer extends Component{
         formData.append("mobile",this.state.tel);
         formData.append("m_code",86);
         formData.append("password",this.state.password);
-        console.log(this.props.token)
         Fetch.post(HttpUrl + 'User/login_psw', formData).then(res => {
             if(res.code === 1) {
-                console.log(res)
-                AsyncStorage.setItem('username', JSON.stringify(res.data.family_name||res.data.middle_name||res.data.name?
-                    res.data.family_name+res.data.middle_name+res.data.name:'匿名用户'))
+                AsyncStorage.setItem('username', res.data.family_name||res.data.middle_name||res.data.name?
+                    JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name):'匿名用户')
                 AsyncStorage.setItem('avatar', JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url))
                 AsyncStorage.setItem('userid', JSON.stringify(res.data.user_id))
-                console.log('res', res.data)
                 onInitUser({
                     username: res.data.family_name||res.data.middle_name||res.data.name?
-                        res.data.family_name+res.data.middle_name+res.data.name:'匿名用户',
-                    avatar: res.data.headimage.domain + res.data.headimage.image_url,
+                        JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name):'匿名用户',
+                    avatar: JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url),
                     userid:res.data.user_id
-                })
+                });
                 if(redirect){
                     NavigatorUtils.goPage({...this.props.navigation.state.params}, redirect)
                 } else {
                     NavigatorUtils.goPage({}, 'ViewPage')
                 }
 
-            } else {
-                console.log(res.msg)
             }
         })
     }
@@ -237,15 +250,121 @@ const mapDispatchToProps = dispatch => ({
 })
 const MapInputContainer = connect(mapStateToProps, mapDispatchToProps)(InputContainer)
 //第三方登录
+import * as WeChat from 'react-native-wechat';
+import NewHttp from '../../utils/NewHttp';
 class Third extends Component{
+    constructor(props) {
+        super(props);
+        WeChat.registerApp('wx675e99e19312c085');
+        this.state = {
+            userInfo: '',
+            isLoading: false
+        }
+    }
+    getUserInfo(){
+        const {token, redirect, onInitUser} = this.props
+        let formData=new FormData();
+        formData.append('token', token);
+        Fetch.post(HttpUrl+'User/get_user',formData).then(
+            res=>{
+                if(res.code===1){
+                    this.setState({
+                        userInfo:res.data[0] || '',
+                        isLoading: false
+                    },() => {
+                        const {userInfo} = this.state;
+                        AsyncStorage.setItem('avatar', JSON.stringify(userInfo.headimage.domain+userInfo.headimage.image_url));
+                        AsyncStorage.setItem('username', userInfo.family_name||userInfo.middle_name||userInfo.name?
+                            JSON.stringify(userInfo.family_name+userInfo.middle_name+userInfo.name):'匿名用户');
+                        AsyncStorage.setItem('userid', JSON.stringify(userInfo.user_id));
+                        onInitUser({
+                            username: userInfo.family_name||userInfo.middle_name||userInfo.name?
+                                JSON.stringify(userInfo.family_name+userInfo.middle_name+userInfo.name):'匿名用户',
+                            avatar: JSON.stringify(userInfo.headimage.domain + userInfo.headimage.image_url),
+                            userid:userInfo.user_id
+                        })
+                        if(redirect){
+                            NavigatorUtils.goPage({...this.props.navigation.state.params}, redirect)
+                        } else {
+                            NavigatorUtils.goPage({}, 'ViewPage')
+                        }
+                    })
+                }
+            }
+        )
+    }
+    _wechatLogin() {
+        let scope = 'snsapi_userinfo';
+        let state = 'none';
+        WeChat.isWXAppInstalled()
+            .then((isInstalled) => {
+                if (isInstalled) {
+                    //发送授权请求
+                    WeChat.sendAuthRequest(scope, state)
+                        .then(responseCode => {
+                            this.setState({
+                                isLoading: true
+                            })
+                            let formData = new FormData();
+                            formData.append("token",this.props.token);
+                            formData.append("code",responseCode.code);
+                            Fetch.post(NewHttp+'WxcallbackApp',formData).then(
+                                res=>{
+                                    if(res.code==1){
+                                        this.getUserInfo()
+                                    }
+                                }
+                            )
+                        })
+                        .catch(err => {
+
+                        })
+                } else {
+                    Platform.OS == 'ios' ?
+                        Alert.alert('没有安装微信', '是否安装微信？', [
+                            {text: '取消'},
+                            {text: '确定', onPress: () => {}}
+                        ]) :
+                        Alert.alert('没有安装微信', '请先安装微信客户端在进行登录', [
+                            {text: '确定'}
+                        ])
+                }
+            })
+    }
+    _qqLogin() {
+
+    }
     render() {
         return(
             <View style={[CommonStyle.commonWidth]}>
                 <View style={CommonStyle.flexCenter}>
                     <Text style={styles.third_txt}>第三方登录</Text>
                 </View>
-                <View style={[CommonStyle.spaceRow]}>
-
+                <View style={[CommonStyle.spaceRow,{
+                    marginTop:20
+                }]}>
+                    <TouchableOpacity
+                        onPress={()=>this._wechatLogin()}
+                    >
+                        <Image
+                            source={require('../../../assets/images/share/wx.png')}
+                            style={{width:25,height:25}}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={()=>this._qqLogin()}
+                    >
+                        <Image
+                            source={require('../../../assets/images/share/qq.png')}
+                            style={{width:25,height:25}}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                        <Image
+                            source={require('../../../assets/images/share/yj.png')}
+                            style={{width:25,height:25}}
+                        />
+                    </TouchableOpacity>
                 </View>
 
             </View>

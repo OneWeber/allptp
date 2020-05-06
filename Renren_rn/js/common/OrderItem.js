@@ -18,7 +18,7 @@ class OrderItem extends Component{
                         <LazyImage
                             source={data_o.cover && data_o.cover.domain?
                                 {uri:data_o.cover.domain + data_o.cover.image_url}
-                                :require('../../assets/images/error.jpeg')
+                                :require('../../assets/images/error.png')
                             }
                             style={styles.img}
                         />

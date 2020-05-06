@@ -45,6 +45,26 @@ import Calendar from '../views/info/createcenter/createActive/CreateStep/common/
 import AboutDifference from '../views/info/createcenter/createActive/CreateStep/common/AboutDifference';
 import SettingDifference from '../views/info/createcenter/createActive/CreateStep/common/SettingDifference';
 import Preferential from '../views/homePage/preference/Preferential';
+import NetError from '../page/NetError';
+import Contact from '../views/msg/Contact';
+import Chat from '../common/Chat';
+import UserInfo from '../views/info/UserInfo';
+import Setting from '../views/info/Setting';
+import MainTheme from '../views/info/setting/MainTheme';
+import Type from '../views/info/createcenter/createActive/CreateStep/Type';
+import Map from '../common/Map';
+import SelectAddress from '../common/SelectAddress';
+import PersonalData from '../views/my/PersonalData';
+import MyIntroduce from '../views/my/MyIntroduce';
+import BankList from '../views/info/trading/BankList';
+import AddCard from '../views/info/trading/AddCard';
+import WithDrawal from '../views/info/trading/WithDrawal';
+import SystemMsg from '../views/info/SystemMsg';
+import SystemWebview from '../views/info/systemmsg/SystemWebview';
+import TravelFunds from '../views/info/TravelFunds';
+import Accommodation from '../views/info/createcenter/createActive/CreateStep/Accommodation';
+import AddAccommodation from '../views/info/createcenter/createActive/CreateStep/common/AddAccommodation';
+import Attention from '../views/info/createcenter/createActive/CreateStep/Attention';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -316,6 +336,126 @@ const MainNavigator = createStackNavigator({
     },
     Preferential: {
         screen: Preferential,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    NetError: {
+        screen: NetError,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Contact: {
+        screen: Contact,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Chat: {
+        screen: Chat,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    UserInfo: {
+        screen: UserInfo,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Setting: {
+        screen: Setting,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    MainTheme: {
+        screen: MainTheme,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Type: {
+        screen: Type,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Map: {
+        screen: Map,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SelectAddress: {
+        screen: SelectAddress,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    PersonalData: {
+        screen: PersonalData,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    MyIntroduce: {
+        screen: MyIntroduce,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    BankList: {
+        screen: BankList,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AddCard: {
+        screen: AddCard,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    WithDrawal: {
+        screen: WithDrawal,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SystemMsg: {
+        screen: SystemMsg,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SystemWebview: {
+        screen: SystemWebview,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    TravelFunds: {
+        screen: TravelFunds,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Accommodation: {
+        screen: Accommodation,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AddAccommodation: {
+        screen: AddAccommodation,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Attention: {
+        screen: Attention,
         navigationOptions: {
             headerShown: false
         }

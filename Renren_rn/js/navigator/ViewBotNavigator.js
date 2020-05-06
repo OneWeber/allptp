@@ -9,81 +9,88 @@ import MyPage from '../page/viewpage/MyPage';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import {connect} from 'react-redux'
-const TABS = {
-    HomePage: {
-        screen: HomePage,
-        navigationOptions: {
-            tabBarLabel: '首页',
-            tabBarIcon:({tintColor, focused}) => (
-                <MaterialCommunityIcons
-                    name={'home'}
-                    size={26}
-                    style={{color:tintColor}}
-                />
-            )
-        }
-    },
-    FavoritePage: {
-        screen: FavoritePage,
-        navigationOptions: {
-            tabBarLabel: '心愿单',
-            tabBarIcon:({tintColor, focused}) => (
-                <MaterialCommunityIcons
-                    name={'chart-bubble'}
-                    size={26}
-                    style={{color:tintColor}}
-                />
-            )
+import CommonStyle from '../../assets/css/Common_css';
+import {Image, Text, View, StyleSheet} from 'react-native';
 
-        }
-    },
-    TravelPage: {
-        screen: TravelPage,
-        navigationOptions: {
-            tabBarLabel: '旅途',
-            tabBarIcon:({tintColor, focused}) => (
-                <MaterialCommunityIcons
-                    name={'beach'}
-                    size={26}
-                    style={{color:tintColor}}
-                />
-            )
-        }
-    },
-    MsgPage: {
-        screen: MsgPage,
-        navigationOptions: {
-            tabBarLabel: '消息',
-            tabBarIcon:({tintColor, focused}) => (
-                <MaterialCommunityIcons
-                    name={'comment-processing'}
-                    size={26}
-                    style={{color:tintColor}}
-                />
-            )
-        }
-    },
-    MyPage: {
-        screen: MyPage,
-        navigationOptions: {
-            tabBarLabel: '我的',
-            tabBarIcon:({tintColor, focused}) => (
-                <MaterialIcons
-                    name={'account-circle'}
-                    size={26}
-                    style={{color:tintColor}}
-                />
-            )
-        }
+const styles = StyleSheet.create({
+    icons: {
+        width:20,
+        height:20
     }
-}
-export default class ViewBotNavigator extends Component{
+})
+class ViewBotNavigator extends Component{
+    constructor(props) {
+        super(props);
+        this.TABS = {
+            HomePage: {
+                screen: HomePage,
+                navigationOptions: {
+                    tabBarLabel:this.props.language===1?'首页':this.props.language===2?'Home page':'トップページ',
+                    tabBarIcon:({tintColor, focused}) => (
+                        focused?
+                            <Image style={styles.icons} source={require('../../assets/images/bot/sy2.png')}/>
+                            :
+                            <Image style={styles.icons} source={require('../../assets/images/bot/sy1.png')}/>
+                    )
+                }
+            },
+            FavoritePage: {
+                screen: FavoritePage,
+                navigationOptions: {
+                    tabBarLabel:this.props.language===1?'收藏夹':this.props.language===2?'Favorites':'お気に入り',
+                    tabBarIcon:({tintColor, focused}) => (
+                        focused?
+                            <Image style={styles.icons} source={require('../../assets/images/bot/scj2.png')}/>
+                            :
+                            <Image style={styles.icons} source={require('../../assets/images/bot/scj1.png')}/>
+                    )
+
+                }
+            },
+            TravelPage: {
+                screen: TravelPage,
+                navigationOptions: {
+                    tabBarLabel: this.props.language===1?'旅途':this.props.language===2?'Journey':'旅の途中',
+                    tabBarIcon:({tintColor, focused}) => (
+                        focused?
+                            <Image style={styles.icons} source={require('../../assets/images/bot/lt2.png')}/>
+                            :
+                            <Image style={styles.icons} source={require('../../assets/images/bot/lt1.png')}/>
+                    )
+                }
+            },
+            MsgPage: {
+                screen: MsgPage,
+                navigationOptions: {
+                    tabBarLabel: this.props.language===1?'消息':this.props.language===2?'Message':'ニュース',
+                    tabBarIcon:({tintColor, focused}) => (
+                        focused?
+                            <Image style={styles.icons} source={require('../../assets/images/bot/xx2.png')}/>
+                            :
+                            <Image style={styles.icons} source={require('../../assets/images/bot/xx1.png')}/>
+                    )
+                }
+            },
+            MyPage: {
+                screen: MyPage,
+                navigationOptions: {
+                    tabBarLabel: this.props.language===1?'我的':this.props.language===2?'Mine':'私の',
+                    tabBarIcon:({tintColor, focused}) => (
+                        focused?
+                            <Image style={styles.icons} source={require('../../assets/images/bot/wd2.png')}/>
+                            :
+                            <Image style={styles.icons} source={require('../../assets/images/bot/wd1.png')}/>
+                    )
+                }
+            }
+        };
+    }
     _tabNavigator() {
         if(this.Tabs) {
             return this.Tabs
         }
         return this.Tabs = createAppContainer(createBottomTabNavigator(
-            TABS, {
+            this.TABS, {
                 tabBarComponent: props => {
                     return <TabBar {...props} />
                 }
@@ -92,9 +99,16 @@ export default class ViewBotNavigator extends Component{
     }
     render(){
         const Tab = this._tabNavigator()
-        return <Tab />
+        return <View style={{flex: 1,position:'relative'}}>
+                <Tab />
+            </View>
+
     }
 }
+const mapStateToPropsV = state => ({
+    language: state.language.language
+});
+export default connect(mapStateToPropsV)(ViewBotNavigator)
 class TabBarComponent extends Component{
     render() {
         return <BottomTabBar
@@ -104,6 +118,7 @@ class TabBarComponent extends Component{
     }
 }
 const mapStateToProps = state =>({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    language: state.language.language
 })
 const TabBar = connect(mapStateToProps)(TabBarComponent)

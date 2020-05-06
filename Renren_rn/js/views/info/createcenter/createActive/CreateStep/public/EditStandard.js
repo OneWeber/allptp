@@ -54,7 +54,7 @@ class FalseDiscount extends Component{
     confirmPrice(){
         const {role,  changeAdultStandard, changeChildStandard} = this.props;
         let data = {
-            standard: 0,
+            standard: 10,
             originalPrice: this.state.standardPrice
         };
         if(role === 'standard') {

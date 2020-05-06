@@ -8,6 +8,8 @@ import action from '../../action'
 import ScrollableTabView , { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import LazyImage from 'animated-lazy-image';
 import ActiveItem from '../../common/ActiveItem';
+import {PinyinUtil} from '../../utils/pinyin'
+import languageType from '../../json/languageType'
 const {width, height} = Dimensions.get('window')
 class TopScoreActive extends Component{
     componentDidMount(){
@@ -30,6 +32,7 @@ class TopScoreActive extends Component{
                 isLoading: false
             }
         }
+        const {language} = this.props;
         return(
             <View style={[CommonStyle.flexCenter,{flex: 1}]}>
                 <View style={CommonStyle.commonWidth}>
@@ -37,9 +40,15 @@ class TopScoreActive extends Component{
                         styles.common_color,
                         styles.common_weight,
                     ]}>
-                        高分目的地体验
+                        {
+                            language===1?languageType.CH.home.high:language===2?languageType.EN.home.high:languageType.JA.home.high
+                        }
                     </Text>
-                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>各地策划人组织带领体验</Text>
+                    <Text style={{color:'#333',fontSize:15,marginTop:8}}>
+                        {
+                            language===1?languageType.CH.home.high_propmt:language===2?languageType.EN.home.high_propmt:languageType.JA.home.high_propmt
+                        }
+                    </Text>
                 </View>
                 <View style={{width: '100%'}}>
                     {
@@ -60,7 +69,12 @@ class TopScoreActive extends Component{
                                     />)}>
                                     {
                                         store.items.data.data.map((item, index) => {
-                                            return <CityItemMap key={index} {...this.props} tabLabel={item.city} data={item} />
+                                            return <CityItemMap
+                                                key={index}
+                                                {...this.props}
+                                                name={item.city}
+                                                tabLabel={language===1?item.city:PinyinUtil.getFirstLetter(item.city)}
+                                                data={item} />
                                         })
                                     }
                                 </ScrollableTabView>
@@ -122,7 +136,7 @@ class CityItem extends Component{
         formData.append('price_high','');
         formData.append('country','');
         formData.append('province','');
-        formData.append('city',this.props.tabLabel);
+        formData.append('city',this.props.name);
         formData.append('region',"");
         formData.append('activ_begin_time',"");
         formData.append('activ_end_time',"");
@@ -130,11 +144,11 @@ class CityItem extends Component{
         formData.append('kind_id',"");
         formData.append('is_volunteen',"");
         formData.append('max_person_num',"");
-        onLoadCityItem(this.props.tabLabel, HttpUrl + 'Activity/activ_list', formData)
+        onLoadCityItem(this.props.name, HttpUrl + 'Activity/activ_list', formData)
     }
     render(){
         const {data, cityitem, theme} = this.props
-        let store = cityitem[this.props.tabLabel]
+        let store = cityitem[this.props.name]
         if(!store){
             store={
                 items: [],

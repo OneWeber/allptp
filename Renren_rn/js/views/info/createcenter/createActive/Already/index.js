@@ -1,11 +1,12 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions} from 'react-native';
+import {StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions, Image} from 'react-native';
 import {connect} from 'react-redux'
 import action from '../../../../../action'
 import HttpUrl from '../../../../../utils/Http';
 import CommonStyle from '../../../../../../assets/css/Common_css';
 import NoData from '../../../../../common/NoData';
 import LazyImage from 'animated-lazy-image';
+import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
 const {width, height} = Dimensions.get('window')
 class Already extends Component{
     componentDidMount(){
@@ -19,17 +20,22 @@ class Already extends Component{
         formData.append('flag',3);
         onLoadAlready(this.storeName, HttpUrl + 'Activity/complete', formData)
     }
+    toActiveDetail(activity_id) {
+        const {changeActivityId} = this.props;
+        changeActivityId(activity_id);
+        NavigatorUtils.goPage({},'Language')
+    }
     renderItem(data){
         return <TouchableOpacity style={[CommonStyle.flexCenter,{padding: 10,
             borderBottomColor:'#f5f5f5',
             borderBottomWidth:5,
             paddingTop:15,
             paddingBottom:15
-        }]}>
+        }]} onPress={() => {this.toActiveDetail(data.item.activity_id)}}>
             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,]}>
                 <LazyImage source={data.item.cover&&data.item.cover.domain&&data.item.cover.image_url?
                     {uri:data.item.cover.domain+data.item.cover.image_url}:
-                    require('../../../../../../assets/images/error.jpeg')} style={{
+                    require('../../../../../../assets/images/error.png')} style={{
                     width:110,
                     height:80,
                     borderRadius: 4
@@ -79,7 +85,10 @@ class Already extends Component{
                             />
                         </View>
                         :
-                        <NoData></NoData>
+                        <Image
+                            source={require('../../../../../../assets/images/que/wdd.png')}
+                            style={{width: 180,height: 180}}
+                        />
                 }
             </View>
         )
@@ -90,6 +99,7 @@ const mapStateToProps = state => ({
     already: state.already
 })
 const mapDispatchToProps = dispatch => ({
-    onLoadAlready: (storeName, url, data) => dispatch(action.onLoadAlready(storeName, url, data))
+    onLoadAlready: (storeName, url, data) => dispatch(action.onLoadAlready(storeName, url, data)),
+    changeActivityId: id => dispatch(action.changeActivityId(id)),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(Already)

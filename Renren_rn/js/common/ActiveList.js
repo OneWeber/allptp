@@ -16,7 +16,7 @@ export default class ActiveList extends Component{
         >
             <LazyImage
                 source={data.item.domain && data.item.image_url?{uri:data.item.domain + data.item.image_url}:
-                require('../../assets/images/error.jpeg')}
+                require('../../assets/images/error.png')}
                 style={styles.active_img}
             />
             <Text

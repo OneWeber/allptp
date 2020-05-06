@@ -27,5 +27,5 @@ const manage = [
         width:24,
         height:22
     }
-]
+];
 export default manage
