@@ -416,6 +416,16 @@ class AboutMe extends Component{
 class MyOrder extends Component{
     constructor(props) {
         super(props);
+    }
+    checkLoginRoute(route, data){
+        const {token, user} = this.props;
+        if(token && user && user.username && user.userid){
+            NavigatorUtils.goPage(data?data:{}, route)
+        } else {
+            NavigatorUtils.goPage({}, 'Login')
+        }
+    }
+    render(){
         this.orders = [
             {
                 title:this.props.language===1?'待体验':this.props.language===2?'stay':'体験する',
@@ -453,16 +463,6 @@ class MyOrder extends Component{
                 height:22
             }
         ];
-    }
-    checkLoginRoute(route, data){
-        const {token, user} = this.props;
-        if(token && user && user.username && user.userid){
-            NavigatorUtils.goPage(data?data:{}, route)
-        } else {
-            NavigatorUtils.goPage({}, 'Login')
-        }
-    }
-    render(){
         const {language} = this.props
         return(
             <View style={[CommonStyle.commonWidth,styles.common_padding,{
@@ -493,6 +493,16 @@ class MyOrder extends Component{
 class ManageActive extends Component{
     constructor(props) {
         super(props);
+    }
+    checkLoginRoute(route, data){
+        const {token, user} = this.props;
+        if(token && user && user.username && user.userid){
+            NavigatorUtils.goPage(data?data:{}, route)
+        } else {
+            NavigatorUtils.goPage({}, 'Login')
+        }
+    }
+    render(){
         this.manages = [
             {
                 title:this.props.language===1?'体验预定':this.props.language===2?'reservation':'体験予定',
@@ -523,16 +533,6 @@ class ManageActive extends Component{
                 height:22
             }
         ];
-    }
-    checkLoginRoute(route, data){
-        const {token, user} = this.props;
-        if(token && user && user.username && user.userid){
-            NavigatorUtils.goPage(data?data:{}, route)
-        } else {
-            NavigatorUtils.goPage({}, 'Login')
-        }
-    }
-    render(){
         const {userInfo, theme, language} = this.props
         return <View style={[CommonStyle.commonWidth,styles.common_padding,{
             backgroundColor:'#fff',
@@ -586,6 +586,17 @@ class ManageActive extends Component{
 class CreateCenter extends Component{
     constructor(props) {
         super(props);
+
+    }
+    checkLoginRoute(route, data){
+        const {token, user} = this.props;
+        if(token && user && user.username && user.userid){
+            NavigatorUtils.goPage(data?data:{}, route)
+        } else {
+            NavigatorUtils.goPage({}, 'Login')
+        }
+    }
+    render(){
         this.creates = [
             {
                 title: this.props.language===1?'创建体验':this.props.language===2?'Create':'体験をつくる',
@@ -616,16 +627,6 @@ class CreateCenter extends Component{
                 height:22
             }
         ];
-    }
-    checkLoginRoute(route, data){
-        const {token, user} = this.props;
-        if(token && user && user.username && user.userid){
-            NavigatorUtils.goPage(data?data:{}, route)
-        } else {
-            NavigatorUtils.goPage({}, 'Login')
-        }
-    }
-    render(){
         const {language} = this.props
         return(
             <View style={[CommonStyle.commonWidth,styles.common_padding,{
@@ -658,11 +659,22 @@ class CreateCenter extends Component{
 class Other extends Component{
     constructor(props) {
         super(props);
+    }
+    checkLoginRoute(route, data){
+        const {token, user} = this.props;
+        if(token && user && user.username && user.userid){
+            NavigatorUtils.goPage(data?data:{}, route)
+        } else {
+            NavigatorUtils.goPage({}, 'Login')
+        }
+    }
+
+    render(){
         this.others = [
             {
-                title:this.props.language===1?'评价我的':this.props.language===2?'evaluation':'私を評価する',
+                title:this.props.language===1?'评价':this.props.language===2?'evaluation':'評価',
                 icon:require('../../../assets/images/home/pjwd.png'),
-                router:'',
+                router:'Evaluation',
                 width:19,
                 height:21
             },
@@ -688,26 +700,38 @@ class Other extends Component{
                 height:21
             }
         ];
-    }
-    checkLoginRoute(route, data){
-        const {token, user} = this.props;
-        if(token && user && user.username && user.userid){
-            NavigatorUtils.goPage(data?data:{}, route)
-        } else {
-            NavigatorUtils.goPage({}, 'Login')
-        }
-    }
-
-    render(){
-        return(
-            <View style={[CommonStyle.commonWidth,styles.common_padding,CommonStyle.spaceRow,{
+        const {userInfo} = this.props;
+        return( //userInfo.isvolunteer && userInfo.audit_idcard == 1
+            <View style={[CommonStyle.commonWidth,styles.common_padding,{
                 backgroundColor:'#fff',
                 marginTop:10,
-                height:92,
+                paddingTop: 22.5,
+                paddingBottom: 22.5,
                 borderRadius: 6,
                 marginBottom: 20
             }]}>
-                <View style={[CommonStyle.spaceRow,{width:'100%'}]}>
+                <Text style={[styles.title,{
+                    marginTop: 0
+                }]}>
+                    其他工具
+                </Text>
+                <View style={[CommonStyle.spaceRow,{width:'100%',marginTop: 22.5}]}>
+                    {
+                        userInfo.isvolunteer && userInfo.audit_idcard == 1
+                        ?
+                            <TouchableOpacity style={CommonStyle.flexCenter}
+                                              onPress={()=>{}}>
+                                <View style={{position:'relative'}}>
+                                    <Image
+                                        source={require('../../../assets/images/home/zyzsq.png')}
+                                        style={{width:24.5,height:19}}
+                                    />
+                                </View>
+                                <Text style={{color:'#333',fontSize: 12,marginTop:13}}>我的志愿</Text>
+                            </TouchableOpacity>
+                        :
+                            null
+                    }
                     {this.others.map((item,index) => {
                         return <TouchableOpacity key={index} style={CommonStyle.flexCenter}
                         onPress={()=>this.checkLoginRoute(item.router, {})}>

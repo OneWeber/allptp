@@ -49,6 +49,7 @@ import {changeTheme} from './theme'
 import {onLoadSystemMsg,onLoadMoreSystemMsg} from './info/systemmsg'
 import {onLoadNoRead} from './info/noread'
 import {onLoadUserInfo} from './info/userinfo'
+import {changeMainLanguage} from './language'
 
 export default {
     InitUser,
@@ -105,5 +106,6 @@ export default {
     onLoadNoRead,
     onLoadUserInfo,
     changeAccommodation,
-    changeAccImageId
+    changeAccImageId,
+    changeMainLanguage
 }

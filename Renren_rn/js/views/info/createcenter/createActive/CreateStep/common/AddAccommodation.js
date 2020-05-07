@@ -96,27 +96,30 @@ class AddAccommodation extends Component{
         }else if(this.state.imageId.length === 0) {
             this.refs.toast.show('请提供住宿图片')
         }else {
-            let list = accommodation;
+            let list = this.props.navigation.state.params.acc_arr;
+            let id_data = [];
+            const {imageList} = this.state;
+            for(let i=0;i<imageList.length;i++) {
+                id_data.push({
+                    image_id: imageList[i].send.image_id,
+                    domain: imageList[i].send.domain,
+                    image_url: imageList[i].send.image_url
+                })
+            }
+            changeAccImageId(id_data);
             let data = {
                 flag: this.state.typeIndex,
                 num: this.state.num,
                 max_person: this.state.max_person,
                 descript: this.state.descript,
                 price: this.state.price,
-                images: this.state.imageList
+                image: id_data,
             }
             list.push(data)
             changeAccommodation(list);
-            let id_data = acc_imageId;
-            const {imageList} = this.state;
-            for(let i=0;i<imageList.length;i++) {
-                id_data.push({
-                    image_id: imageList[i].send.image_id
-                })
-            }
-            changeAccImageId(id_data);
 
-            NavigatorUtils.goPage({},'Accommodation')
+            // NavigatorUtils.backToUp(this.props, true)
+           NavigatorUtils.goPage({},'Accommodation')
         }
     }
     onloadImages() {
@@ -145,7 +148,7 @@ class AddAccommodation extends Component{
                 if(res.code === 1) {
                     list.push({
                         imageDetail: images,
-                        send: {image_id:res.data.image_id,img:res.data.domain+res.data.image_url}
+                        send: {image_id:res.data.image_id,domain:res.data.domain,image_url:res.data.image_url}
                     })
                     for(let i=0;i<list.length;i++) {
                         image_id.push({image_id:list[i].send.image_id})
@@ -164,6 +167,27 @@ class AddAccommodation extends Component{
             }
         )
     }
+    dropImage(data) {
+        if(data.imageDetail) {
+            ImagePickers.openCropper({
+                path: data.imageDetail.path,
+                width: 300,
+                height: 400
+            }).then(image => {
+                console.log(image);
+            });
+        }
+    }
+    delImage(i) {
+        let list = this.state.imageList;
+        let image_id = this.state.imageId;
+        list.splice(i, 1);
+        image_id.splice(i, 1);
+        this.setState({
+            imageList: list,
+            imageId: image_id
+        })
+    }
     render(){
         const {typeIndex, imageList} = this.state;
         let Images = [];
@@ -179,7 +203,7 @@ class AddAccommodation extends Component{
                     this.dropImage(imageList[i])
                 }}>
                     <LazyImage
-                        source={{uri: imageList[i].send.img}}
+                        source={{uri: imageList[i].send.domain + imageList[i].send.image_url }}
                         style={{
                             width:(width*0.94-30)/3,
                             height: (width*0.94-30)/3,
@@ -285,6 +309,7 @@ class AddAccommodation extends Component{
                                         placeholder="请填写"
                                         style={styles.acc_input}
                                         defaultValue={this.state.num}
+                                        keyboardType={"number-pad"}
                                         onChangeText={(text)=>{this.setState({
                                             num: text
                                         })}}
@@ -300,6 +325,7 @@ class AddAccommodation extends Component{
                                     <TextInput
                                         placeholder="请填写"
                                         style={styles.acc_input}
+                                        keyboardType={"number-pad"}
                                         defaultValue={this.state.max_person}
                                         onChangeText={(text)=>{this.setState({
                                             max_person: text

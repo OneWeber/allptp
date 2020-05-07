@@ -65,6 +65,12 @@ import TravelFunds from '../views/info/TravelFunds';
 import Accommodation from '../views/info/createcenter/createActive/CreateStep/Accommodation';
 import AddAccommodation from '../views/info/createcenter/createActive/CreateStep/common/AddAccommodation';
 import Attention from '../views/info/createcenter/createActive/CreateStep/Attention';
+import Reservation from '../views/info/createcenter/createActive/CreateStep/Reservation';
+import Booking from '../views/info/createcenter/createActive/CreateStep/Booking';
+import Vol from '../views/info/createcenter/createActive/Vol';
+import Submit from '../views/info/createcenter/createActive/CreateStep/Submit';
+import SettingLanguage from '../views/info/setting/SettingLanguage';
+import Evaluation from '../views/info/other/Evaluation';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -456,6 +462,42 @@ const MainNavigator = createStackNavigator({
     },
     Attention: {
         screen: Attention,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Reservation: {
+        screen: Reservation,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Booking: {
+        screen: Booking,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Vol: {
+        screen: Vol,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Submit: {
+        screen: Submit,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SettingLanguage: {
+        screen: SettingLanguage,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Evaluation: {
+        screen: Evaluation,
         navigationOptions: {
             headerShown: false
         }

@@ -15,11 +15,6 @@ import languageType from '../../json/languageType'
 class TravelPage extends Component{
     constructor(props) {
         super(props);
-        this.tabNames = [
-            this.props.language===1?'未开始':this.props.language===2?"Not started":'未開始',
-            this.props.language===1?'进行中':this.props.language===2?"ongoing":'進行中',
-            this.props.language===1?'已参加':this.props.language===2?"Have to attend":'参加した',
-        ];
         this.state = {
             viewIndex: 0
         }
@@ -33,7 +28,12 @@ class TravelPage extends Component{
         })
     }
     render(){
-        let {theme,language} = this.props
+        let {theme,language} = this.props;
+        this.tabNames = [
+            this.props.language===1?'未开始':this.props.language===2?"Not started":'未開始',
+            this.props.language===1?'进行中':this.props.language===2?"ongoing":'進行中',
+            this.props.language===1?'已参加':this.props.language===2?"Have to attend":'参加した',
+        ];
         return <View style={{flex: 1,backgroundColor:'#fff'}}>
                     <RNEasyTopNavBar
                         title={language===1?languageType.CH.journey.title:language===2?languageType.EN.journey.title:languageType.JA.journey.title}

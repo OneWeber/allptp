@@ -49,7 +49,7 @@ class CreateActive extends Component{
         let userInfo = userStore.items.data.data[0]
         return <View>
             {
-                userInfo.refuse_reason
+                userInfo.audit_face!=1 && userInfo.audit_face!=2
                 ?
                     <View style={CommonStyle.flexStart}>
                         <Tooltip

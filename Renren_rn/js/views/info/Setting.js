@@ -46,6 +46,19 @@ export default class Setting extends Component{
                             style={{color:'#999'}}
                         />
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[CommonStyle.spaceRow,styles.setting_item]}
+                        onPress={() => {
+                            NavigatorUtils.goPage({},'SettingLanguage')
+                        }}
+                    >
+                        <Text style={styles.setting_title}>语言</Text>
+                        <AntDesign
+                            name={'right'}
+                            size={16}
+                            style={{color:'#999'}}
+                        />
+                    </TouchableOpacity>
                 </ScrollView>
             </View>
         )

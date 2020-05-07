@@ -37,33 +37,6 @@ class HomePage extends Component{
             opacity: 0,
             isFetching: false
         }
-        this.navs=[
-            {
-                title:this.props.language===1?'志愿者':this.props.language===2?'volunteers':'ボランティア',
-                router:'Volunteer',
-                icon: require('../../../assets/images/home/zyz.png')
-            },
-            {
-                title:this.props.language===1?'策划者':this.props.language===2?'planners':'企画者',
-                router:'Creater',
-                icon: require('../../../assets/images/home/chz.png')
-            },
-            {
-                title:this.props.language===1?'体验':this.props.language===2?'experience':'体験',
-                router:'ActiveList',
-                icon: require('../../../assets/images/home/tiyan.png')
-            },
-            {
-                title:this.props.language===1?'故事':this.props.language===2?'story':'ストーリー',
-                router:'StoryList',
-                icon: require('../../../assets/images/home/gushi.png')
-            },
-            {
-                title:this.props.language===1?'热搜':this.props.language===2?'Hot search':'暑い狩り',
-                router:'TopSearch',
-                icon: require('../../../assets/images/home/resou.png')
-            },
-        ]
     }
     componentDidMount() {
         const {token, onLoadUserInfo} = this.props
@@ -92,6 +65,33 @@ class HomePage extends Component{
         this.refs.search.close()
     }
     render(){
+        this.navs=[
+            {
+                title:this.props.language===1?'志愿者':this.props.language===2?'volunteers':'ボランティア',
+                router:'Volunteer',
+                icon: require('../../../assets/images/home/zyz.png')
+            },
+            {
+                title:this.props.language===1?'策划者':this.props.language===2?'planners':'企画者',
+                router:'Creater',
+                icon: require('../../../assets/images/home/chz.png')
+            },
+            {
+                title:this.props.language===1?'体验':this.props.language===2?'experience':'体験',
+                router:'ActiveList',
+                icon: require('../../../assets/images/home/tiyan.png')
+            },
+            {
+                title:this.props.language===1?'故事':this.props.language===2?'story':'ストーリー',
+                router:'StoryList',
+                icon: require('../../../assets/images/home/gushi.png')
+            },
+            {
+                title:this.props.language===1?'热搜':this.props.language===2?'Hot search':'暑い狩り',
+                router:'TopSearch',
+                icon: require('../../../assets/images/home/resou.png')
+            },
+        ]
         const {scrollY} = this.state
         let nav = <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{marginTop: 30}]}>
             {this.navs.map((item, index) => {
