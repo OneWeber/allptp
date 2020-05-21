@@ -14,7 +14,7 @@ import {
 import Fetch from '../../expand/dao/Fetch';
 import HttpUrl from '../../utils/Http';
 import {connect} from 'react-redux'
-import Swiper from '../../model/Swiper';
+import Swiper from 'react-native-swiper'
 import {ScrollView} from 'react-navigation';
 import CommonStyle from '../../../assets/css/Common_css';
 import StarRating from "react-native-star-rating";
@@ -57,6 +57,7 @@ class ActiveDetail extends Component{
             isLoading:true
         }, () => {
             this.loadData();
+            this.loadDiscount();
             this.getWishList();
         })
 
@@ -81,9 +82,22 @@ class ActiveDetail extends Component{
                         activeImgs:imgArr,
                         banner: bannerArr
                     },() => {
+                        console.log('banner', this.state.banner)
                         this.checkStatus(this.state.data)
                     })
                 })
+            }
+        })
+    }
+    loadDiscount() {
+        const {token} = this.props
+        let formData=new FormData();
+        formData.append('token',token);
+        formData.append('version','2.0');
+        formData.append('activity_id',this.table_id);
+        Fetch.post(NewHttp+'ActivityDiscountTwo', formData).then(res => {
+            if(res.code === 1) {
+                console.log('discount', res)
             }
         })
     }
@@ -185,7 +199,17 @@ class ActiveDetail extends Component{
                 initJoin(datas)
                 NavigatorUtils.goPage({vol: vol, isMe: isMe, issatay: data.issatay},'SingleDay', 'navigate')
             } else {
-                alert('多天活动')
+                const {initJoin, join, initSlot} = this.props;
+                initSlot({
+                    slot: this.state.data.slot
+                });
+                let datas = join
+                datas.activity_id = table_id;
+                datas.age_limit = data.age_limit;
+                datas.house = data.house
+                initJoin(datas)
+
+                NavigatorUtils.goPage({},'ManyDay', 'navigate')
             }
         }
 
@@ -234,7 +258,7 @@ class ActiveDetail extends Component{
                         <AntDesign
                             name={'left'}
                             size={24}
-                            style={{color:'#333'}}
+                            style={{color:onTouchEnd<=0?'#fff':'#333'}}
                             onPress={()=>{NavigatorUtils.backToUp(this.props)}}
                         />
                         <View style={[CommonStyle.flexEnd]}>
@@ -251,14 +275,14 @@ class ActiveDetail extends Component{
                                     <AntDesign
                                         name={'hearto'}
                                         size={20}
-                                        style={{color: '#333',marginRight: 20}}
+                                        style={{color:onTouchEnd<=0?'#fff':'#333',marginRight: 20}}
                                         onPress={()=>{this.refs.wishList.open()}}
                                     />
                             }
                             <AntDesign
                                 name={'export'}
                                 size={24}
-                                style={{color:'#333'}}
+                                style={{color:onTouchEnd<=0?'#fff':'#333'}}
                                 onPress={()=>{
                                     this.refs.share.open()
                                 }}
@@ -286,14 +310,29 @@ class ActiveDetail extends Component{
                 >
                     <View style={styles.banner_con}>
                         <Swiper
-                            data={this.state.banner}
-                            dotType={'offset'}
-                            cWidth={width}
-                            cHeight={height*0.7}
-                            inActiveColor={'#f5f5f5'}
-                            onSliderChange={(index)=>this._onSliderChange(index)}
+                            showsButtons={false}
+                            horizontal={true}
+                            loop={true}
+                            showsPagination={true}
+                            autoplay={true}
+                            autoplayTimeout={6}
+                            activeDotColor={this.props.theme}
+                            style={{backgroundColor: '#f5f5f5'}}
                         >
+                            {
+                                this.state.banner.map((item, index) => {
+                                    return <LazyImage
+                                        key={index}
+                                        source={{uri:item.url.uri}}
+                                        style={{
+                                            width:width,
+                                            height:height*0.7
+                                        }}
+                                    />
+                                })
+                            }
                         </Swiper>
+
                         <View style={[CommonStyle.flexCenter, styles.more_img_btn]}>
                             <Text style={{color:'#999'}}>更多图集与视频</Text>
                         </View>
@@ -721,7 +760,7 @@ class AboutActive extends Component{
                         <Text style={{color:'#333'}}>{data.country}{data.province}</Text>
                     </View>
                     <View style={aboutStyles.active_tabs}>
-                        <Text style={{color:'#333'}}>{data.kind?data.kind[0].kind_name:null}</Text>
+                        <Text style={{color:'#333'}}>{data.kind&&data.kind[0]?data.kind[0].kind_name:null}</Text>
                     </View>
                 </View>
                 <View style={[CommonStyle.flexStart,{flexWrap: 'wrap',alignItems: 'flex-start',justifyContent: "flex-start"}]}>
@@ -1220,7 +1259,7 @@ class SameActive extends Component{
                             ?
                                 <Loading />
                             :
-                                activeList.length > 0
+                                activeList&&activeList.length > 0
                             ?
                                 <ActiveList data={activeList} limit={4} goType={'push'}/>
                             :

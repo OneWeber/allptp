@@ -152,11 +152,25 @@ const ScrollableTabBar = createReactClass({
                         </Text>
                     </View>
                     :
-                    <View style={[styles.tab, this.props.tabStyle, ]}>
-                        <Text style={[{color: textColor, fontWeight, }, textStyle, ]}>
-                            {name}
-                        </Text>
-                    </View>
+                    this.props.calendar
+                        ?
+                        <View style={[this.props.tabStyle,{
+                            marginLeft: page===0?WINDOW_WIDTH*0.03: 20,
+                            marginRight: page === this.props.total-1?WINDOW_WIDTH*0.03:0,
+                            height:40,
+                            justifyContent:'center',
+                            alignItems: 'center'
+                        }]}>
+                            <Text style={[{color: textColor,fontSize: 16, fontWeight, }, textStyle, ]}>
+                                {name}
+                            </Text>
+                        </View>
+                        :
+                        <View style={[styles.tab, this.props.tabStyle, ]}>
+                            <Text style={[{color: textColor, fontWeight, }, textStyle, ]}>
+                                {name}
+                            </Text>
+                        </View>
             }
 
         </Button>;
@@ -205,7 +219,7 @@ const ScrollableTabBar = createReactClass({
                         return renderTab(name, page, isTabActive, this.props.goToPage, this.measureTab.bind(this, page));
                     })}
                     {
-                        this.props.hotcity
+                        this.props.hotcity || this.props.calendar
                             ?
                             null
                             :

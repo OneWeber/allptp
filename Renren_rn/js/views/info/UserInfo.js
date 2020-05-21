@@ -100,7 +100,7 @@ class UserHeader extends Component{
                 marginTop: 30
             }]}>
                 <LazyImage
-                    source={userInfo.headimage&&userInfo.headimage.domain&&userInfo.headimage.image_url?
+                    source={userInfo&&userInfo.headimage&&userInfo.headimage.domain&&userInfo.headimage.image_url?
                         {uri:userInfo.headimage.domain+userInfo.headimage.image_url}:
                         require('../../../assets/images/touxiang.png')}
                     style={{width:60,height:60,borderRadius: 30}}
@@ -259,7 +259,7 @@ class RecentNews extends Component{
                 }}>
                     <View style={[CommonStyle.flexStart]}>
                         <LazyImage
-                            source={this.state.dynamicList[i].domain&&this.state.dynamicList[i].image_url?
+                            source={this.state.dynamicList[i]&&this.state.dynamicList[i].domain&&this.state.dynamicList[i].image_url?
                                 {uri:this.state.dynamicList[i].domain+this.state.dynamicList[i].image_url}:
                                 require('../../../assets/images/touxiang.png')}
                             style={{width:40,height:40,borderRadius: 20}}
@@ -293,14 +293,14 @@ class RecentNews extends Component{
                     </View>
                     <View style={{marginTop: 15}}>
                         {
-                            this.state.dynamicList[i].datas.image.length === 1
+                            this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length === 1
                                 ?
                                 <LazyImage
                                     source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
                                     style={{width:'100%',height:150}}
                                 />
                                 :
-                                this.state.dynamicList[i].datas.image.length === 2
+                            this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length === 2
                                     ?
                                     <View style={CommonStyle.spaceRow}>
                                         <LazyImage
@@ -313,6 +313,8 @@ class RecentNews extends Component{
                                         />
                                     </View>
                                     :
+                                this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length >=3
+                                ?
                                     <View style={CommonStyle.spaceRow}>
                                         <LazyImage
                                             source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
@@ -332,6 +334,8 @@ class RecentNews extends Component{
                                             />
                                         </View>
                                     </View>
+                                :
+                                    null
                         }
                     </View>
                     <Text style={{
@@ -422,7 +426,7 @@ class Active extends Component{
                         backgroundColor: '#fff',
                     }}>
                         <LazyImage
-                            source={create_activity[i].cover&&create_activity[i].cover.domain&&create_activity[i].cover.image_url?
+                            source={create_activity[i]&&create_activity[i].cover&&create_activity[i].cover.domain&&create_activity[i].cover.image_url?
                                 {uri:create_activity[i].cover.domain+create_activity[i].cover.image_url}:
                                 require('../../../assets/images/error.png')}
                             style={{

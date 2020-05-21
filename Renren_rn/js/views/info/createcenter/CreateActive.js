@@ -23,7 +23,9 @@ class CreateActive extends Component{
     componentDidMount() {
         console.log(this.props.userinfo)
     }
-
+    toCheck() {
+        NavigatorUtils.goPage({identity:'planner'}, 'Authenticate')
+    }
     getLeftButton() {
         return <TouchableOpacity
             style={CommonStyle.back_icon}
@@ -46,10 +48,10 @@ class CreateActive extends Component{
                 isLoading: false
             }
         }
-        let userInfo = userStore.items.data.data[0]
+        let userInfo = userStore.items&&userStore.items.data&&userStore.items.data.data?userStore.items.data.data[0]:''
         return <View>
             {
-                userInfo.audit_face!=1 && userInfo.audit_face!=2
+                userInfo && userInfo.audit_face!=1 && userInfo.audit_face!=2
                 ?
                     <View style={CommonStyle.flexStart}>
                         <Tooltip
@@ -68,6 +70,8 @@ class CreateActive extends Component{
                             fontWeight:'bold',
                             color:'#ff5673',
                             marginLeft:3
+                        }} onPress={()=>{
+                            this.toCheck()
                         }}>身份验证</Text>
                     </View>
                 :

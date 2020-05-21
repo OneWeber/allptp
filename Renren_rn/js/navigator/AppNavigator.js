@@ -71,6 +71,8 @@ import Vol from '../views/info/createcenter/createActive/Vol';
 import Submit from '../views/info/createcenter/createActive/CreateStep/Submit';
 import SettingLanguage from '../views/info/setting/SettingLanguage';
 import Evaluation from '../views/info/other/Evaluation';
+import Authenticate from '../views/authenticate/Authenticate';
+import ManyDay from '../views/active/ManyDay';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -498,6 +500,18 @@ const MainNavigator = createStackNavigator({
     },
     Evaluation: {
         screen: Evaluation,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Authenticate: {
+        screen: Authenticate,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    ManyDay: {
+        screen: ManyDay,
         navigationOptions: {
             headerShown: false
         }

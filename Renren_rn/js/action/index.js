@@ -38,7 +38,8 @@ import {
     changeStatus,
     changeFull,
     changeAccommodation,
-    changeAccImageId
+    changeAccImageId,
+    changeDate
 } from './info/steps'
 import {onLoadBank} from './info/bank'
 import {changeNet} from "./netinfo"
@@ -107,5 +108,6 @@ export default {
     onLoadUserInfo,
     changeAccommodation,
     changeAccImageId,
-    changeMainLanguage
+    changeMainLanguage,
+    changeDate
 }

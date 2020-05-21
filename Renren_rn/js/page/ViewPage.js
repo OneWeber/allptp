@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, ActivityIndicator, Text, SafeAreaView} from 'react-native';
+import {StyleSheet, View, ActivityIndicator, Text, Image} from 'react-native';
 import ViewBotNavigator from '../navigator/ViewBotNavigator';
 import NetInfo from "@react-native-community/netinfo";
 import NavigatorUtils from '../navigator/NavigatorUtils';
 import {connect} from 'react-redux'
 import HttpUrl from '../utils/Http';
-import HttpUtils from '../expand/dao/Fetch';
 import AsyncStorage from '@react-native-community/async-storage';
 import InitToken from '../expand/dao/InitToken';
 import actions from '../action';
@@ -27,8 +26,6 @@ class ViewPage extends Component{
                 isConnected: state.isConnected
             };
             changeNet(data)
-            //console.log("Connection type", state.type);
-            //console.log("Is connected?", state.isConnected);
         });
         NetInfo.addEventListener(state => {
             let data = {
@@ -119,7 +116,13 @@ class ViewPage extends Component{
                         bottom:0,
                         backgroundColor: '#fff'
                     }]}>
-                        <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                        <Image
+                            source={require('../../assets/images/loding.webp')}
+                            style = {{
+                                width: 70,
+                                height: 70
+                            }}
+                        />
                         <Text style={{
                             color:'#f5f5f5',
                             fontWeight: 'bold',

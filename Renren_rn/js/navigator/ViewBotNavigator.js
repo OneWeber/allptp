@@ -6,11 +6,8 @@ import FavoritePage from '../page/viewpage/FavoritPage';
 import TravelPage from '../page/viewpage/TravelPage';
 import MsgPage from '../page/viewpage/MsgPage';
 import MyPage from '../page/viewpage/MyPage';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import {connect} from 'react-redux'
-import CommonStyle from '../../assets/css/Common_css';
-import {Image, Text, View, StyleSheet} from 'react-native';
+import {Image, View, StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
     icons: {
@@ -44,7 +41,6 @@ class ViewBotNavigator extends Component{
                             :
                             <Image style={styles.icons} source={require('../../assets/images/bot/scj1.png')}/>
                     )
-
                 }
             },
             TravelPage: {

@@ -21,7 +21,8 @@ const defaultState = {
     activity_id: '',
     full:[],//满减
     accommodation: [], //住宿,
-    acc_imageId: []
+    acc_imageId: [],
+    date: []
 }
 export default function (state=defaultState, action) {
     switch (action.type) {
@@ -94,7 +95,12 @@ export default function (state=defaultState, action) {
             return {
                 ...state,
                 acc_imageId: action.arr
-            }
+            };
+        case Types.CHANGE_DATE:
+            return {
+                ...state,
+                date: action.arr
+            };
         default:
             return state
     }

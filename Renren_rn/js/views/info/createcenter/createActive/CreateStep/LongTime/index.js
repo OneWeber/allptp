@@ -22,11 +22,15 @@ import Toast, {DURATION} from 'react-native-easy-toast';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Fetch from '../../../../../../expand/dao/Fetch';
 import NewHttp from '../../../../../../utils/NewHttp';
+import Modal from 'react-native-modalbox';
+import CalendarDate from './Calendar';
+const {width, height} = Dimensions.get('window');
 class LongTime extends Component{
     constructor(props) {
         super(props);
         this.state = {
             trueSwitchIsOn: this.props.hasDiscount,
+            timeIndex: this.props.navigation.state.params.timeIndex,
             beginTime:'',
             endTime: '',
             isEnd:false,
@@ -45,7 +49,8 @@ class LongTime extends Component{
             minutes: '',
             limitHour: '',
             limitMinutes: '',
-            people: ''
+            people: '',
+
         }
     }
 
@@ -81,32 +86,32 @@ class LongTime extends Component{
             this.picker.open(true)
         })
     }
-    _confirm(year, month, day){
-        if(!this.state.isEnd){
-            let begin = year+'-'+month+'-'+day;
-            this.setState({
-                beginTime: begin
-            })
-        } else{
-            let end = year+'-'+month+'-'+day;
-            this.setState({
-                endTime: end
-            })
-        }
-    }
-    _confirmTime(hour, minutes){
-        if(!this.state.isTimeEnd) {
-            let begin = (hour.split('').length===1?'0'+ hour:hour) + ':' + (minutes.split('').length===1?'0'+ minutes:minutes);
-            this.setState({
-                beginPeriodTime: begin
-            })
-        } else {
-            let end = (hour.split('').length===1?'0'+ hour:hour) + ':' + (minutes.split('').length===1?'0'+ minutes:minutes);
-            this.setState({
-                endPeriodTime: end
-            })
-        }
-    }
+    // _confirm(year, month, day){
+    //     if(!this.state.isEnd){
+    //         let begin = year+'-'+month+'-'+day;
+    //         this.setState({
+    //             beginTime: begin
+    //         })
+    //     } else{
+    //         let end = year+'-'+month+'-'+day;
+    //         this.setState({
+    //             endTime: end
+    //         })
+    //     }
+    // }
+    // _confirmTime(hour, minutes){
+    //     if(!this.state.isTimeEnd) {
+    //         let begin = (hour.split('').length===1?'0'+ hour:hour) + ':' + (minutes.split('').length===1?'0'+ minutes:minutes);
+    //         this.setState({
+    //             beginPeriodTime: begin
+    //         })
+    //     } else {
+    //         let end = (hour.split('').length===1?'0'+ hour:hour) + ':' + (minutes.split('').length===1?'0'+ minutes:minutes);
+    //         this.setState({
+    //             endPeriodTime: end
+    //         })
+    //     }
+    // }
     clickBeginPeriod(){
         const {beginPeriodTime} = this.state;
         this.setState({
@@ -143,25 +148,6 @@ class LongTime extends Component{
         });
     }
     confirmAdd(){
-        /*
-        * const {longDay, changeLongDay} = this.props
-        let list = longDay;
-        let data = {
-            longDayTime: {
-                beginTime: this.state.beginTime,
-                endTime: this.state.endTime,
-            },
-            longDayPeriod: {
-                beginTime: this.state.beginPeriodTime,
-                endTime: this.state.endPeriodTime,
-            },
-            people: this.state.people,
-        };
-        list.push(data)
-        changeLongDay(list)
-       // NavigatorUtils.backToUp(this.props);
-        NavigatorUtils.goPage({}, 'Time')
-        * */
         const {beginTime, endTime, beginPeriodTime, endPeriodTime, people} = this.state;
         if(!beginTime || !endTime || !beginPeriodTime || !endPeriodTime) {
             this.refs.toast.show('请选择完整的体验日期和起止时间');
@@ -182,17 +168,16 @@ class LongTime extends Component{
         formData.append("token",token);
         formData.append("version",'2.0');
         formData.append("activity_id",activity_id);
-        formData.append("begin_date",beginTime);
-        formData.append("end_date",endTime);
+        formData.append("date",JSON.stringify([{begin_date: beginTime, end_date: endTime}]));
         formData.append("time",JSON.stringify([{begin_time:beginPeriodTime, end_time:endPeriodTime}]));
         formData.append("max_person_num",people);
         formData.append("is_discount",trueSwitchIsOn);
         formData.append("price_origin",this.props.adultStandard.originalPrice);
         formData.append("price_discount",this.props.adultStandard.standard);
-        formData.append("price",this.props.adultStandard.standard*(this.props.adultStandard.standard/10));
+        formData.append("price",this.props.adultStandard.originalPrice*(this.props.adultStandard.standard/10));
         formData.append("kids_price_origin",this.props.childStandard.originalPrice);
         formData.append("kids_price_discount",this.props.childStandard.standard);
-        formData.append("kids_price",this.props.childStandard.standard*(this.props.childStandard.standard/10));
+        formData.append("kids_price",this.props.childStandard.originalPrice*(this.props.childStandard.standard/10));
         formData.append("combine",JSON.stringify(this.props.parenChildPackage.concat(this.props.customePackage)));
         Fetch.post(NewHttp+'SlotAddAllTwo', formData).then(res => {
             if(res.code === 1) {
@@ -207,6 +192,8 @@ class LongTime extends Component{
                 changeParentChildPackage([]);
                 changeCustomePackage([]);
                 NavigatorUtils.backToUp(this.props, true)
+            }else{
+                console.log(res.msg)
             }
         })
 
@@ -231,9 +218,10 @@ class LongTime extends Component{
                                     <Text style={styles.title_text}>体验日期</Text>
                                     <TouchableOpacity
                                         style={CommonStyle.flexEnd}
-                                        onPress={()=>{this.picker.open()}}
+                                        onPress={()=>{this.refs.calendar.open()}}
                                     >
-                                        {
+                                        {/*
+                                            {
                                             !beginTime && !endTime
                                             ?
                                                 <Text style={{color:'#C6C6C6'}}>选择日期</Text>
@@ -250,6 +238,8 @@ class LongTime extends Component{
                                                 }}>{endTime?endTime:'结束日期'}</Text>
                                                 </Text>
                                         }
+                                        */}
+                                        <Text style={{color:'#C6C6C6'}}>选择日期</Text>
 
                                         <AntDesign
                                             name={'right'}
@@ -561,6 +551,7 @@ class LongTime extends Component{
                     </View>
                 </SafeAreaView>
                 {/*体验日期选择*/}
+                {/*
                 <TimePicker
                     ref={picker=>this.picker=picker}
                     cancel={()=>{}}
@@ -573,7 +564,6 @@ class LongTime extends Component{
                     title={this.state.title}
                     confirm={(year, month, day) => {this._confirm(year, month, day)}}
                 />
-                {/*体验起止时间选择*/}
                 <TimePeriodPicker
                     ref={picker=>this.timePicker=picker}
                     cancel={()=>{}}
@@ -583,6 +573,29 @@ class LongTime extends Component{
                     limitMinutes={JSON.stringify(parseFloat(this.state.limitMinutes))}
                     confirm={(hour, minutes)=>{this._confirmTime(hour, minutes)}}
                 />
+                */}
+                <Modal
+                    style={{height:height,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"calendar"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        width: '100%',
+                        height: height,
+                        backgroundColor: '#fff'
+                    }}>
+                        <CalendarDate
+                            timeIndex={this.state.timeIndex}
+                            closeCalendar={()=>{
+                                this.refs.calendar.close()
+                            }}
+                        />
+                    </View>
+                </Modal>
             </View>
         )
     }

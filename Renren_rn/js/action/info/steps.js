@@ -48,3 +48,6 @@ export function changeAccommodation(arr) {
 export function changeAccImageId(arr) {
     return {type:Types.CHANGE_ACCIMAGEID, arr}
 }
+export function changeDate(arr) {
+    return {type:Types.CHANGE_DATE, arr}
+}

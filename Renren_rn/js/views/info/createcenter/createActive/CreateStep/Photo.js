@@ -143,7 +143,7 @@ class Photo extends Component{
             if(response.didCancel){
                 return
             }else if(response.error){
-                alert(JSON.stringify(response.error))
+                console.log(JSON.stringify(response.error))
             }else{
                 this.uploadImage(response.uri)
             }

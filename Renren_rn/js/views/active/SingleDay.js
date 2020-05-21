@@ -316,7 +316,7 @@ class SingleDay extends Component{
         return(
             <View style={[CommonStyle.flexCenter,{flex: 1,backgroundColor:'#fff',justifyContent:'flex-start',position: 'relative'}]}>
                 <RNEasyTopNavBar
-                    title={'我的订单'}
+                    title={'单天体验'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
         bottom:0,
         borderTopWidth: 1,
         borderTopColor: '#f5f5f5',
-        minHeight: 100,
+        minHeight: 150,
         maxHeight: 400
     },
     select_btn: {

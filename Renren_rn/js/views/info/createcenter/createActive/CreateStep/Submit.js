@@ -11,9 +11,16 @@ class Submit extends Component{
         const {userinfo} = this.props;
         let store = userinfo['userinfo'];
         let info = store.items&&store.items.data&&store.items.data.data?store.items.data.data[0]:'';
-        if(info.audit_face!=1&&info.audit_face!=2) {
+        console.log('info', info)
+        if(info.audit_face!=2) {
             this.refs.prompt.open()
+        } else {
+
         }
+    }
+    goCheck() {
+        this.refs.prompt.close();
+        NavigatorUtils.goPage({identity:'planner', activity_id: this.props.activity_id}, 'Authenticate')
     }
     render(){
         return(
@@ -26,7 +33,7 @@ class Submit extends Component{
                             name={'left'}
                             size={20}
                             style={{
-                                color:'3333'
+                                color:'#333'
                             }}
                             onPress={()=>{
                                 NavigatorUtils.backToUp(this.props)
@@ -83,28 +90,27 @@ class Submit extends Component{
                     </View>
                 </ScrollView>
                 <Modal
-                    style={[CommonStyle.flexCenter,{height:140,width:'100%',backgroundColor:'rgba(0,0,0,0)'}]}
+                    style={[CommonStyle.flexCenter,{height:145,width:'100%',backgroundColor:'rgba(0,0,0,0)'}]}
                     ref={"prompt"}
                     animationDuration={200}
-                    position={"center"}
+                    position={"bottom"}
                     backdropColor={'rgba(0,0,0,0.5)'}
                     swipeToClose={true}
                     backdropPressToClose={true}
                     coverScreen={true}>
                     <View style={{
-                        width: '80%',
-                        height: 140,
+                        width: '100%',
+                        height: 145,
                         backgroundColor: '#fff',
-                        borderRadius: 5,
                         padding: 15
                     }}>
                         <Text style={{
                             lineHeight: 24,
                             color:'#333',
                             marginTop: 5
-                        }}>当前您还未验证策划者身份信息，威保证您的体验能成功通过审核请前往验证策划者身份信息。</Text>
+                        }}><Text style={{color:'red'}}>*</Text>当前您还未验证策划者身份信息，为保证您的体验能成功通过审核请前往验证策划者身份信息。</Text>
                         <View style={[CommonStyle.spaceRow,{
-                            marginTop: 30
+                            marginTop: 20
                         }]}>
                             <Text style={{
                                 color:'#666'
@@ -114,6 +120,8 @@ class Submit extends Component{
                             <Text style={{
                                 color:this.props.theme,
                                 fontWeight: 'bold'
+                            }} onPress={()=>{
+                                this.goCheck()
                             }}>前往验证</Text>
                         </View>
                     </View>
@@ -138,6 +146,7 @@ const styles = StyleSheet.create({
 })
 const mapStateToProps = state => ({
     theme: state.theme.theme,
-    userinfo: state.userinfo
+    userinfo: state.userinfo,
+    activity_id: state.steps.activity_id,
 })
 export default connect(mapStateToProps)(Submit)

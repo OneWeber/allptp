@@ -125,6 +125,7 @@ class Time extends Component{
     goLongTime(){
         let _this = this;
         NavigatorUtils.goPage({
+            timeIndex: this.state.timeIndex,
             refresh: function () {
                 _this.getSlot()
             }
