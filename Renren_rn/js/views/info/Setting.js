@@ -59,6 +59,32 @@ export default class Setting extends Component{
                             style={{color:'#999'}}
                         />
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[CommonStyle.spaceRow,styles.setting_item]}
+                        onPress={() => {
+                            NavigatorUtils.goPage({},'Securitycenter')
+                        }}
+                    >
+                        <Text style={styles.setting_title}>安全中心</Text>
+                        <AntDesign
+                            name={'right'}
+                            size={16}
+                            style={{color:'#999'}}
+                        />
+                    </TouchableOpacity>
+                    {/*<TouchableOpacity*/}
+                    {/*    style={[CommonStyle.spaceRow,styles.setting_item]}*/}
+                    {/*    onPress={() => {*/}
+                    {/*        NavigatorUtils.goPage({},'AccountSet')*/}
+                    {/*    }}*/}
+                    {/*>*/}
+                    {/*    <Text style={styles.setting_title}>账号设置</Text>*/}
+                    {/*    <AntDesign*/}
+                    {/*        name={'right'}*/}
+                    {/*        size={16}*/}
+                    {/*        style={{color:'#999'}}*/}
+                    {/*    />*/}
+                    {/*</TouchableOpacity>*/}
                 </ScrollView>
             </View>
         )

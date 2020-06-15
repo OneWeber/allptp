@@ -4,6 +4,7 @@ import CommonStyle from '../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import LazyImage from "animated-lazy-image";
 import languageType from '../json/languageType'
+import NavigatorUtils from '../navigator/NavigatorUtils';
 const widthScreen = Dimensions.get('window').width;
 /*
 *       borderColor: '#ddd',
@@ -14,6 +15,9 @@ const widthScreen = Dimensions.get('window').width;
         shadowRadius: 1,
 * */
 class TravelItem extends Component{
+    goDetail(table_id) {
+        NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
+    }
     render() {
         let {data_t, theme, data_index,language} = this.props
         return(
@@ -24,7 +28,7 @@ class TravelItem extends Component{
                         <Text style={styles.action_time}>{data_t.activ_begin_time}</Text>
                     </View>
                     <View style={[styles.line_con]}>
-                        <TouchableOpacity>
+                        <View>
                             <LazyImage
                                 source={data_t.cover&&data_t.cover.domain&&data_t.cover.image_url?
                                     {uri:data_t.cover.domain + data_t.cover.image_url}
@@ -53,7 +57,7 @@ class TravelItem extends Component{
                                     :
                                     '匿名用户'
                             }</Text>
-                        </TouchableOpacity>
+                        </View>
                         <View style={[CommonStyle.flexEnd,{marginTop: 20}]}>
                             <TouchableOpacity style={[CommonStyle.flexCenter,{
                                 paddingLeft: 10,
@@ -62,7 +66,9 @@ class TravelItem extends Component{
                                 borderWidth: 1,
                                 borderColor:'#dfe1e4',
                                 borderRadius: 4,
-                            }]}>
+                            }]}
+                            onPress={() => {this.goDetail(data_t.activity_id || data_t.activity_id==0?data_t.activity_id:data_t.table_id)}}
+                            >
                                 <Text style={styles.do_t}>
                                     {
                                         language===1

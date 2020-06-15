@@ -111,6 +111,8 @@ class Accommodation extends Component{
                 }else{
                     this.saveAccommodation()
                 }
+            }else{
+                this.saveAccommodation()
             }
         }
 
@@ -137,6 +139,15 @@ class Accommodation extends Component{
                 })
             }
 
+        })
+    }
+    _delAcco(index) {
+        let data = this.state.acc_arr;
+        let datas = []
+        data.splice(index, 1);
+        datas=data;
+        this.setState({
+            acc_arr: datas
         })
     }
     render(){
@@ -217,7 +228,12 @@ class Accommodation extends Component{
                         {
                             tabIndex === 1
                             ?
-                                <Provide initData={()=>{this.initData()}} {...this.props} {...this.state}/>
+                                <Provide
+                                    initData={()=>{this.initData()}}
+                                    {...this.props}
+                                    {...this.state}
+                                    delAcco={(index) => this._delAcco(index)}
+                                />
                             :
                             tabIndex === 2
                             ?
@@ -245,6 +261,11 @@ class Accommodation extends Component{
                             justifyContent:'flex-start'}]}>
                             <View style={CommonStyle.commonWidth}>
                                 <Text style={styles.main_title}>是否为志愿者提供住宿</Text>
+                                <Text style={{
+                                    color:this.props.theme,
+                                    fontSize: 12,
+                                    marginTop: 5
+                                }}>(注意:为志愿者提供住宿为无偿免费)</Text>
                                 {
                                     this.tabNamesVol.map((item, index) => {
                                         return <TouchableOpacity key={index} style={[CommonStyle.flexStart,{
@@ -485,6 +506,12 @@ class Provide extends Component{
             acc_arr: this.props.acc_arr
         }, 'AddAccommodation')
     }
+    delAcco(index) {
+        this.props.delAcco(index)
+    }
+    editAcco(item, index) {
+        NavigatorUtils.goPage({isEdit: true, item:item, index: index,acc_arr: this.props.acc_arr}, 'AddAccommodation')
+    }
     render() {
         const {acc_arr} = this.props;
         return (
@@ -566,8 +593,20 @@ class Provide extends Component{
                                         height:75,
                                         alignItems:'flex-start'
                                     }]}>
-                                        <Text style={{color:'#a4a4a4',fontSize: 13,marginRight: 15}}>编辑</Text>
-                                        <Text style={{color:'#a4a4a4',fontSize: 13}}>删除</Text>
+                                        <Text
+                                            style={{color:'#a4a4a4',fontSize: 13,marginRight: 15}}
+                                            onPress={() => {
+                                                this.editAcco(item,index)
+                                            }}
+                                        >编辑</Text>
+                                        <Text
+                                            style={{color:'#a4a4a4',fontSize: 13}}
+                                            onPress={() => {
+                                                this.delAcco(index)
+                                            }}
+                                        >
+                                            删除
+                                        </Text>
                                     </View>
 
                                 </View>

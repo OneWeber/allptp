@@ -117,10 +117,10 @@ class ViewPage extends Component{
                         backgroundColor: '#fff'
                     }]}>
                         <Image
-                            source={require('../../assets/images/loding.webp')}
+                            source={require('../../assets/images/loding.gif')}
                             style = {{
-                                width: 70,
-                                height: 70
+                                width: 140,
+                                height: 140
                             }}
                         />
                         <Text style={{

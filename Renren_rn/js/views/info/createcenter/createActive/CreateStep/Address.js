@@ -34,6 +34,8 @@ import Fetch from '../../../../../expand/dao/Fetch';
 import HttpUrl from '../../../../../utils/Http';
 import action from '../../../../../action';
 import NewHttp from '../../../../../utils/NewHttp';
+import {bd_encrypt, dd_encrypt} from '../../../../../utils/auth'
+import {string} from 'prop-types';
 const {width, height} = Dimensions.get('window');
 
 class Address extends Component{
@@ -90,54 +92,77 @@ class Address extends Component{
                     goplace: res.data.set_address,
                     goPlaceLat: res.data.set_address_lat,
                     goPlaceLng: res.data.set_address_lng,
-                    goPlaceLatIcon: parseFloat(res.data.set_address_lat),
-                    goPlaceLngIcon: parseFloat(res.data.set_address_lng),
+                    goPlaceLatIcon: res.data.set_address_lat,
+                    goPlaceLngIcon: res.data.set_address_lng ,
                 }, () => {
                     changeStatus(res.data.step.split(','))
                 })
             }
         })
     }
-    initAddress() {
-        Geolocation.getCurrentPosition(
-            (position) => {
-                if(position) {
-                    this.changeAddress(position.coords.latitude, position.coords.longitude)
-                }
-            },
-            (error) => {
-                console.log(error.code, error.message);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-    }
+    // initAddress() {
+    //     Geolocation.getCurrentPosition(
+    //         (position) => {
+    //             if(position) {
+    //                 this.changeAddress(position.coords.latitude, position.coords.longitude)
+    //             }
+    //         },
+    //         (error) => {
+    //             console.log(error.code, error.message);
+    //         },
+    //         { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    //     );
+    // }
     async changeAddress(latitudes, longitudes, val){
         const searchResult = await Geocode.reverse({ latitude: latitudes, longitude: longitudes });
+        console.log(searchResult)
          if(val) {
               this.setState({
                 goplace: searchResult.address+searchResult.description,
                 goPlaceLatIcon: searchResult.latitude,
                 goPlaceLngIcon: searchResult.longitude,
-            })
+            },() => {
+                  // const {goPlaceLatIcon, goPlaceLngIcon} = this.state;
+                  // let data = bd_encrypt(goPlaceLatIcon, goPlaceLngIcon)
+                  // this.setState({
+                  //     goPlaceLatIcon: data.bg_lat,
+                  //     goPlaceLngIcon: data.bd_lng,
+                  // })
+              })
         } else {
               this.setState({
                 nowAddress:searchResult,
-                goPlaceLatIcon: searchResult.latitude,
-                goPlaceLngIcon: searchResult.longitude,
-            })
+                  goPlaceLatIcon: searchResult.latitude,
+                  goPlaceLngIcon: searchResult.longitude,
+            },() => {
+                  // const {goPlaceLatIcon, goPlaceLngIcon} = this.state;
+                  // let data = dd_encrypt(goPlaceLatIcon, goPlaceLngIcon)
+                  // this.setState({
+                  //     goPlaceLatIcon: data.bg_lat,
+                  //     goPlaceLngIcon: data.bd_lng,
+                  // })
+              })
         }
 
     }
     async  changeAddressTitle(address, val){
         const searchResult = await Geocode.search(address);
+        console.log(searchResult)
          this.setState({
-            goPlaceLatIcon: searchResult.latitude,
+            goPlaceLatIcon:searchResult.latitude,
             goPlaceLngIcon: searchResult.longitude,
-        })
+        },() => {
+             const {goPlaceLatIcon, goPlaceLngIcon} = this.state;
+             let data = dd_encrypt(goPlaceLatIcon, goPlaceLngIcon)
+             this.setState({
+                 goPlaceLatIcon: data.bg_lat,
+                 goPlaceLngIcon: data.bd_lng,
+             })
+         })
 
     }
-    _changeCoor(data) {
-        this.changeAddress(data.coordinate.latitude, data.coordinate.longitude, true)
+    async _changeCoor(data) {
+         this.changeAddress(data.coordinate.latitude, data.coordinate.longitude, true)
     }
     goNext(){
         const {nowAddress,country, province, city, goplace, goOtherWhere} = this.state;
@@ -170,8 +195,8 @@ class Address extends Component{
         formData.append("city",this.state.city);
         formData.append("isapp",1);
         formData.append("set_address",goplace?goplace:(nowAddress.address+nowAddress.description));
-        formData.append("set_address_lng",this.state.goPlaceLatIcon);
-        formData.append("set_address_lat",this.state.goPlaceLngIcon);
+        formData.append("set_address_lng",this.state.goPlaceLngIcon);
+        formData.append("set_address_lat",this.state.goPlaceLatIcon);
         Fetch.post(HttpUrl+'Activity/save_activity', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
@@ -315,48 +340,55 @@ class Address extends Component{
                                 />
                             </View>
                             <View style={styles.address_map}>
-                                <MapView
-                                    zoomTapEnabled={true}
-                                    zoomEnabled={true}
-                                    pitchEnabled={false}
-                                    zoomControlEnabled={true}
-                                    showsUserLocation={false}
-                                    followsUserLocation={false}
-                                    showsMyLocationButton={false}
-                                    scrollEnabled={true}
-                                    showsIndoorLevelPicker={false}
-                                    loadingEnabled={false}
-                                    userLocationAnnotationTitle={'我当前的位置'}
-                                    region={{
-                                        latitude: this.state.goPlaceLatIcon?this.state.goPlaceLatIcon: 30.095848083496094,
-                                        longitude: this.state.goPlaceLngIcon?this.state.goPlaceLngIcon:103.83992004394531,
-                                        latitudeDelta: 0.09,
-                                        longitudeDelta: 0.09,
-                                    }}
-                                    onPress={() => {
-                                        this.refs.map.open()
-                                    }}
-                                    style={{
-                                        width:'100%',
-                                        height: 180
-                                    }}
-                                >
-                                    <Marker
-                                        coordinate={{
-                                            latitude: this.state.goPlaceLatIcon?this.state.goPlaceLatIcon:30.095848083496094,
-                                            longitude: this.state.goPlaceLngIcon?this.state.goPlaceLngIcon:103.83992004394531,
-                                        }}
-                                        tracksViewChanges={true}
-                                    >
-                                        <View style={CommonStyle.spaceCol}>
-                                            <AntDesign
-                                                name={'enviroment'}
-                                                size={24}
-                                                style={{color:this.props.theme}}
-                                            />
-                                        </View>
-                                    </Marker>
-                                </MapView>
+                                {
+                                    this.state.goPlaceLatIcon!='' && this.state.goPlaceLngIcon!= ''
+                                    ?
+                                        <MapView
+                                            zoomTapEnabled={false}
+                                            zoomEnabled={true}
+                                            pitchEnabled={false}
+                                            zoomControlEnabled={false}
+                                            showsUserLocation={false}
+                                            followsUserLocation={false}
+                                            showsMyLocationButton={false}
+                                            scrollEnabled={false}
+                                            showsIndoorLevelPicker={false}
+                                            loadingEnabled={true}
+                                            userLocationAnnotationTitle={'我当前的位置'}
+                                            region={{
+                                                latitude: Number(this.state.goPlaceLatIcon),
+                                                longitude: Number(this.state.goPlaceLngIcon),
+                                                latitudeDelta: 0.09,
+                                                longitudeDelta: 0.09,
+                                            }}
+                                            onPress={() => {
+                                                this.refs.map.open()
+                                            }}
+                                            style={{
+                                                width:'100%',
+                                                height: 180
+                                            }}
+                                        >
+                                            <Marker
+                                                coordinate={{
+                                                    latitude: Number(this.state.goPlaceLatIcon),
+                                                    longitude: Number(this.state.goPlaceLngIcon) ,
+                                                }}
+                                                tracksViewChanges={true}
+                                            >
+                                                <View style={CommonStyle.spaceCol}>
+                                                    <AntDesign
+                                                        name={'enviroment'}
+                                                        size={24}
+                                                        style={{color:this.props.theme}}
+                                                    />
+                                                </View>
+                                            </Marker>
+                                        </MapView>
+                                    :
+                                        null
+                                }
+
                             </View>
                             <View style={[CommonStyle.flexCenter,{
                                 backgroundColor:'#fff',
@@ -456,9 +488,11 @@ const mapDispatchToProps = dispatch => ({
 export default connect(mapStateToProps, mapDispatchToProps)(Address)
 
 class MapContainer extends Component{
+
     clickMap(data) {
         this.props.changeCoor(data)
     }
+
     render() {
         return(
             <View style={{flex: 1}}>
@@ -475,10 +509,10 @@ class MapContainer extends Component{
                     loadingEnabled={false}
                     userLocationAnnotationTitle={'我当前的位置'}
                     region={{
-                        latitude: this.props.goPlaceLat,
-                        longitude: this.props.goPlaceLng,
-                        latitudeDelta: 0.09,
-                        longitudeDelta: 0.09,
+                        latitude:Number(this.props.goPlaceLatIcon),
+                        longitude: Number(this.props.goPlaceLngIcon),
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
                     }}
                     onPress={e =>{
                         this.clickMap(e.nativeEvent)
@@ -489,8 +523,8 @@ class MapContainer extends Component{
                 >
                     <Marker
                         coordinate={{
-                            latitude: this.props.goPlaceLatIcon,
-                            longitude: this.props.goPlaceLngIcon,
+                            latitude:Number(this.props.goPlaceLatIcon),
+                            longitude: Number(this.props.goPlaceLngIcon),
                         }}
                         title={this.props.nowAddress.address}
                         tracksViewChanges={true}

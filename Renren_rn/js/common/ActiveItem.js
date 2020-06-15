@@ -3,11 +3,11 @@ import {StyleSheet, View, Text, TouchableOpacity, Image, Dimensions} from 'react
 import LazyImage from 'animated-lazy-image';
 import CommonStyle from '../../assets/css/Common_css';
 import NavigatorUtils from '../navigator/NavigatorUtils';
+import AntDesign from 'react-native-vector-icons/AntDesign'
 const {width, height} = Dimensions.get('window')
 export default class ActiveItem extends Component{
     constructor(props) {
         super(props);
-        this.tabs=['3折起','返差价','多套餐']
     }
     goDetail(table_id){
         NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
@@ -68,27 +68,59 @@ export default class ActiveItem extends Component{
                 }
                 <Text numberOfLines={2} ellipsizeMode={'tail'}
                       style={[styles.common_weight,styles.common_color,{
-                          marginTop: 4.5
+                          marginTop: 4.5,
+                          marginBottom: 5
                       }]}>{data.title}</Text>
-                <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 5}]}>
-                    {this.tabs.map((item, index) => {
-                        return <View key={index} style={[styles.tab_item,{
-                            backgroundColor:index===0?'#EEFFFF':'#F5F6F8',
-                            marginTop: 5
-                        }]}>
-                            <Text style={{
-                                fontSize: 10,
-                                color:index===0?theme:'#626467'
-                            }}>{item}</Text>
-                        </View>
-                    })}
+                <View style={[CommonStyle.flexStart,{flexWrap:'wrap'}]}>
+                    {
+                        data.price_discount_concat&&data.price_discount_concat.split(',').length>1
+                        ?
+                            <View style={[styles.tab_item,{
+
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:theme
+                                }}>{parseFloat(data.price_discount_concat.split(',')[1])}折起</Text>
+                            </View>
+                        :
+                            null
+                    }
+                    {
+                        data.is_differ
+                        ?
+                            <View style={[styles.tab_item,{
+                                backgroundColor:'#F5F6F8',
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:'#626467'
+                                }}>返差价</Text>
+                            </View>
+                        :
+                            null
+                    }
+                    {
+                        data.is_combine
+                            ?
+                            <View style={[styles.tab_item,{
+                                backgroundColor:'#F5F6F8',
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:'#626467'
+                                }}>含套餐</Text>
+                            </View>
+                            :
+                            null
+                    }
                 </View>
                 <View style={[CommonStyle.flexStart,{marginTop: 8}]}>
-                    <Image
-                        source={parseFloat(data.score)>0?
-                            require('../../assets/images/home/pingxing.png'):
-                            require('../../assets/images/home/wpx.png')}
-                        style={{width: 10,height:9.5}}
+
+                    <AntDesign
+                        name={'star'}
+                        size={10}
+                        style={{color:this.props.theme}}
                     />
                     <Text style={[{
                         fontSize:11,marginLeft:3,
@@ -97,9 +129,9 @@ export default class ActiveItem extends Component{
                     }]}>{parseFloat(data.score)>0?data.score:'暂无评分'}</Text>
                     <Text style={[{color:'#626467',fontSize: 11,marginLeft: 10}]}>
                         {
-                            data.leaving_num
+                            data.comment_num
                                 ?
-                                data.leaving_num + '点评'
+                                data.comment_num + '点评'
                                 :
                                 '暂无点评'
                         }

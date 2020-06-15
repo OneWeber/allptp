@@ -8,6 +8,7 @@ import {connect} from 'react-redux'
 import action from '../../../../../../action'
 import Fetch from '../../../../../../expand/dao/Fetch';
 import NewHttp from '../../../../../../utils/NewHttp';
+import Toast from 'react-native-easy-toast';
 const {width} = Dimensions.get('window')
 class SettingDifference extends Component{
     constructor(props) {
@@ -16,6 +17,8 @@ class SettingDifference extends Component{
             num:this.props.navigation.state.params?this.props.navigation.state.params.data?JSON.stringify(this.props.navigation.state.params.data.num):'':'',
             refund_rate:this.props.navigation.state.params?this.props.navigation.state.params.data?this.props.navigation.state.params.data.refund_rate:'':'',
         }
+        this.difference = this.props.navigation.state.params.difference?this.props.navigation.state.params.difference:[];
+        this.index = this.props.navigation.state.params.index>=0?this.props.navigation.state.params.index:-1
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -41,6 +44,24 @@ class SettingDifference extends Component{
         </View>
     }
     confirmDifference(){
+        if(this.props.navigation.state.params&&this.props.navigation.state.params.data) {
+            for (let i=0;i<this.difference.length; i++) {
+                if(i>=this.index) {
+                    if(this.state.refund_rate==this.difference[i].refund_rate || this.state.refund_rate>this.difference[i].refund_rate) {
+                        this.refs.toast.show('后面的返还比例必须比前面比例大');
+                        return
+                    }
+                }
+            }
+        }else{
+            for (let i=0;i<this.difference.length; i++) {
+                if(this.state.refund_rate==this.difference[i].refund_rate || this.state.refund_rate<this.difference[i].refund_rate) {
+                    this.refs.toast.show('后面的返还比例必须比前面比例大');
+                    return
+                }
+            }
+        }
+
         const {changeDifference, difference, token, activity_id} = this.props;
         let formData=new FormData();
         formData.append('token',token);
@@ -77,8 +98,9 @@ class SettingDifference extends Component{
     render(){
         return(
             <View style={{flex: 1,position:'relative',backgroundColor: '#f5f5f5'}}>
+                <Toast ref="toast" position='center' positionValue={0}/>
                 <RNEasyTopNavBar
-                    title={'添加亲子套餐'}
+                    title={'返差价'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
@@ -107,7 +129,8 @@ class SettingDifference extends Component{
                                     <View style={CommonStyle.flexEnd}>
                                         <TextInput
                                             onChangeText={(text)=>this.setState({num:text})}
-                                            defaultValue={this.state.num}
+                                            defaultValue={this.state.num?JSON.stringify(parseFloat(this.state.num)):''}
+                                            keyboardType={"number-pad"}
                                             style={{
                                                 width:170,
                                                 height:60,
@@ -133,7 +156,8 @@ class SettingDifference extends Component{
                                     <View style={CommonStyle.flexEnd}>
                                         <TextInput
                                             onChangeText={(text)=>this.setState({refund_rate:text})}
-                                            defaultValue={this.state.refund_rate}
+                                            defaultValue={this.state.refund_rate?JSON.stringify(parseFloat(this.state.refund_rate)):''}
+                                            keyboardType='numeric'
                                             style={{
                                                 width:170,
                                                 height:60,

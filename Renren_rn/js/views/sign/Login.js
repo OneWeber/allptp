@@ -148,7 +148,9 @@ const mapStateToPropss = state => ({
     token: state.token.token
 })
 const mapDispatchToPropss= dispatch => ({
-    onInitUser: user => dispatch(action.InitUser(user))
+    onInitUser: user => dispatch(action.InitUser(user)),
+    onLoadUserInfo: (storeName, url, data) => dispatch(action.onLoadUserInfo(storeName, url, data)),
+    initBalance: (storeName, url, data) => dispatch(action.initBalance(storeName, url, data))
 })
 const LoginContainerMap = connect(mapStateToPropss, mapDispatchToPropss)(LoginContainer)
 //输入账号密码区域
@@ -191,6 +193,16 @@ class InputContainer extends Component{
                     avatar: JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url),
                     userid:res.data.user_id
                 });
+                const {token, onLoadUserInfo} = this.props
+                let formData=new FormData();
+                formData.append('token', token);
+                onLoadUserInfo('userinfo', HttpUrl+'User/get_user', formData);
+
+                const {initBalance} = this.props;
+                let formDatas=new FormData();
+                formDatas.append('token',token);
+                formDatas.append('page',1);
+                initBalance('balance', NewHttp+'BalanceTwo', formDatas)
                 if(redirect){
                     NavigatorUtils.goPage({...this.props.navigation.state.params}, redirect)
                 } else {
@@ -213,6 +225,7 @@ class InputContainer extends Component{
                         placeholderTextColor={'#fff'}
                         onChangeText={text => {this._onChange(text, 'user')}}
                         defaultValue={this.state.tel}
+                        keyboardType={"number-pad"}
                     />
                 </View>
                 <View style={[styles.input_con, {marginTop: 20}]}>
@@ -246,7 +259,9 @@ const mapStateToProps = state => ({
     token: state.token.token
 })
 const mapDispatchToProps = dispatch => ({
-    onInitUser: user => dispatch(action.InitUser(user))
+    onInitUser: user => dispatch(action.InitUser(user)),
+    onLoadUserInfo: (storeName, url, data) => dispatch(action.onLoadUserInfo(storeName, url, data)),
+    initBalance: (storeName, url, data) => dispatch(action.initBalance(storeName, url, data))
 })
 const MapInputContainer = connect(mapStateToProps, mapDispatchToProps)(InputContainer)
 //第三方登录
@@ -282,7 +297,16 @@ class Third extends Component{
                                 JSON.stringify(userInfo.family_name+userInfo.middle_name+userInfo.name):'匿名用户',
                             avatar: JSON.stringify(userInfo.headimage.domain + userInfo.headimage.image_url),
                             userid:userInfo.user_id
-                        })
+                        });
+                        const {token, onLoadUserInfo} = this.props
+                        let formData=new FormData();
+                        formData.append('token', token);
+                        onLoadUserInfo('userinfo', HttpUrl+'User/get_user', formData);
+                        const {initBalance} = this.props;
+                        let formDatas=new FormData();
+                        formDatas.append('token',token);
+                        formDatas.append('page',1);
+                        initBalance('balance', NewHttp+'BalanceTwo', formDatas)
                         if(redirect){
                             NavigatorUtils.goPage({...this.props.navigation.state.params}, redirect)
                         } else {

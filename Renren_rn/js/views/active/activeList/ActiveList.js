@@ -25,6 +25,7 @@ import Loading from '../../../common/Loading';
 import Screening from '../../../model/screen';
 import PriceRange from '../../../model/range';
 import RNEasyAddressPicker from 'react-native-easy-address-picker';
+import NewHttp from '../../../utils/NewHttp';
 const {width, height} = Dimensions.get('window')
 class ActiveList extends Component{
     constructor(props) {
@@ -32,12 +33,12 @@ class ActiveList extends Component{
         this.tabNames = [
             {
                 title:'类型',
-                data:[{title:'户外活动',id: 1},{title:'少数民族',id: 2},{title:'本土文化', id:3}],
+                data:[{title:'全部',id: 1},{title:'户外活动',id: 1},{title:'少数民族',id: 2},{title:'本土文化', id:3}],
                 type: 1
             },
             {
                 title:'排序',
-                data:[{title:'价格低到高',},{title:'评分优先'},{title:'评论优先'},{title:'收藏优先'}],
+                data:[{title:'全部',id: 0},{title:'价格低到高',id: 6},{title:'评分优先', id: 1},{title:'评论优先', id: 4},{title:'收藏优先', id: 3}],
                 type: 1
             },
             {
@@ -53,7 +54,13 @@ class ActiveList extends Component{
         ];
         this.state = {
             screenIndex: '',
-            kind_id: ''
+            kind_id: '',
+            sort: '',
+            country: '',
+            province: '',
+            city: '',
+            region: '',
+            customData: ''
         }
     }
     getCustom(){
@@ -62,32 +69,65 @@ class ActiveList extends Component{
         )
     }
     _clickConfirmBtn(data){
+        this.screen.openOrClosePanel(this.state.screenIndex);
+        this.setState({
+            country: data.country,
+            province: data.province,
+            city: data.city,
+            customData: data.country+data.province+data.city
+        },() => {
+          this.loadData();
+        })
+    }
+    _clickCancelBtn() {
         this.screen.openOrClosePanel(this.state.screenIndex)
     }
     _itemOnpress(tIndex, index, data){
+        if(tIndex==0) {
+            this.setState({
+                kind_id: data.id
+            },() => {
+                this.loadData();
+            })
+        }else if(tIndex==1) {
+            this.setState({
+                sort: data.id
+            },() => {
+                this.loadData();
+            })
+        }
+
+    }
+    loadData() {
+        const {onLoadActiveList} = this.props;
+        this.storeName = 'activelist'
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords', '');
+        formData.append('sort', this.state.sort);
+        formData.append('page', 1);
+        formData.append('price_low', '');
+        formData.append('price_high','');
+        formData.append('country',this.state.country);
+        formData.append('province', this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', '');
+        formData.append('activ_begin_time', '');
+        formData.append('activ_end_time', '');
+        formData.append('laguage', '');
+        formData.append('kind_id',this.state.kind_id);
+        formData.append('is_volunteen', '');
+        formData.append('max_person_num', '');
+        onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
+    }
+    _initCustomData() {
         this.setState({
-            kind_id: data.id
+            customData: '',
+            country: '',
+            province: '',
+            city: '',
         },() => {
-            const {onLoadActiveList} = this.props;
-            this.storeName = 'activelist'
-            let formData=new FormData();
-            formData.append('token', this.props.token);
-            formData.append('keywords', '');
-            formData.append('sort', '');
-            formData.append('page', 1);
-            formData.append('price_low', '');
-            formData.append('price_high','');
-            formData.append('country','');
-            formData.append('province', '');
-            formData.append('city', '');
-            formData.append('region', '');
-            formData.append('activ_begin_time', '');
-            formData.append('activ_end_time', '');
-            formData.append('laguage', '');
-            formData.append('kind_id',this.state.kind_id);
-            formData.append('is_volunteen', '');
-            formData.append('max_person_num', '');
-            onLoadActiveList(this.storeName, HttpUrl + 'Activity/activ_list', formData)
+            this.loadData()
         })
     }
     render(){
@@ -138,10 +178,11 @@ class ActiveList extends Component{
                     }}
                     selectIndex={[0,0,0,0]}
                     customContent={this.getCustom()}
-                    customData={[]}
+                    customData={this.state.customData}
                     customFunc={()=>{
                         this.picker.showPicker()
                     }}
+                    initCustomData={() => {this._initCustomData()}}
                     itemOnpress={(tIndex, index, data) => {
                         this._itemOnpress(tIndex, index, data)
                     }}
@@ -154,6 +195,7 @@ class ActiveList extends Component{
                             selectCountry={(index) => {}}
                             selectCity={(index) => {}}
                             clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                            clickCancelBtn={() => {this._clickCancelBtn()}}
                         />
                     </View>
                 </Screening>
@@ -213,24 +255,25 @@ class ActiveListContent extends Component{
     loadData(){
         const {token, onLoadActiveList} = this.props
         this.storeName = 'activelist'
+        this.step = 1;
         let formData=new FormData();
         formData.append('token', token);
         formData.append('keywords', '');
-        formData.append('sort', '');
+        formData.append('sort', this.props.sort);
         formData.append('page', 1);
         formData.append('price_low', '');
         formData.append('price_high','');
-        formData.append('country','');
-        formData.append('province', '');
-        formData.append('city', '');
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
         formData.append('laguage', '');
-        formData.append('kind_id','');
+        formData.append('kind_id',this.props.kind_id);
         formData.append('is_volunteen', '');
         formData.append('max_person_num', '');
-        onLoadActiveList(this.storeName, HttpUrl + 'Activity/activ_list', formData)
+        onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
     }
     goDetail(activity_id) {
         NavigatorUtils.goPage({table_id: activity_id}, 'ActiveDetail')
@@ -264,17 +307,48 @@ class ActiveListContent extends Component{
                       marginTop: 4.5
                   }]}>{data.item.title}</Text>
             <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 5}]}>
-                {this.tabs.map((item, index) => {
-                    return <View key={index} style={[styles.tab_item,{
-                        backgroundColor:index===0?'#EEFFFF':'#F5F6F8',
-                        marginTop: 5
-                    }]}>
-                        <Text style={{
-                            fontSize: 10,
-                            color:index===0?theme:'#626467'
-                        }}>{item}</Text>
-                    </View>
-                })}
+                {
+                    data.item.price_discount_concat&&data.item.price_discount_concat.split(',').length>1
+                        ?
+                        <View style={[styles.tab_item,{
+                            backgroundColor:'#EEFFFF',
+                        }]}>
+                            <Text style={{
+                                fontSize: 10,
+                                color:theme
+                            }}>{parseFloat(data.item.price_discount_concat.split(',')[1])}折起</Text>
+                        </View>
+                        :
+                        null
+                }
+                {
+                    data.item.is_differ
+                        ?
+                        <View style={[styles.tab_item,{
+                            backgroundColor:'#F5F6F8',
+                        }]}>
+                            <Text style={{
+                                fontSize: 10,
+                                color:'#626467'
+                            }}>返差价</Text>
+                        </View>
+                        :
+                        null
+                }
+                {
+                    data.item.is_combine
+                        ?
+                        <View style={[styles.tab_item,{
+                            backgroundColor:'#F5F6F8',
+                        }]}>
+                            <Text style={{
+                                fontSize: 10,
+                                color:'#626467'
+                            }}>含套餐</Text>
+                        </View>
+                        :
+                        null
+                }
             </View>
             <View style={[CommonStyle.flexStart,{marginTop: 8}]}>
                 <Image
@@ -311,6 +385,40 @@ class ActiveListContent extends Component{
             }
         </TouchableOpacity>
     }
+    genIndicator(){
+        const {activelist} = this.props
+        let store = activelist[this.storeName]
+        return store.hideMoreshow || store.hideMoreshow === undefined ?null:
+            <View style={[CommonStyle.flexCenter, {width: '100%',marginTop: 10,marginBottom: 10}]}>
+                <ActivityIndicator size={'small'} color={'#999'}/>
+            </View>
+    }
+    onLoadMore() {
+        const {onLoadMoreActive, token,activelist} = this.props;
+        let store = activelist[this.storeName]
+        this.step ++;
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('keywords', '');
+        formData.append('sort', this.props.sort);
+        formData.append('page', this.step);
+        formData.append('price_low', '');
+        formData.append('price_high','');
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
+        formData.append('region', '');
+        formData.append('activ_begin_time', '');
+        formData.append('activ_end_time', '');
+        formData.append('laguage', '');
+        formData.append('kind_id',this.props.kind_id);
+        formData.append('is_volunteen', '');
+        formData.append('max_person_num', '');
+        onLoadMoreActive(this.storeName, NewHttp + 'ActivityListUserTwo', formData, store.items, callback => {
+
+        })
+
+    }
     render(){
         const {activelist} = this.props
         let store = activelist[this.storeName]
@@ -338,6 +446,17 @@ class ActiveListContent extends Component{
                                 showsHorizontalScrollIndicator = {false}
                                 showsVerticalScrollIndicator = {false}
                                 keyExtractor={(item, index) => index.toString()}
+                                ListFooterComponent={() => this.genIndicator()}
+                                onEndReachedThreshold={0.1}
+                                onEndReached={() => {
+                                    if(this.canLoadMore) {
+                                        this.onLoadMore();
+                                        this.canLoadMore = false;
+                                    }
+                                }}
+                                onMomentumScrollBegin={() => {
+                                    this.canLoadMore = true; //fix 初始化时页调用onEndReached的问题
+                                }}
                             />
                         </View>
                     :
@@ -353,7 +472,8 @@ const mapStateToProps = state => ({
     theme: state.theme.theme
 })
 const mapDispatchToProps = dispatch => ({
-    onLoadActiveList: (storeName, url, data) => dispatch(action.onLoadActiveList(storeName, url, data))
+    onLoadActiveList: (storeName, url, data) => dispatch(action.onLoadActiveList(storeName, url, data)),
+    onLoadMoreActive: (storeName, url, data, oItems, callback) => dispatch(action.onLoadMoreActive(storeName, url, data, oItems, callback))
 })
 const ActiveListContentMap = connect(mapStateToProps, mapDispatchToProps)(ActiveListContent)
 class CustomContent extends Component{

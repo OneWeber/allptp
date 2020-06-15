@@ -32,7 +32,6 @@ const defaulStyles = {
         height: 150,
     },
     info: {
-        flex: 0.5,
         alignItems: 'center',
         padding: 30,
     },
@@ -47,6 +46,7 @@ const defaulStyles = {
         color: '#fff',
         fontSize: 30,
         paddingBottom: 20,
+        fontWeight:'bold'
     },
     description: {
         color: '#fff',
@@ -58,7 +58,7 @@ const defaulStyles = {
         fontWeight: 'bold',
     },
     dotStyle: {
-        backgroundColor: 'rgba(255,255,255,.3)',
+        backgroundColor: 'rgba(0,0,0,.1)',
         width: 13,
         height: 13,
         borderRadius: 7,
@@ -68,7 +68,7 @@ const defaulStyles = {
         marginBottom: 7,
     },
     activeDotStyle: {
-        backgroundColor: '#fff',
+        backgroundColor: '#14c5ca',
     },
     paginationContainer: {
         position: 'absolute',
@@ -208,7 +208,7 @@ export default class AppIntro extends Component {
         return (
             <View style={[this.styles.paginationContainer]}>
                 <View style={{width:80}}></View>
-                <View style={{width:60,justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
+                <View style={{width:120,justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
                     {this.props.showDots && RenderDots(index, total, {
                         ...this.props,
                         styles: this.styles
@@ -245,18 +245,23 @@ export default class AppIntro extends Component {
         const AnimatedStyle3 = this.getTransform(index, 15, level);
         const imgSource = (typeof img === 'string') ? {uri: img} : img;
         const pageView = (
-            <View style={[this.styles.slide, { backgroundColor }]} showsPagination={false} key={index}>
-                <Animated.View style={[this.styles.header, ...AnimatedStyle1.transform]}>
-                    <Image style={imgStyle} source={imgSource} />
-                </Animated.View>
-                <View style={this.styles.info}>
+            <View style={[this.styles.slide, { backgroundColor, justifyContent: 'flex-start' }]} showsPagination={false} key={index}>
+                <View style={[this.styles.info,{
+                    marginTop: 50
+                }]}>
                     <Animated.View style={AnimatedStyle2.transform}>
-                        <Text style={[this.styles.title, { color: fontColor }]}>{title}</Text>
+                        <Text style={[this.styles.title, { color: fontColor, }]}>{title}</Text>
                     </Animated.View>
                     <Animated.View style={AnimatedStyle3.transform}>
                         <Text style={[this.styles.description, { color: fontColor }]}>{description}</Text>
                     </Animated.View>
                 </View>
+                <Animated.View style={[this.styles.header, ...AnimatedStyle1.transform,{
+                    marginTop: 50
+                }]}>
+                    <Image style={imgStyle} source={imgSource} />
+                </Animated.View>
+
             </View>
         );
         return pageView;
@@ -393,10 +398,10 @@ AppIntro.propTypes = {
 };
 
 AppIntro.defaultProps = {
-    dotColor: 'rgba(255,255,255,.3)',
-    activeDotColor: '#fff',
-    rightTextColor: '#fff',
-    leftTextColor: '#fff',
+    dotColor: 'rgba(0,0,0,.1)',
+    activeDotColor: '#14c5ca',
+    rightTextColor: '#14c5ca',
+    leftTextColor: '#14c5ca',
     pageArray: [],
     onSlideChange: () => {},
     onSkipBtnClick: () => {},

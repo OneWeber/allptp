@@ -10,8 +10,10 @@ import {
     Easing,
     Image,
     ScrollView,
+    TouchableHighlight
 } from 'react-native';
 import {PropTypes} from 'prop-types'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 const {width, height} = Dimensions.get('window')
 export default class Screening extends Component{
     constructor(props, context) {
@@ -46,10 +48,10 @@ export default class Screening extends Component{
         activeTintColor: PropTypes.string,
         inactiveTintColor: PropTypes.string,
         customContent: PropTypes.element,
-        //itemOnpress:PropTypes.fun,
         customFunc: PropTypes.func,
-        //customData: [],
-        selectHeader: PropTypes.func
+        customData: PropTypes.string,
+        selectHeader: PropTypes.func,
+        initCustomData: PropTypes.func
     }
     static defaultProps = {
         screenData: [],
@@ -59,8 +61,9 @@ export default class Screening extends Component{
         inactiveTintColor: '#333',
         customFunc: () => {},
         itemOnpress: () => {},
-        customData: [],
-        clickPanelItem: () => {}
+        customData: '',
+        clickPanelItem: () => {},
+        initCustomData: () => {}
 
     }
     _selectHeader(data, index) {
@@ -137,41 +140,47 @@ export default class Screening extends Component{
                         :
                         screenData[activityIndex].type === 1
                             ?
-                            <TouchableOpacity
+                            <TouchableHighlight
+                                underlayColor='rgba(255,255,255,.1)'
                                 style={styles.conBg}
                                 onPress={()=>this.openOrClosePanel(activityIndex)}
                             >
-                                {
-                                    screenData[activityIndex].data.map((item, index) => {
-                                        return <TouchableOpacity  key={index} style={[styles.spaceRow,{
-                                            height: 50,
-                                            borderBottomWidth: 1,
-                                            borderBottomColor:'#f5f5f5',
-                                            backgroundColor:'#fff',
-                                            paddingLeft: this.props.siderPadding,
-                                            paddingRight: this.props.siderPadding,
-                                        }]}
-                                              onPress={()=>this.itemOnpress(index)}
-                                        >
-                                            <Text style={{
-                                                color:index === selectData[activityIndex].index?activeTintColor:'#333',
-                                                fontSize: 13
-                                            }}>{item.title}</Text>
-                                            {
-                                                index === selectData[activityIndex].index
-                                                    ?
-                                                    <Image
-                                                        style={{
-                                                            tintColor: activeTintColor
-                                                        }}
-                                                        source={require('./images/menu_check.png')}/>
-                                                    :
-                                                    null
-                                            }
-                                        </TouchableOpacity>
-                                    })
-                                }
-                            </TouchableOpacity>
+                                <View style={styles.conBg}>
+                                    {
+                                        screenData[activityIndex].data.map((item, index) => {
+                                            return <TouchableHighlight  key={index}
+                                                  underlayColor='rgba(255,255,255,.8)'
+                                                  onPress={()=>this.itemOnpress(index)}
+                                            >
+                                                <View style={[styles.spaceRow,{
+                                                    height: 50,
+                                                    borderBottomWidth: 1,
+                                                    borderBottomColor:'#f5f5f5',
+                                                    backgroundColor:'#fff',
+                                                    paddingLeft: this.props.siderPadding,
+                                                    paddingRight: this.props.siderPadding,
+                                                }]}>
+                                                    <Text style={{
+                                                        color:index === selectData[activityIndex].index?activeTintColor:'#333',
+                                                        fontSize: 13
+                                                    }}>{item.title}</Text>
+                                                    {
+                                                        index === selectData[activityIndex].index
+                                                            ?
+                                                            <Image
+                                                                style={{
+                                                                    tintColor: activeTintColor
+                                                                }}
+                                                                source={require('./images/menu_check.png')}/>
+                                                            :
+                                                            null
+                                                    }
+                                                </View>
+                                            </TouchableHighlight>
+                                        })
+                                    }
+                                </View>
+                            </TouchableHighlight>
                             :
                             screenData[activityIndex].type === 3
                                 ?
@@ -216,22 +225,36 @@ export default class Screening extends Component{
                                 <Text
                                     numberOfLines={1} ellipsizeMode={'tail'}
                                     style={{fontWeight:'bold',maxWidth:80}}>
-                                    {selectData[index]?selectData[index].title:item.title}
+                                    {selectData[index]?selectData[index].title:item.type===2?this.props.customData?this.props.customData:item.title:item.title}
                                 </Text>
-                                <Animated.Image
-                                    source={require('./images/dropdown_arrow.png')}
-                                    style={{
-                                        width:10,
-                                        height:6,
-                                        marginLeft: 8,
-                                        tintColor:index===activityIndex?activeTintColor:inactiveTintColor,
-                                        transform: [{
-                                            rotateZ: this.state.rotationAnims[index].interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: ['0deg', '360deg']
-                                            })
-                                        }]
-                                    }} />
+                                {
+                                    item.type===2&&this.props.customData
+                                    ?
+                                        <AntDesign
+                                            name={'close'}
+                                            size={14}
+                                            style={{color:'#333'}}
+                                            onPress={()=>{
+                                                this.props.initCustomData()
+                                            }}
+                                        />
+                                    :
+                                        <Animated.Image
+                                            source={require('./images/dropdown_arrow.png')}
+                                            style={{
+                                                width:10,
+                                                height:6,
+                                                marginLeft: 8,
+                                                tintColor:index===activityIndex?activeTintColor:inactiveTintColor,
+                                                transform: [{
+                                                    rotateZ: this.state.rotationAnims[index].interpolate({
+                                                        inputRange: [0, 1],
+                                                        outputRange: ['0deg', '360deg']
+                                                    })
+                                                }]
+                                            }} />
+                                }
+
                             </TouchableOpacity>
                         })
                     }

@@ -10,8 +10,16 @@ import NewHttp from '../../../utils/NewHttp';
 import NoData from '../../../common/NoData';
 import LazyImage from 'animated-lazy-image';
 import Modal from 'react-native-modalbox';
+import Fetch from '../../../expand/dao/Fetch';
+import HttpUrl from '../../../utils/Http';
 const {width, height} = Dimensions.get('window')
 class MyStory extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            itemData: ''
+        }
+    }
     componentDidMount(){
         this.loadData()
     }
@@ -40,11 +48,34 @@ class MyStory extends Component{
             />
         </TouchableOpacity>
     }
-    _showModal() {
-        this.refs.story.open()
+    _showModal(data) {
+        this.setState({
+            itemData: data
+        }, () => {
+            this.refs.story.open()
+        })
+
     }
     renderItem(data){
-        return <MyStoryItem showModal={()=>this._showModal()} data_m={data.item} data_index={data.index} />
+        return <MyStoryItem showModal={(data)=>this._showModal(data)} data_m={data.item} data_index={data.index} />
+    }
+    goEditStory() {
+        this.refs.story.close();
+        NavigatorUtils.goPage({
+            isEdit: true,
+            data: this.state.itemData,
+        }, 'PublishStory')
+    }
+    goDelStory() {
+        this.refs.story.close();
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('story_id', this.state.itemData.story_id);
+        Fetch.post(HttpUrl+'Story/del_story', formData).then(res => {
+            if(res.code === 1) {
+                this.loadData();
+            }
+        })
     }
     render(){
         const {mystory} = this.props;
@@ -105,6 +136,9 @@ class MyStory extends Component{
                                         borderBottomColor: '#f5f5f5',
                                         borderBottomWidth: 1
                                     }]}
+                                    onPress={() => {
+                                        this.goEditStory()
+                                    }}
                                 >
                                     <Text style={{color:'#333',fontWeight: 'bold'}}>编辑故事</Text>
                                 </TouchableOpacity>
@@ -113,6 +147,9 @@ class MyStory extends Component{
                                         width: '100%',
                                         height: 50,
                                     }]}
+                                    onPress={()=>{
+                                        this.goDelStory()
+                                    }}
                                 >
                                     <Text style={{color:'#333',fontWeight: 'bold'}}>删除故事</Text>
                                 </TouchableOpacity>
@@ -155,20 +192,21 @@ const mapDispatchToProps = dispatch => ({
 export default connect(mapStateToProps, mapDispatchToProps)(MyStory)
 
 class MyStoryItem extends Component{
-    _showModal(){
-        this.props.showModal()
+    _showModal(data){
+        this.props.showModal(data)
     }
     render(){
         const {data_m} = this.props
         return(
-            <TouchableOpacity style={[CommonStyle.commonWidth,{
+            <View style={[CommonStyle.commonWidth,{
                 backgroundColor: '#fff',
                 marginLeft: width*0.03,
                 paddingTop: 22,
                 paddingBottom: 20.5,
                 borderBottomWidth: 1,
                 borderBottomColor: '#f5f5f5'
-            }]}>
+            }]}
+            >
                 <Text style={{
                     color:'#666',
                     fontSize: 12
@@ -177,7 +215,9 @@ class MyStoryItem extends Component{
                     marginTop: 10
                 }]}>
                     <LazyImage
-                        source={{uri:data_m.cover.domain+data_m.cover.image_url}}
+                        source={data_m.cover&&data_m.cover.domain&&data_m.cover.image_url?{
+                            uri:data_m.cover.domain+data_m.cover.image_url
+                        }:require('../../../../assets/images/error.png')}
                         style={{
                             width: 120,
                             height: 90,
@@ -206,13 +246,13 @@ class MyStoryItem extends Component{
                                 name={'ellipsis1'}
                                 size={16}
                                 style={{color:'#BBBBBB'}}
-                                onPress={()=>{this._showModal()}}
+                                onPress={()=>{this._showModal(data_m)}}
                             />
                         </View>
 
                     </View>
                 </View>
-            </TouchableOpacity>
+            </View>
         )
     }
 }

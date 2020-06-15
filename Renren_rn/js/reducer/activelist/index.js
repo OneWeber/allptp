@@ -27,6 +27,34 @@ export default function onAction(state=defaultState, action) {
                     isLoading: false
                 }
             };
+        case Types.ONLOAD_MORE_ACTIVE:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    isLoading: false,
+                    hideMoreshow: false
+                }
+            };
+        case Types.ONLOAD_MORE_ACTIVE_SUCCESS:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    items: action.items,
+                    isLoading:false,
+                    hideMoreshow: true,
+                }
+            };
+        case Types.ONLOAD_MORE_ACTIVE_FAIL:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    isLoading: false,
+                    hideMoreshow: true
+                }
+            };
         default:
             return state
     }

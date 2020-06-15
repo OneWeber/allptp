@@ -21,10 +21,13 @@ import LazyImage from 'animated-lazy-image';
 import Badge from '../../model/Badge';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
 import languageType from '../../json/languageType'
+import HttpUrl from '../../utils/Http';
 const {width, height} = Dimensions.get('window')
 class MsgPage extends Component{
+
     componentDidMount() {
-        this.loadData()
+        this.loadData();
+        this.loadApply();
     }
     loadData(){
         const {onLoadMsg} = this.props;
@@ -33,6 +36,13 @@ class MsgPage extends Component{
         formData.append('token',this.props.token);
         formData.append('page',1);
         onLoadMsg(this.storeName, NewHttp+'MyMsg', formData)
+    }
+    loadApply() {
+        const {onLoadFriendApply} = this.props;
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('page', 1);
+        onLoadFriendApply('friendapply', HttpUrl+'Friend/getlist', formData)
     }
     renderItem(data){
         return <TouchableOpacity style={[CommonStyle.spaceRow,{
@@ -94,12 +104,20 @@ class MsgPage extends Component{
         </TouchableOpacity>
     }
     render(){
-        const {msg, language} = this.props;
+        const {msg, language, friendapply} = this.props;
         let store = msg[this.storeName];
         if(!store) {
             store = {
                 items: [],
                 isLoading: false
+            }
+        }
+        let applyStore = friendapply['friendapply'];
+        if(!applyStore) {
+            applyStore = {
+                items: [],
+                isLoading: false,
+                applyLength: []
             }
         }
         return (
@@ -142,7 +160,9 @@ class MsgPage extends Component{
                     <TouchableOpacity style={[CommonStyle.flexCenter,{
                         borderBottomWidth: 10,
                         borderBottomColor:'#f5f5f5'
-                    }]}>
+                    }]}
+                    onPress={()=>NavigatorUtils.goPage({},'FriendApply')}
+                    >
                         <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
                             height:77
                         }]}>
@@ -162,6 +182,13 @@ class MsgPage extends Component{
                                 </Text>
                             </View>
                             <View style={CommonStyle.flexEnd}>
+                                {
+                                    applyStore.applyLength.length>0
+                                    ?
+                                        <Badge num={applyStore.applyLength.length}/>
+                                    :
+                                        null
+                                }
                                 <AntDesign
                                     name={'right'}
                                     size={16}
@@ -225,9 +252,11 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => ({
     token: state.token.token,
     msg: state.msg,
-    language: state.language.language
+    language: state.language.language,
+    friendapply: state.friendapply,
 });
 const mapDispatchToProps = dispatch => ({
-    onLoadMsg: (storeName, url, data) => dispatch(action.onLoadMsg(storeName, url, data))
+    onLoadMsg: (storeName, url, data) => dispatch(action.onLoadMsg(storeName, url, data)),
+    onLoadFriendApply: (storeName, url, data) => dispatch(action.onLoadFriendApply(storeName, url, data))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(MsgPage)

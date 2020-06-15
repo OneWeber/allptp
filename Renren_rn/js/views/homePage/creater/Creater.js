@@ -23,18 +23,18 @@ import FlashMessage from "react-native-flash-message";
 import Screening from '../../../model/screen';
 import RNEasyAddressPicker from 'react-native-easy-address-picker';
 const {width} = Dimensions.get('window')
-export default class Creater extends Component{
+class Creater extends Component{
     constructor(props) {
         super(props);
         this.tabNames = [
             {
                 title:'排序',
-                data:[{title:'评分优先'},{title:'点赞优先'},{title:'留言优先'},{title:'粉丝优先'}],
+                data:[{title:'全部', id:0},{title:'评分降序', id:1},{title:'点赞降序',id:2},{title:'留言降序',id:5},{title:'粉丝总数降序',id:6}],
                 type: 1
             },
             {
                 title:'语言',
-                data:[{title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
+                data:[{title:'全部',id: 0}, {title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
                 type: 1
             },
             {
@@ -44,7 +44,13 @@ export default class Creater extends Component{
             },
         ];
         this.state = {
-            screenIndex: ''
+            screenIndex: '',
+            customData: '',
+            sort: '',
+            language: '',
+            country: '',
+            province: '',
+            city: ''
         }
     }
     getLeftButton(){
@@ -66,8 +72,58 @@ export default class Creater extends Component{
     getCustom() {
 
     }
-    _itemOnpress() {
-
+    _itemOnpress(tIndex, index, data) {
+        if(tIndex===0) {
+            this.setState({
+                sort: data.id
+            },() => {
+                this.loadData()
+            })
+        }else if(tIndex===1) {
+            this.setState({
+                language: data.id
+            },() => {
+                this.loadData()
+            })
+        }
+    }
+    _clickCancelBtn() {
+        this.screen.openOrClosePanel(this.state.screenIndex)
+    }
+    _clickConfirmBtn(data) {
+        this.screen.openOrClosePanel(this.state.screenIndex);
+        this.setState({
+            country: data.country,
+            province: data.province,
+            city: data.city,
+            customData: data.country+data.province+data.city
+        },() => {
+            this.loadData();
+        })
+    }
+    _initCustomData() {
+        this.setState({
+            customData: '',
+            country: '',
+            province: '',
+            city: '',
+        },() => {
+            this.loadData()
+        })
+    }
+    loadData() {
+        const {onLoadCreater} = this.props;
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords','');
+        formData.append('sort',this.state.sort);
+        formData.append('page',1);
+        formData.append('country',this.state.country);
+        formData.append('province',this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', "");
+        formData.append('language', this.state.language);
+        onLoadCreater('creater', NewHttp + 'Planner', formData, false, 0)
     }
     render(){
         return(
@@ -88,10 +144,11 @@ export default class Creater extends Component{
                     }}
                     selectIndex={[0,0,0]}
                     customContent={this.getCustom()}
-                    customData={[]}
+                    customData={this.state.customData}
                     customFunc={()=>{
                         this.picker.showPicker()
                     }}
+                    initCustomData={() => {this._initCustomData()}}
                     itemOnpress={(tIndex, index, data) => {
                         this._itemOnpress(tIndex, index, data)
                     }}
@@ -104,6 +161,7 @@ export default class Creater extends Component{
                             selectCountry={(index) => {}}
                             selectCity={(index) => {}}
                             clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                            clickCancelBtn={() => {this._clickCancelBtn()}}
                         />
                         <FlashMessage position="top" />
                     </View>
@@ -112,6 +170,13 @@ export default class Creater extends Component{
         )
     }
 }
+const mapState = state => ({
+    token: state.token.token,
+});
+const mapDispatch = dispatch => ({
+    onLoadCreater: (storeName, url, data, oNum, callback) => dispatch(action.onLoadCreater(storeName, url, data, oNum, callback)),
+})
+export default connect(mapState, mapDispatch)(Creater)
 const styles = StyleSheet.create({
     back_icon: {
         paddingLeft: width*0.03
@@ -230,7 +295,7 @@ class CreaterContent extends Component{
             }
         }
         return(
-            <View>
+            <View style={CommonStyle.commonWidth}>
                 {
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
                         ?
@@ -266,7 +331,7 @@ class CreaterContent extends Component{
                             />
                         </View>
                         :
-                        <NoData></NoData>
+                        <NoData />
                 }
             </View>
         )

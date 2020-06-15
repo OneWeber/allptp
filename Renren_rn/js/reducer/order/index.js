@@ -9,7 +9,8 @@ export default function onAction(state=defaultState, action) {
                 [action.storeName]:{
                     ...state[action.storeName],
                     items: action.items,
-                    isLoading: false
+                    isLoading: false,
+                    hideMoreshow: true,
                 }
             };
         case Types.ORDER_REFRESH:
@@ -17,7 +18,8 @@ export default function onAction(state=defaultState, action) {
                 ...state,
                 [action.storeName]:{
                     ...state[action.storeName],
-                    isLoading: true
+                    isLoading: true,
+                    hideMoreshow: true,
                 }
             };
         case Types.LOAD_ORDER_FAIL:
@@ -25,7 +27,8 @@ export default function onAction(state=defaultState, action) {
                 ...state,
                 [action.storeName]:{
                     ...state[action.storeName],
-                    isLoading: false
+                    isLoading: false,
+                    hideMoreshow: true,
                 }
             };
         case Types.MORE_ORDER_LOADING:

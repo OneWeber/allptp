@@ -46,7 +46,8 @@ class Time extends Component{
             maxAge: '',
             isChild: false,
             ageLimit: '',
-            isLoading: false
+            isLoading: false,
+            showSlot: []
         }
     }
     componentDidMount() {
@@ -66,6 +67,7 @@ class Time extends Component{
         formData.append("activity_id",this.props.activity_id);
         Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
             if(res.code === 1) {
+                console.log('ressssss', res)
                 this.setState({
                     minAge: res.data.kids_stand_low,
                     maxAge: res.data.kids_stand_high,
@@ -86,14 +88,53 @@ class Time extends Component{
         Fetch.post(NewHttp+'ActivitySlotUserTwo', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
-                    slot: res.data
+                    slot: res.data,
+                    // timeIndex: res.data.length>0?res.data[0].long_day:0
                 },() => {
+                    console.log(res.data)
+                    if(this.state.timeIndex) {
+                        this.initSingleDate(this.state.slot)
+                    }else{
+                        this.initManyDate(this.state.slot)
+                    }
+                    const {slot} = this.state;
+                    let data = [];
+                    for(let i=0;i<slot.length;i++) {
+                        if(slot[i].online===0) {
+                            data.push(slot[i])
+                        }
+                    }
+                    this.setState({
+                        showSlot: data
+                    })
                     changeLongDay(this.state.slot)
                 })
             } else {
                 changeLongDay([])
             }
         })
+    }
+    initSingleDate(data){
+        let dates = [];
+        const {changeDateValue} = this.props;
+        for(let i=0;i<data.length;i++){
+            dates.push({
+                begin_date: data[i].date,
+                end_date:data[i].date
+            })
+        }
+        changeDateValue(dates)
+    }
+    initManyDate(data) {
+        let dates = [];
+        const {changeDateValue} = this.props;
+        for(let i=0;i<data.length;i++){
+            dates.push({
+                begin_date: data[i].begin_date,
+                end_date:data[i].end_date
+            })
+        }
+        changeDateValue(dates)
     }
     getDiffer() {
         const {activity_id, token, changeDifference} = this.props;
@@ -112,17 +153,33 @@ class Time extends Component{
         })
     }
     changeIndex(index, id){
-        if(index === this.state.timeIndex) {
-            this.setState({
-                timeIndex: -1
-            })
-        } else {
-            this.setState({
-                timeIndex: id
-            })
+        if(this.state.showSlot.length===0) {
+            if(index === this.state.timeIndex) {
+                this.setState({
+                    timeIndex: -1
+                })
+            } else {
+                this.setState({
+                    timeIndex: id
+                })
+            }
         }
+
     }
     goLongTime(){
+        const {changeDiscount,changeAdultStandard,changeChildStandard,changeParentChildPackage,changeCustomePackage,changeNewDate} = this.props;
+        changeAdultStandard({
+            standard: 10,
+            originalPrice: ''
+        });
+        changeChildStandard({
+            standard: 10,
+            originalPrice: ''
+        });
+        changeParentChildPackage([]);
+        changeCustomePackage([]);
+        changeNewDate([]);
+        changeDiscount(false)
         let _this = this;
         NavigatorUtils.goPage({
             timeIndex: this.state.timeIndex,
@@ -142,6 +199,10 @@ class Time extends Component{
             this.refs.toast.show('请选择举办体验时间段')
         }else if(!this.state.ageLimit) {
             this.refs.toast.show('请填写参与者年龄下限')
+        }else if(!this.state.minAge||!this.state.maxAge) {
+            this.refs.toast.show('请完善儿童价标准')
+        }else if(parseFloat(this.state.ageLimit)>parseFloat(this.state.minAge)) {
+            this.refs.toast.show('参与者年龄下限不得大于儿童价标准最低年龄')
         }else {
             this.setState({
                 isLoading: true
@@ -155,6 +216,7 @@ class Time extends Component{
             formData.append("activity_id",activity_id);
             formData.append("step",11);
             formData.append("isapp",1);
+            console.log('dataaaaaa', formData)
             Fetch.post(NewHttp+'ActivitSaveTwo', formData).then(res => {
                 this.setState({
                     isLoading: false
@@ -174,7 +236,17 @@ class Time extends Component{
         this.setState({
             dateIndex: index
         },() => {
-            NavigatorUtils.goPage({slot: data, isSingle: true}, 'Calendar')
+            let _this = this;
+            NavigatorUtils.goPage({
+                slot: data,
+                isSingle: this.state.timeIndex,
+                refresh: function () {
+                    _this.setState({
+                        dateIndex: -1
+                    });
+                    _this.getSlot()
+                }
+            }, 'Calendar')
         })
     }
     renderItem(data){
@@ -182,33 +254,74 @@ class Time extends Component{
         const {theme} = this.props
         let begin = data.item.begin_date.split('-');
         let end = data.item.end_date.split('-');
-        return <TouchableOpacity style={[CommonStyle.flexCenter,{
-            width: 90,
-            height: 50,
-            backgroundColor: dateIndex===data.index?'#ECFEFF':'#F5F7FA',
-            borderRadius: 5,
-            marginLeft: data.index===0?width*0.03:5,
-            marginRight: data.index===this.state.slot.length-1?65.5:0
-        }]} onPress={() => {this.clickDateItem(data.index, data.item)}}>
-            <Text style={{
-                color:dateIndex===data.index?theme:'#333',
-                fontSize: 13
-            }}>{begin[1]+'.'+begin[2]} - {end[1]+'.'+end[2]}</Text>
-            <Text style={{
-                color:dateIndex===data.index?theme:'#333',
-                fontSize: 13,
-                marginTop: 2
-            }}>{this.getWeekDay(begin.join('/'))}开始</Text>
-        </TouchableOpacity>
+        return <View>
+            {
+                data.item.online===0
+                ?
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        width: 90,
+                        height: 50,
+                        backgroundColor: dateIndex===data.index?'#ECFEFF':'#F5F7FA',
+                        borderRadius: 5,
+                        marginLeft: width*0.03,
+                        marginRight: data.index===this.state.slot.length-1?65.5:0
+                    }]} onPress={() => {this.clickDateItem(data.index, data.item)}}>
+                        <Text style={{
+                            color:dateIndex===data.index?theme:'#333',
+                            fontSize: 13
+                        }}>{
+                            this.state.timeIndex&&data.item.date!='1970-01-01'
+                                ?
+                                data.item.date
+                                :
+                                begin[1]+'.'+begin[2] +'-'+ end[1]+'.'+end[2]
+                        }</Text>
+                        <Text style={{
+                            color:dateIndex===data.index?theme:'#333',
+                            fontSize: 13,
+                            marginTop: 2
+                        }}>{this.getWeekDay(begin.join('/'))}开始</Text>
+                    </TouchableOpacity>
+                :
+                    null
+            }
+
+        </View>
     }
-    goDifference(data, differ_id){
-        NavigatorUtils.goPage({data: data, differ_id: differ_id}, 'SettingDifference')
+    goDifference(data, differ_id, index){
+        NavigatorUtils.goPage({ //this.props.difference
+            data: data,
+            differ_id: differ_id,
+            index: index,
+            difference: this.props.difference
+        }, 'SettingDifference')
     }
     _changeAge(text, val) {
         if(val === 'min') {
-            this.setState({minAge:text})
+            if(parseFloat(this.state.maxAge)>0) {
+                if(parseFloat(text)<parseFloat(this.state.maxAge)) {
+                    console.log(111)
+                    this.setState({minAge:text})
+                }else{
+                    console.log(222)
+                    this.refs.toast.show('最大年龄必须大于最低年龄')
+                    this.setState({minAge:0})
+                }
+            }else{
+                this.setState({minAge:text})
+            }
         }else {
-            this.setState({maxAge:text})
+            if(parseFloat(this.state.minAge)>0) {
+                if(parseFloat(text)>parseFloat(this.state.minAge)) {
+                    this.setState({maxAge:text})
+                }else{
+                    this.refs.toast.show('最大年龄必须大于最低年龄')
+                    this.setState({maxAge:0})
+                }
+            }else{
+                this.setState({maxAge:text})
+            }
+
         }
     }
     _ageLimitChange(text) {
@@ -335,47 +448,17 @@ class Time extends Component{
                                 </TouchableOpacity>
                             </View>
                             {
-                                this.state.slot.length > 0
+                                this.state.showSlot.length > 0
                                 ?
                                     <View style={[CommonStyle.flexStart,{marginTop: 15,flexDirection:'row',position:'relative'}]}>
                                         <FlatList
-                                            data={this.state.slot}
+                                            data={this.state.showSlot}
                                             horizontal={true}
                                             showsVerticalScrollIndicator = {false}
                                             showsHorizontalScrollIndicator = {false}
                                             renderItem={data=>this.renderItem(data)}
                                             keyExtractor={(item, index) => index.toString()}
                                         />
-                                        <TouchableOpacity style={[CommonStyle.flexCenter,{
-                                            position:'absolute',
-                                            right:0,
-                                            top:0,
-                                            bottom:0,
-                                            width:60.5,
-                                            backgroundColor:'rgba(245,247,250,1)',
-                                            borderRadius: 3,
-                                            flexDirection:'row',
-                                            shadowColor:'#333',
-                                            shadowOffset:{width:0.5, height:0.5},
-                                            shadowOpacity: 0.4,
-                                            shadowRadius: 1,
-                                        }]} onPress={()=>{
-                                            this.setState({
-                                                dateIndex: -1
-                                            },()=>{
-                                                NavigatorUtils.goPage({slot: this.state.slot}, 'Calendar')
-                                            })
-                                        }}>
-                                            <View style={CommonStyle.flexCenter}>
-                                                <Text style={{color:'#333',fontSize: 13}}>查看</Text>
-                                                <Text style={{color:'#333',fontSize: 13}}>日期</Text>
-                                            </View>
-                                            <AntDesign
-                                                name={'right'}
-                                                size={14}
-                                                style={{color:'#666'}}
-                                            />
-                                        </TouchableOpacity>
                                     </View>
                                 :
                                     null
@@ -429,7 +512,7 @@ class Time extends Component{
                                         <View style={[CommonStyle.flexEnd]}>
                                             <Text
                                                 style={{color:'#a4a4a4',fontSize: 13,marginRight: 20}}
-                                                onPress={()=>{this.goDifference(item, item.differ_id)}}
+                                                onPress={()=>{this.goDifference(item, item.differ_id, index)}}
                                             >编辑</Text>
                                             <Text
                                                 style={{color:'#a4a4a4',fontSize: 13}}
@@ -486,7 +569,11 @@ class Time extends Component{
                             this.setState({
                                 isChild: false
                             },()=>{
-                                this.refs.child.open()
+                                if(!this.state.minAge) {
+                                    this.refs.toast.show('请先设置儿童价标准')
+                                }else{
+                                    this.refs.child.open()
+                                }
                             })
                         }}>
                             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
@@ -549,7 +636,9 @@ class Time extends Component{
                                     ?
                                         <ChildModal changeAge={(text, val)=>this._changeAge(text, val)} {...this.state}/>
                                     :
-                                        <UserModal ageLimitChange={(text)=>this._ageLimitChange(text)} {...this.state}/>
+                                        <UserModal showToast={(data) => {
+                                            this.refs.toast.show(data)
+                                        }} ageLimitChange={(text)=>this._ageLimitChange(text)} {...this.state}/>
                                 }
 
                             </View>
@@ -614,10 +703,18 @@ const mapStateToProps = state => ({
     activity_id: state.steps.activity_id,
     token: state.token.token
 });
+
 const mapDispatchToProps = dispatch => ({
     changeLongDay: longday => dispatch(action.changeLongDay(longday)),
     changeDifference: arr => dispatch(action.changeDifference(arr)),
-    changeStatus: arr => dispatch(action.changeStatus(arr))
+    changeStatus: arr => dispatch(action.changeStatus(arr)),
+    changeDateValue: arr => dispatch(action.changeDateValue(arr)),
+    changeDiscount: status => dispatch(action.changeDiscount(status)),
+    changeAdultStandard: data => dispatch(action.changeAdultStandard(data)),
+    changeChildStandard: data => dispatch(action.changeChildStandard(data)),
+    changeParentChildPackage: data => dispatch(action.changeParentChildPackage(data)),
+    changeCustomePackage: data => dispatch(action.changeCustomePackage(data)),
+    changeNewDate: arr => dispatch(action.changeNewDate(arr))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(Time)
 class ChildModal extends Component{
@@ -628,13 +725,25 @@ class ChildModal extends Component{
             maxAge: this.props.maxAge
         }
     }
+    componentDidMount(){
+        console.log('minAge',this.state.minAge)
+    }
+
     changeAge(text, val) {
         if(val === 'min') {
-            this.setState({minAge:text})
+            this.setState({
+                minAge:text
+            },() => {
+                this.props.changeAge(text, val)
+            })
         }else {
-            this.setState({maxAge:text})
+            this.setState({
+                maxAge:text
+            },() => {
+                this.props.changeAge(text, val)
+            })
         }
-        this.props.changeAge(text, val)
+
     }
     render(){
         return(
@@ -650,7 +759,8 @@ class ChildModal extends Component{
                     <TextInput
                         placeholder="请输入最低年龄"
                         onChangeText={(text)=>this.changeAge(text, 'min')}
-                        defaultValue={this.state.minAge}
+                        defaultValue={this.state.minAge?JSON.stringify(parseFloat(this.state.minAge)):''}
+                        keyboardType='numeric'
                         style={{
                         height:40,
                         borderBottomWidth: 1,
@@ -667,8 +777,9 @@ class ChildModal extends Component{
                     }}>儿童最大年龄:</Text>
                     <TextInput
                         placeholder="请输入最大年龄"
+                        keyboardType='numeric'
                         onChangeText={(text)=>this.changeAge(text, 'max')}
-                        defaultValue={this.state.maxAge}
+                        defaultValue={this.state.maxAge?JSON.stringify(parseFloat(this.state.maxAge)):''}
                         style={{
                             height:40,
                             borderBottomWidth: 1,
@@ -689,11 +800,21 @@ class UserModal extends Component{
         }
     }
     changeAge(text) {
-        this.setState({
-            ageLimit: text
-        },() => {
-            this.props.ageLimitChange(text)
-        })
+        if(text>this.props.minAge) {
+            this.setState({
+                ageLimit: this.props.minAge
+            },() => {
+                this.props.ageLimitChange(this.state.ageLimit)
+                this.props.showToast('参与者年龄下限不能大于儿童价年龄下限')
+            })
+        }else{
+            this.setState({
+                ageLimit: text
+            },() => {
+                this.props.ageLimitChange(text)
+            })
+        }
+
     }
     render(){
         return(
@@ -709,7 +830,8 @@ class UserModal extends Component{
                     <TextInput
                         placeholder="参与者年龄下限"
                         onChangeText={(text)=>this.changeAge(text)}
-                        defaultValue={this.state.ageLimit}
+                        defaultValue={this.state.ageLimit?JSON.stringify(parseFloat(this.state.ageLimit)):''}
+                        keyboardType='numeric'
                         style={{
                             height:40,
                             borderBottomWidth: 1,

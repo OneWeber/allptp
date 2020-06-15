@@ -73,6 +73,46 @@ import SettingLanguage from '../views/info/setting/SettingLanguage';
 import Evaluation from '../views/info/other/Evaluation';
 import Authenticate from '../views/authenticate/Authenticate';
 import ManyDay from '../views/active/ManyDay';
+import CalendarDate from '../views/info/createcenter/createActive/CreateStep/LongTime/CalendarDate';
+import TextInput from '../common/TextInput';
+import AllComments from '../common/AllComments';
+import OrderDetail from '../views/order/OrderDetail';
+import RefundDetail from '../views/order/RefundDetail';
+import ActiveCalendar from '../views/info/createcenter/ActiveCalendar';
+import InviteVol from '../views/info/createcenter/activecalendar/InviteVol';
+import MyInvite from '../views/info/createcenter/activecalendar/MyInvite';
+import CancelActive from '../views/info/createcenter/activecalendar/CancelActive';
+import ConfirmVisitors from '../views/active/joinstep/ConfirmVisitors';
+import AddVistitors from '../views/active/joinstep/AddVistitors';
+import OrderPay from '../views/active/joinstep/OrderPay';
+import House from '../views/active/joinstep/House';
+import InitiativeRefundDetail from '../views/info/activemanage/common/InitiativeRefundDetail';
+import InitiativeOrderDetail from '../views/info/activemanage/common/InitiativeOrderDetail';
+import InitiativeRefund from '../views/info/activemanage/common/InitiativeRefund';
+import VolApply from '../views/info/activemanage/VolApply';
+import VolApplyDetail from '../views/info/activemanage/common/VolApplyDetail';
+import CompleteActive from '../views/info/activemanage/CompleteActive';
+import RefundApply from '../views/info/activemanage/RefundApply';
+import RefundApplyDetail from '../views/info/activemanage/common/RefundApplyDetail';
+import MyVol from '../views/info/other/MyVol';
+import PinviteDetail from '../views/info/other/myvol/pinvite/PinviteDetail';
+import VapplyDetail from '../views/info/other/myvol/vapply/VapplyDetail';
+import SignUp from '../views/active/SignUp';
+import Translate from '../views/active/Translate';
+import FriendApply from '../views/msg/FriendApply';
+import AccountSet from '../views/info/setting/AccountSet';
+import Securitycenter from '../views/info/setting/Securitycenter';
+import BindTel from '../views/info/setting/securitycenter/BindTel';
+import BindEmail from '../views/info/setting/securitycenter/BindEmail';
+import Settingsecurity from '../views/info/setting/securitycenter/Settingsecurity';
+import Setsecurity from '../views/info/setting/securitycenter/Setsecurity';
+import Changesecurity from '../views/info/setting/securitycenter/Changesecurity';
+import Settelsecurity from '../views/info/setting/securitycenter/Settelsecurity';
+import Emailchangesecurity from '../views/info/setting/securitycenter/Emailchangesecurity';
+import AsyncStorage from '@react-native-community/async-storage';
+import PraiseAndBack from '../views/PraiseAndBack';
+import DesCity from '../views/destination/DesCity';
+import BatchDelete from '../views/info/createcenter/createActive/CreateStep/common/BatchDelete';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -515,8 +555,261 @@ const MainNavigator = createStackNavigator({
         navigationOptions: {
             headerShown: false
         }
+    },
+    CalendarDate: {
+        screen: CalendarDate,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    TextInput: {
+        screen: TextInput,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AllComments: {
+        screen: AllComments,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    OrderDetail: {
+        screen: OrderDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    RefundDetail: {
+        screen: RefundDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    ActiveCalendar: {
+        screen: ActiveCalendar,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    InviteVol: {
+        screen: InviteVol,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    MyInvite: {
+        screen: MyInvite,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    CancelActive: {
+        screen: CancelActive,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    ConfirmVisitors: {
+        screen: ConfirmVisitors,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AddVistitors: {
+        screen: AddVistitors,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    OrderPay: {
+        screen: OrderPay,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    House: {
+        screen: House,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    InitiativeRefundDetail: {
+        screen: InitiativeRefundDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    InitiativeOrderDetail: {
+        screen: InitiativeOrderDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    InitiativeRefund: {
+        screen: InitiativeRefund,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    VolApply: {
+        screen: VolApply,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    VolApplyDetail: {
+        screen: VolApplyDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    CompleteActive: {
+        screen: CompleteActive,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    RefundApply: {
+        screen: RefundApply,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    RefundApplyDetail: {
+        screen: RefundApplyDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    MyVol: {
+        screen: MyVol,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    PinviteDetail: {
+        screen: PinviteDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    VapplyDetail: {
+        screen: VapplyDetail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    SignUp: {
+        screen: SignUp,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Translate: {
+        screen: Translate,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    FriendApply: {
+        screen: FriendApply,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AccountSet: {
+        screen: AccountSet,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Securitycenter: {
+        screen: Securitycenter,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    BindTel: {
+        screen: BindTel,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    BindEmail: {
+        screen: BindEmail,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Settingsecurity: {
+        screen: Settingsecurity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Setsecurity: {
+        screen: Setsecurity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Changesecurity: {
+        screen: Changesecurity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Settelsecurity: {
+        screen: Settelsecurity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Emailchangesecurity: {
+        screen: Emailchangesecurity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    PraiseAndBack: {
+        screen: PraiseAndBack,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    DesCity: {
+        screen: DesCity,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    BatchDelete: {
+        screen: BatchDelete,
+        navigationOptions: {
+            headerShown: false
+        }
     }
 })
+let status = '';
+AsyncStorage.getItem('status',(error,result)=>{
+    status = result;
+    if(status=='true'){
+        AsyncStorage.setItem('status','true',(error)=>{
+            if(error){
+                alert('存储失败')
+            }
+        })
+
+    }else{
+        AsyncStorage.setItem('status','true',(error)=>{
+            if(error){
+                alert('存储失败')
+            }
+        })
+    }
+})
+
 export default createAppContainer(createSwitchNavigator({
     Init:InitNavigator,
     Guide:GuideNavigator,

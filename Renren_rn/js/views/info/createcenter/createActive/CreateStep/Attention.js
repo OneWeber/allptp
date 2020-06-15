@@ -23,6 +23,7 @@ import HttpUrl from '../../../../../utils/Http';
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
 import action from '../../../../../action';
 import NewHttp from '../../../../../utils/NewHttp';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 const {width} = Dimensions.get('window');
 class Attention extends Component{
     constructor(props) {
@@ -31,7 +32,6 @@ class Attention extends Component{
             isOpenning: false,
             isLoading: false,
             return_policy: 0,
-            age_limit: '',
             return_content: '',
             activ_notice: ''
         }
@@ -67,7 +67,6 @@ class Attention extends Component{
             if(res.code === 1) {
                 this.setState({
                     return_policy: res.data.return_policy,
-                    age_limit: res.data.age_limit,
                     return_content: res.data.return_content,
                     activ_notice: res.data.activ_notice
                 },() => {
@@ -89,8 +88,6 @@ class Attention extends Component{
                 this.refs.toast.show('请选择退订政策')
             }else if(!this.state.return_content) {
                 this.refs.toast.show('请填写退订政策内容')
-            }else if(!this.state.age_limit) {
-                this.refs.toast.show('请填写年龄限制')
             }else if(!this.state.activ_notice) {
                 this.refs.toast.show('请填写体验中的注意事项')
             }else {
@@ -106,7 +103,6 @@ class Attention extends Component{
         let formData = new FormData();
         formData.append("token",this.props.token);
         formData.append("activity_id",this.props.activity_id);
-        formData.append("age_limit",this.state.age_limit);
         formData.append("return_policy",this.state.return_policy);
         formData.append("return_content",this.state.return_content);
         formData.append("activ_notice",this.state.activ_notice);
@@ -152,6 +148,7 @@ class Attention extends Component{
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
                     })}}/>
+                    <KeyboardAwareScrollView >
                     <ScrollView>
                         <View style={[CommonStyle.flexCenter,{
                             backgroundColor:'#fff',
@@ -244,32 +241,6 @@ class Attention extends Component{
                             paddingTop:20,
                             paddingBottom: 20,
                             marginTop: 10,
-                            justifyContent:'flex-start'}]}>
-                            <View style={CommonStyle.commonWidth}>
-                                <Text style={styles.main_title}>参加体验的年龄限制</Text>
-                                <TextInput
-                                    placeholder="请输入年龄"
-                                    keyboardType={"number-pad"}
-                                    defaultValue={this.state.age_limit}
-                                    onChangeText={(text)=>{
-                                        this.setState({
-                                            age_limit: text
-                                        })
-                                    }}
-                                    style={{
-                                        height: 40,
-                                        borderBottomColor: '#f5f5f5',
-                                        borderBottomWidth: 1,
-                                        marginTop: 15
-                                    }}
-                                />
-                            </View>
-                        </View>
-                        <View style={[CommonStyle.flexCenter,{
-                            backgroundColor:'#fff',
-                            paddingTop:20,
-                            paddingBottom: 20,
-                            marginTop: 10,
                             marginBottom: 100,
                             justifyContent:'flex-start'}]}>
                             <View style={CommonStyle.commonWidth}>
@@ -294,6 +265,7 @@ class Attention extends Component{
                             </View>
                         </View>
                     </ScrollView>
+                    </KeyboardAwareScrollView>
                     <SafeAreaView style={[CommonStyle.bot_btn,CommonStyle.flexCenter]}>
                         <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:49}]}>
                             <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{

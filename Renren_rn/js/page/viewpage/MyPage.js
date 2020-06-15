@@ -28,7 +28,6 @@ class MyPage extends Component{
         super(props);
         this.state = {
             userInfo: '',
-            balance: '',
         }
     }
     componentDidMount(){
@@ -51,25 +50,18 @@ class MyPage extends Component{
         onLoadUserInfo(this.storeNames, HttpUrl+'User/get_user', formData)
     }
     getBalance(){
+        const {initBalance} = this.props;
         const {token} = this.props
         let formData=new FormData();
         formData.append('token',token);
         formData.append('page',1);
-        Fetch.post(NewHttp+'balance',formData).then(
-            result=>{
-                if(result.code==1){
-                    this.setState({
-                        balance:(parseFloat(result.data.due_balance)+parseFloat(result.data.unpaid_amount?result.data.unpaid_amount:0)).toFixed(2)
-                    })
-                }
-            }
-        )
+        initBalance('balance', NewHttp+'BalanceTwo', formData)
     }
     toSetting() {
         NavigatorUtils.goPage({},'Setting')
     }
     render(){
-        const {initToken, initUser,userinfo} = this.props;
+        const {token, user,userinfo} = this.props;
         let store = this.props.noread[this.storeName];
         if(!store) {
             store={
@@ -85,6 +77,7 @@ class MyPage extends Component{
             }
         }
         return (
+
             <View style={[styles.container,{justifyContent: 'flex-start'}]}>
                 <View>
                     <SafeAreaView style={[CommonStyle.flexCenter]}>
@@ -102,7 +95,7 @@ class MyPage extends Component{
                                     height:19.5
                                 }}/>
                                 {
-                                    store.items&&store.items.data&&store.items.data.data&&store.items.data.data.sys_count
+                                    token&&user&&user.username&&user.userid&&store.items&&store.items.data&&store.items.data.data&&store.items.data.data.sys_count
                                         ?
                                         <View style={[CommonStyle.flexCenter,{
                                             width: 17,
@@ -208,13 +201,15 @@ const mapStateToProps = state => ({
     theme: state.theme.theme,
     language: state.language.language,
     noread: state.noread,
-    userinfo: state.userinfo
+    userinfo: state.userinfo,
+    balance: state.balance
 })
 const mapDispatchToProps = dispatch => ({
     initToken: token => dispatch(action.InitToken(token)),
     initUser: user => dispatch(action.InitUser(user)),
     onLoadNoRead: (storeName, url, data) => dispatch(action.onLoadNoRead(storeName, url, data)),
     onLoadUserInfo: (storeName, url, data) => dispatch(action.onLoadUserInfo(storeName, url, data)),
+    initBalance: (storeName, url, data) => dispatch(action.initBalance(storeName, url, data))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(MyPage)
 class InfoHeader extends Component{
@@ -226,24 +221,18 @@ class InfoHeader extends Component{
                     token && user.username && user.userid
                     ?
                         <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                            <TouchableOpacity
-                                onPress={()=>{
-                                    NavigatorUtils.goPage({}, 'PersonalData')
-                                }}
-                            >
-                                <LazyImage
-                                    source={user&&user.avatar?{uri:JSON.parse(user.avatar)}:
+                            <LazyImage
+                                source={user&&user.avatar?{uri:JSON.parse(user.avatar)}:
                                     require('../../../assets/images/touxiang.png')}
-                                    style={{width:60,height:60,borderRadius:30}}
-                                />
-                            </TouchableOpacity>
+                                style={{width:60,height:60,borderRadius:30}}
+                            />
                             <View style={[CommonStyle.spaceCol,{
                                 height:60,
                                 width:width*0.94-150,
                                 alignItems: 'flex-start'
                             }]}>
                                 <Text style={{color:'#333',fontSize:18,fontWeight:'bold'}}>
-                                    {user&&user.username?JSON.parse(user.username):null}
+                                    {user&&user.username?user.username=='匿名用户'?user.username:JSON.parse(user.username):null}
                                 </Text>
                                 <View style={[CommonStyle.flexStart]}>
                                     {
@@ -290,7 +279,7 @@ class InfoHeader extends Component{
                             <TouchableOpacity
                                 style={[CommonStyle.flexEnd]}
                                 onPress={()=>{
-                                    NavigatorUtils.goPage({user_id: this.props.user.userid},'UserInfo')
+                                    NavigatorUtils.goPage({}, 'PersonalData')
                                 }}
                             >
                                 <Text numberOfLines={1} ellipsizeMode={'tail'}
@@ -352,7 +341,14 @@ class AboutMe extends Component{
         }
     }
     render(){
-        const {userInfo,balance,language} = this.props
+        const {userInfo,balance,language,token, user} = this.props;
+        let store = balance['balance'];
+        if(!store) {
+            store = {
+                items: [],
+                isLoading: false
+            }
+        }
         return(
             <View style={[CommonStyle.commonWidth,styles.common_padding,CommonStyle.spaceRow,{
                 backgroundColor:'#fff',
@@ -366,7 +362,7 @@ class AboutMe extends Component{
                         redirect: 'Focus'
                     })}
                 >
-                    <Text style={styles.txt}>{userInfo.attention_num?userInfo.attention_num:0}</Text>
+                    <Text style={styles.txt}>{token&&user&&user.username&&user.userid?userInfo.attention_num?userInfo.attention_num:0:0}</Text>
                     <Text style={styles.down_txt}>
                         {
                             language===1?languageType.CH.my.focus:language===2?languageType.EN.my.focus:languageType.JA.my.focus
@@ -379,7 +375,7 @@ class AboutMe extends Component{
                         redirect: 'Fans'
                     })}
                 >
-                    <Text style={styles.txt}>{userInfo.fans_num?userInfo.fans_num:0}</Text>
+                    <Text style={styles.txt}>{token&&user&&user.username&&user.userid?userInfo.fans_num?userInfo.fans_num:0:0}</Text>
                     <Text style={styles.down_txt}>
                         {
                             language===1?languageType.CH.my.fans:language===2?languageType.EN.my.fans:languageType.JA.my.fans
@@ -387,9 +383,12 @@ class AboutMe extends Component{
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[CommonStyle.flexCenter]}
-
+                      onPress={() => this.checkLoginRoute('PraiseAndBack',{
+                          user_id: userInfo.user_id,
+                          redirect: 'PraiseAndBack'
+                      })}
                 >
-                    <Text style={styles.txt}>15</Text>
+                    <Text style={styles.txt}>{token&&user&&user.username&&user.userid?userInfo.praise_num+userInfo.leaving_num:0}</Text>
                     <Text style={styles.down_txt}>
                         {
                             language===1?languageType.CH.my.back:language===2?languageType.EN.my.back:languageType.JA.my.back
@@ -402,7 +401,21 @@ class AboutMe extends Component{
                           redirect: 'Trading'
                       })}
                 >
-                    <Text style={styles.txt}>{balance?balance:0.00}</Text>
+                    {
+                        store.items&&store.items.data&&store.items.data.data
+                        ?
+                            <Text style={styles.txt}>
+                                {
+                                    token&&user&&user.username&&user.userid
+                                        ?
+                                        (parseFloat(store.items.data.data.due_balance)+parseFloat(store.items.data.data.unpaid_amount?store.items.data.data.unpaid_amount:0)).toFixed(2)
+                                        :
+                                        0.00
+                                }
+                            </Text>
+                        :
+                            <Text style={styles.txt}>0.00</Text>
+                    }
                     <Text style={styles.down_txt}>
                         {
                             language===1?languageType.CH.my.trading:language===2?languageType.EN.my.trading:languageType.JA.my.trading
@@ -514,26 +527,26 @@ class ManageActive extends Component{
             {
                 title:this.props.language===1?'志愿者申请':this.props.language===2?'Volunteer application':'志願者申請',
                 icon:require('../../../assets/images/home/zyzsq.png'),
-                router:'',
+                router:'VolApply',
                 width:24.5,
                 height:19
             },
             {
                 title:this.props.language===1?'已完成':this.props.language===2?'complete':'完了した',
                 icon:require('../../../assets/images/home/ywc.png'),
-                router:'',
+                router:'CompleteActive',
                 width:18,
                 height:23
             },
             {
                 title:this.props.language===1?'退款申请':this.props.language===2?'Refund application':'返金申請',
                 icon:require('../../../assets/images/home/tyyd.png'),
-                router:'',
+                router:'RefundApply',
                 width:24,
                 height:22
             }
         ];
-        const {userInfo, theme, language} = this.props
+        const {userInfo, theme, language,token,user} = this.props
         return <View style={[CommonStyle.commonWidth,styles.common_padding,{
             backgroundColor:'#fff',
             marginTop:10,
@@ -548,6 +561,8 @@ class ManageActive extends Component{
             </Text>
             <View style={[CommonStyle.spaceRow,{width:'100%',marginTop:25}]}>
                 {
+                    token&&user&&user.username&&user.userid
+                    ?
                     userInfo.isplanner && userInfo.audit_face==2
                     ?
                         this.manages.map((item,index) => {
@@ -576,6 +591,23 @@ class ManageActive extends Component{
                                 {
                                     language===1?languageType.CH.my.be_creater:language===2?languageType.EN.my.be_creater:languageType.JA.my.be_creater
                                 }
+                            </Text>
+                        </View>
+                   :
+                        <View style={[CommonStyle.flexCenter,{width:'100%'}]}>
+                            <Text style={{color:'#999'}}>
+                                {
+                                    language===1?languageType.CH.my.experience_propmt:language===2?languageType.EN.my.experience_propmt:languageType.JA.my.experience_propmt
+                                }
+                            </Text>
+                            <Text style={{
+                                color:theme,
+                                fontWeight:'bold',
+                                marginTop: 15
+                            }} onPress={()=>{
+                                NavigatorUtils.goPage({}, 'Login')
+                            }}>
+                                立即登录
                             </Text>
                         </View>
                 }
@@ -608,7 +640,7 @@ class CreateCenter extends Component{
             {
                 title:this.props.language===1?'体验日历':this.props.language===2?'calendar':'体験カレンダー',
                 icon:require('../../../assets/images/home/tyrl.png'),
-                router:'',
+                router:'ActiveCalendar',
                 width:20,
                 height:20.5
             },
@@ -720,7 +752,9 @@ class Other extends Component{
                         userInfo.isvolunteer && userInfo.audit_idcard == 1
                         ?
                             <TouchableOpacity style={CommonStyle.flexCenter}
-                                              onPress={()=>{}}>
+                                              onPress={()=>{
+                                                  this.checkLoginRoute('MyVol', {})
+                                              }}>
                                 <View style={{position:'relative'}}>
                                     <Image
                                         source={require('../../../assets/images/home/zyzsq.png')}

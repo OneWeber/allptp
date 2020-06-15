@@ -37,6 +37,13 @@ import bank from './info/bank';
 import systemmsg from './info/systemmsg';
 import noread from './info/noread';
 import userinfo from './info/userinfo';
+import comments from './comments'
+import volapply from './info/volapply';
+import refundapply from './info/refundapply';
+import pevaluate from './info/pevaluate';
+import pinvite from './info/pinvite';
+import balance from './info/balance'
+import friendapply from './msg/friendapply';
 const index = combineReducers({
     theme: theme,
     user: user,
@@ -75,6 +82,13 @@ const index = combineReducers({
     bank: bank,
     systemmsg: systemmsg,
     noread: noread,
-    userinfo: userinfo
+    userinfo: userinfo,
+    comments: comments,
+    volapply:volapply,
+    refundapply: refundapply,
+    pevaluate: pevaluate,
+    pinvite: pinvite,
+    balance: balance,
+    friendapply: friendapply
 })
 export default index

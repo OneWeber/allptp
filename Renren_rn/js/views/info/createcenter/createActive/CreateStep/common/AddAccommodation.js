@@ -51,7 +51,39 @@ class AddAccommodation extends Component{
                 title: '酒店'
             }
         ]
+        this.isEdit = this.props.navigation.state.params.isEdit?this.props.navigation.state.params.isEdit:false;
+        this.index = this.props.navigation.state.params.isEdit?this.props.navigation.state.params.index:'';
+        this.item = this.props.navigation.state.params.isEdit?this.props.navigation.state.params.item:''
     }
+    componentDidMount() {
+        if(this.isEdit) {
+            this.setState({
+                typeIndex: this.item.flag,
+                num: this.item.num,
+                max_person: this.item.max_person,
+                price: this.item.price,
+                descript: this.item.descript
+            },() => {
+                let imgs = this.item.image;
+                //send: {image_id:res.data.image_id,domain:res.data.domain,image_url:res.data.image_url}
+                let iList = [];
+                let idList = [];
+                for(let i=0;i<imgs.length;i++) {
+                    iList.push({
+                        send:{image_id:imgs[i].image_id,domain:imgs[i].domain,image_url:imgs[i].image_url}
+                    })
+                    idList.push({
+                        image_id:imgs[i].image_id
+                    })
+                }
+                this.setState({
+                    imageList: iList,
+                    imageId: idList
+                })
+            })
+        }
+    }
+
     getLeftButton() {
         return <TouchableOpacity
             style={CommonStyle.back_icon}
@@ -81,14 +113,52 @@ class AddAccommodation extends Component{
             this.refs.type.close()
         })
     }
+    changeAccommodation() {
+        const {accommodation, changeAccommodation, changeAccImageId, acc_imageId} = this.props;
+        if(!this.state.typeIndex) {
+            this.refs.toast.show('请选择住宿类型')
+        }else if(!this.state.num) {
+            this.refs.toast.show('请填写提供的'+this.state.typeIndex===1?'帐篷数':'房间数')
+        }else if(!this.state.max_person) {
+            this.refs.toast.show('请填写一个'+this.state.typeIndex===1?'帐篷可住人数':'房间可住人数')
+        }else if(!this.state.descript) {
+            this.refs.toast.show('请简单介绍您住宿的情况')
+        }else if(!this.state.price) {
+            this.refs.toast.show('请填写住宿价格')
+        }else if(this.state.imageId.length === 0) {
+            this.refs.toast.show('请提供住宿图片')
+        }else{
+            let list = this.props.navigation.state.params.acc_arr;
+            let id_data = [];
+            const {imageList} = this.state;
+            for(let i=0;i<imageList.length;i++) {
+                id_data.push({
+                    image_id: imageList[i].send.image_id,
+                    domain: imageList[i].send.domain,
+                    image_url: imageList[i].send.image_url
+                })
+            }
+            changeAccImageId(id_data);
+            list[this.index] = {
+                flag: this.state.typeIndex,
+                num: this.state.num,
+                max_person: this.state.max_person,
+                descript: this.state.descript,
+                price: this.state.price,
+                image: id_data,
+            }
+            changeAccommodation(list);
+            NavigatorUtils.goPage({},'Accommodation')
+        }
+    }
     addAccommodation() {
         const {accommodation, changeAccommodation, changeAccImageId, acc_imageId} = this.props;
         if(!this.state.typeIndex) {
             this.refs.toast.show('请选择住宿类型')
         }else if(!this.state.num) {
-            this.refs.toast.show('请填写提供的房间数')
+            this.refs.toast.show('请填写提供的'+this.state.typeIndex===1?'帐篷数':'房间数')
         }else if(!this.state.max_person) {
-            this.refs.toast.show('请填写一个房间可住人数')
+            this.refs.toast.show('请填写一个'+this.state.typeIndex===1?'帐篷可住人数':'房间可住人数')
         }else if(!this.state.descript) {
             this.refs.toast.show('请简单介绍您住宿的情况')
         }else if(!this.state.price) {
@@ -253,7 +323,6 @@ class AddAccommodation extends Component{
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
-                    rightButton={this.getRightButton()}
                 />
                 <Toast ref="toast" position='center' positionValue={0}/>
                 <KeyboardAwareScrollView>
@@ -304,11 +373,11 @@ class AddAccommodation extends Component{
                                 borderBottomWidth: 1
                             }]}>
                                 <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                                    <Text style={styles.acc_title}>提供的房间数</Text>
+                                    <Text style={styles.acc_title}>提供的{this.state.typeIndex===1?'帐篷':'房间'}数</Text>
                                     <TextInput
                                         placeholder="请填写"
                                         style={styles.acc_input}
-                                        defaultValue={this.state.num}
+                                        defaultValue={this.state.num?JSON.stringify(parseFloat(this.state.num)):''}
                                         keyboardType={"number-pad"}
                                         onChangeText={(text)=>{this.setState({
                                             num: text
@@ -321,12 +390,12 @@ class AddAccommodation extends Component{
                                 paddingBottom: 20,
                             }]}>
                                 <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                                    <Text style={styles.acc_title}>一个房间可住人数</Text>
+                                    <Text style={styles.acc_title}>一个{this.state.typeIndex===1?'帐篷':'房间'}可住人数</Text>
                                     <TextInput
                                         placeholder="请填写"
                                         style={styles.acc_input}
                                         keyboardType={"number-pad"}
-                                        defaultValue={this.state.max_person}
+                                        defaultValue={this.state.max_person?JSON.stringify(parseFloat(this.state.max_person)):''}
                                         onChangeText={(text)=>{this.setState({
                                             max_person: text
                                         })}}
@@ -386,7 +455,8 @@ class AddAccommodation extends Component{
                                     </View>
                                     <TextInput
                                         placeholder="请填写"
-                                        defaultValue={this.state.price}
+                                        keyboardType='numeric'
+                                        defaultValue={this.state.price?JSON.stringify(parseFloat(this.state.price)):''}
                                         onChangeText={(text)=>{this.setState({
                                             price: text
                                         })}}
@@ -443,15 +513,30 @@ class AddAccommodation extends Component{
                 </KeyboardAwareScrollView>
                 <SafeAreaView style={[CommonStyle.bot_btn,CommonStyle.flexCenter]}>
                     <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:49}]}>
-                        <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
-                            backgroundColor:this.props.theme
-                        }]}
-                         onPress={()=>{
-                             this.addAccommodation()
-                         }}
-                        >
-                            <Text style={{color:'#fff'}}>添加</Text>
-                        </TouchableOpacity>
+                        {
+                            this.isEdit
+                            ?
+                                <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
+                                    backgroundColor:this.props.theme
+                                }]}
+                                onPress={() => {
+                                    this.changeAccommodation()
+                                }}
+                                >
+                                    <Text style={{color:'#fff'}}>确认修改</Text>
+                                </TouchableOpacity>
+                            :
+                                <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
+                                    backgroundColor:this.props.theme
+                                }]}
+                                  onPress={()=>{
+                                      this.addAccommodation()
+                                  }}
+                                >
+                                    <Text style={{color:'#fff'}}>添加</Text>
+                                </TouchableOpacity>
+                        }
+
                     </View>
                 </SafeAreaView>
                 <Modal
@@ -493,7 +578,8 @@ const styles = StyleSheet.create({
     },
     acc_input: {
         minWidth: 200,
-        textAlign: 'right'
+        textAlign: 'right',
+        paddingRight: 5
     },
     detail_imgs_btn: {
         width:(width*0.94-30)/3,

@@ -78,7 +78,7 @@ class Vol extends Component{
                 this.setState({
                     is_volunteen: res.data.is_volunteen,
                     volun_require: res.data.volun_require,
-                    volun_laguage: res.data.volun_laguage.split(',')
+                    volun_laguage: res.data.volun_laguage?res.data.volun_laguage.split(','):[]
                 },() => {
                     console.log(res.data)
                     changeStatus(res.data.step.split(','))
@@ -167,6 +167,7 @@ class Vol extends Component{
                 autoClosing={true}         //默认为true 如果为true 一有事件发生抽屉就会关闭
             >
                 <View style={{flex: 1,position:'relative',backgroundColor: "#f5f5f5"}}>
+
                     <Toast ref="toast" position='center' positionValue={0}/>
                     <CreateHeader title={'志愿者'} navigation={this.props.navigation}/>
                     <SiderMenu clickIcon={()=>{this.setState({
@@ -382,6 +383,7 @@ const mapStateToProps = state => ({
     token: state.token.token,
     theme: state.theme.theme,
     activity_id: state.steps.activity_id,
+    type: state.steps.type
 });
 const mapDispatchToProps = dispatch => ({
     changeStatus: arr => dispatch(action.changeStatus(arr))

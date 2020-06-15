@@ -12,6 +12,7 @@
 #import <React/RCTRootView.h>
 #import <GoogleMaps/GoogleMaps.h>
 #import <React/RCTLinkingManager.h>
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -31,6 +32,7 @@
   [GMSServices provideAPIKey:@"AIzaSyDUAwAKv-_edMQDrteCld7VWVjRmbfTQX8"];
   return YES;
 }
+
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
 sourceApplication:(NSString *)sourceApplication annotation:(id)annotation

@@ -8,6 +8,7 @@ export default function onAction(state=defaultState, action) {
                 [action.storeName]: {
                     ...state[action.storeName],
                     items: action.items,
+                    dataNum: action.dataNum,
                     isLoading: false
                 }
             };
@@ -25,6 +26,34 @@ export default function onAction(state=defaultState, action) {
                 [action.storeName]: {
                     ...state[action.storeName],
                     isLoading: false
+                }
+            };
+        case Types.ONLOAD_MORE_STORY:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    isLoading: false,
+                    hideMoreshow: false
+                }
+            };
+        case Types.ONLOAD_MORE_STORY_SUCCESS:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    items: action.items,
+                    isLoading:false,
+                    hideMoreshow: true,
+                }
+            };
+        case Types.ONLOAD_MORE_STORY_FAIL:
+            return {
+                ...state,
+                [action.storeName]: {
+                    ...state[action.storeName],
+                    isLoading: false,
+                    hideMoreshow: true
                 }
             };
         default:

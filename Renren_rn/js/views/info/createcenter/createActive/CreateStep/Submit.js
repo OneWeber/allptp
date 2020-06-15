@@ -6,17 +6,63 @@ import {connect} from 'react-redux'
 import Modal from 'react-native-modalbox';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
+import Fetch from '../../../../../expand/dao/Fetch';
+import HttpUrl from '../../../../../utils/Http';
+import action from '../../../../../action';
 class Submit extends Component{
     _submitActive() {
         const {userinfo} = this.props;
         let store = userinfo['userinfo'];
         let info = store.items&&store.items.data&&store.items.data.data?store.items.data.data[0]:'';
-        console.log('info', info)
         if(info.audit_face!=2) {
             this.refs.prompt.open()
         } else {
-
+            let formData = new FormData();
+            formData.append("token",this.props.token);
+            formData.append("complete",1);
+            formData.append("activity_id",this.props.activity_id);
+            Fetch.post(HttpUrl+'Activity/save_activity', formData).then(res => {
+                if(res.code === 1) {
+                    this.initDate();
+                    this.initUn();
+                    this.initAl();
+                    this.initNot();
+                    NavigatorUtils.goPage({}, 'CreateActive')
+                }
+            })
         }
+    }
+    initDate() {
+        const {token, onLoadToAudit} = this.props;
+        this.storeName = 'toaudit';
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('flag',2);
+        onLoadToAudit(this.storeName, HttpUrl + 'Activity/complete', formData)
+    }
+    initUn() {
+        const {token, onLoadUncommit} = this.props;
+        this.storeName = 'uncommit';
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('flag',1);
+        onLoadUncommit(this.storeName, HttpUrl + 'Activity/complete', formData)
+    }
+    initAl(){
+        const {token, onLoadAlready} = this.props;
+        this.storeName = 'already';
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('flag',3);
+        onLoadAlready(this.storeName, HttpUrl + 'Activity/complete', formData)
+    }
+    initNot(){
+        const {token, onLoadNotPass} = this.props;
+        this.storeName = 'notpass';
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('flag',4);
+        onLoadNotPass(this.storeName, HttpUrl + 'Activity/complete', formData)
     }
     goCheck() {
         this.refs.prompt.close();
@@ -84,7 +130,7 @@ class Submit extends Component{
                             }]} onPress={()=>{
                                 this._submitActive()
                             }}>
-                                <Text style={{color: '#fff'}}>确认提交审核</Text>
+                                <Text style={{color: '#fff'}}>{this.props.type?'保存':'确认提交审核'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -145,8 +191,16 @@ const styles = StyleSheet.create({
     },
 })
 const mapStateToProps = state => ({
+    token:state.token.token,
     theme: state.theme.theme,
     userinfo: state.userinfo,
     activity_id: state.steps.activity_id,
+    type: state.steps.type
 })
-export default connect(mapStateToProps)(Submit)
+const mapDispatchToProps = dispatch => ({
+    onLoadToAudit: (storeName, url, data) => dispatch(action.onLoadToAudit(storeName, url, data)),
+    onLoadUncommit:(storeName, url, data) => dispatch(action.onLoadUncommit(storeName, url, data)),
+    onLoadAlready: (storeName, url, data) => dispatch(action.onLoadAlready(storeName, url, data)),
+    onLoadNotPass: (storeName, url, data) => dispatch(action.onLoadNotPass(storeName, url, data)),
+})
+export default connect(mapStateToProps, mapDispatchToProps)(Submit)

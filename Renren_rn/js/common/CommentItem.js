@@ -47,7 +47,18 @@ class CommentItem extends Component{
                         />
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.c_content}>{data_c.content}</Text>
+                <TouchableOpacity
+                    onPress={() => {
+                        this.props.showBackModal({
+                            msg_id: data_c.msg_id?data_c.msg_id:data_c.comment_id
+                        })
+                    }}
+                >
+                    <Text
+                        style={styles.c_content}
+                    >{data_c.content}</Text>
+                </TouchableOpacity>
+
                 {/*评论中带有图片*/}
                 {
                     data_c.image && data_c.image.length > 0

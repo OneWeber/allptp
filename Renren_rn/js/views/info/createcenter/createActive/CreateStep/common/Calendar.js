@@ -8,6 +8,7 @@ import {
     ScrollView,
     Animated,
     ActivityIndicator,
+    Alert
 } from 'react-native';
 import {connect} from 'react-redux'
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
@@ -22,6 +23,9 @@ class Calendar extends Component{
     constructor(props) {
         super(props);
         this.days=['日','一','二','三','四','五','六']
+        this.timeIndex = this.props.navigation.state.params.isSingle;
+        this.slot = this.props.navigation.state.params.slot;
+
         this.state = {
             dateArr: [],
             calendarList: [],
@@ -31,7 +35,8 @@ class Calendar extends Component{
             titleDate: '',
             dayIndex: -1,
             date: '',
-            slotData: ''
+            slotData: '',
+            singleData: []
         }
     }
     componentDidMount() {
@@ -67,27 +72,30 @@ class Calendar extends Component{
     }
     getHasDate() { //获取体验设计到的年月
         const {isSingle} = this.props.navigation.state.params;
-        const {slot} = this.props.navigation.state.params;
+        const {slot, isAll} = this.props.navigation.state.params;
         let dateList = [];
-        if(isSingle) {
-            let data = getAll(slot.begin_date, slot.end_date);
-            for(let j=0; j<data.length; j++) {
-                dateList.push({
-                    y:data[j].split('-')[0],
-                    m:data[j].split('-')[1],
-                })
-            }
-        } else {
-            for(let i=0; i<slot.length; i++) {
-                let data = getAll(slot[i].begin_date, slot[i].end_date);
+        if(isAll) {
+
+        }else{
+            if(isSingle&&slot.date!='1970-01-01') {
+                let data = getAll(slot.date, slot.date);
                 for(let j=0; j<data.length; j++) {
                     dateList.push({
                         y:data[j].split('-')[0],
                         m:data[j].split('-')[1],
                     })
                 }
+            } else {
+                let slots = getAll(slot.begin_date, slot.end_date)
+                for(let i=0; i<slots.length; i++) {
+                    dateList.push({
+                        y:slots[i].split('-')[0],
+                        m:slots[i].split('-')[1],
+                    })
+                }
             }
         }
+
 
         dateList = objRemoveDuplicated(dateList);
         this.setState({
@@ -111,8 +119,8 @@ class Calendar extends Component{
                     day: j+1,
                     status: 0
                 });
-                if(isSingle) {
-                    if(this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))>=this.parseDate(slot.begin_date)&&this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))<=this.parseDate(slot.end_date)) {
+                if(isSingle&&slot.date!='1970-01-01') {
+                    if(this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))==this.parseDate(slot.date)) {
                         temp[j].status = 1
                     } else {
                         if(temp[j].status === 1) {
@@ -123,8 +131,9 @@ class Calendar extends Component{
 
                     }
                 }else {
-                    for(let y=0; y<slot.length; y++) {
-                        if(this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))>=this.parseDate(slot[y].begin_date)&&this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))<=this.parseDate(slot[y].end_date)) {
+                    let slots = getAll(slot.begin_date, slot.end_date)
+                    for(let y=0; y<slots.length; y++) {
+                        if(this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))>=this.parseDate(slots[y])&&this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))<=this.parseDate(slots[y])) {
                             temp[j].status = 1
                         } else {
                             if(temp[j].status === 1) {
@@ -183,15 +192,30 @@ class Calendar extends Component{
     }
     getRightButton(){
         return <TouchableOpacity
-            style={{paddingRight: width*0.03}}
+            style={[CommonStyle.flexStart,{paddingRight: width*0.03}]}
             onPress={()=>{
                 NavigatorUtils.goPage({},'LongTime')
             }}
         >
             <Text style={{
                 color:this.props.theme,
-                fontSize: 16
+                fontSize: 14
             }}>添加日期</Text>
+            {
+                this.timeIndex&&this.state.isShowDetail
+                ?
+                    <Text style={{
+                        color:'#666',
+                        marginLeft: 15
+                    }}
+                    onPress={()=>{
+                        NavigatorUtils.goPage({}, 'BatchDelete')
+                    }}
+                    >批量删除</Text>
+                :
+                    null
+            }
+
         </TouchableOpacity>
     }
     clickDateItem(i, index, day){
@@ -214,10 +238,12 @@ class Calendar extends Component{
             this.loadSlotDetail()
         })
     }
-    loadSlotDetail() {
-        this.setState({
-            isLoading: true
-        });
+    loadSlotDetail(val) {
+        if(val) {
+            this.setState({
+                isLoading: true
+            });
+        }
         const {token, activity_id} = this.props;
         const {date} = this.state;
         let formData=new FormData();
@@ -225,11 +251,13 @@ class Calendar extends Component{
         formData.append('version','2.0');
         formData.append('activity_id',activity_id);
         formData.append('date',date);
+        console.log(formData)
         Fetch.post(NewHttp+'ActivitySlotDetailTwo', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
-                    slotData: res.data[0],
-                    isLoading: false
+                    slotData: res.data,
+                    isLoading: false,
+                    singleData: []
                 })
             }
         })
@@ -299,11 +327,12 @@ class Calendar extends Component{
                 </View>
             )
         }
-        const {theme} = this.props
+        const {theme} = this.props;
+        const {isSingle} = this.props.navigation.state.params;
         return(
             <View style={styles.container}>
                 <RNEasyTopNavBar
-                    title={this.state.isShowDetail?'':'多天体验日期'}
+                    title={this.state.isShowDetail?'':isSingle?'单天体验日期':'多天体验日期'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
@@ -398,7 +427,7 @@ class Calendar extends Component{
                     ?
                         <ScrollView>
                             <View>
-                                <DateDetail {...this.state} {...this.props}/>
+                                <DateDetail initData={()=>{this.loadSlotDetail(true)}} {...this.state} {...this.props} timeIndex={this.timeIndex} slot={this.state.slotData}/>
                             </View>
                         </ScrollView>
                     :
@@ -477,6 +506,49 @@ class DateDetail extends Component{
     loadData() {
 
     }
+    goDel(slot_id) {
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('activity_id', this.props.activity_id);
+        formData.append('is_all',0);
+        formData.append('slot_id',slot_id);
+        formData.append('version','2.0');
+        Fetch.post(NewHttp+'ActivitySlotDelTwo', formData).then(res => {
+            if(res.code === 1) {
+                NavigatorUtils.backToUp(this.props, true)
+            }
+        })
+    }
+    delInfo(index) {
+        const {slot, slotData} = this.props;
+        if(this.props.timeIndex) {
+            Alert.alert('删除','确定删除'+(slotData[index].date=='1970-01-01'?slotData[index].begin_date:slotData[index].date)+' '+slotData[index].begin_time+' -- '+slotData[index].end_time+'该天该时间段体验吗？',[
+                {text:'取消'},
+                {text:'确定', onPress: () => {this.goDel(slotData[index].slot_id)}}
+            ],{
+                cancelable: false,
+            })
+        }else{
+            Alert.alert('删除','确定删除'+slotData[index].begin_date+'至'+slotData[index].end_date+'该时间段体验吗？',[
+                {text:'取消'},
+                {text:'确定', onPress: () => {this.goDel(slotData[index].slot_id)}}
+            ],{
+                cancelable: false,
+            })
+        }
+
+    }
+    editInfo(index) {
+        let _this = this;
+        NavigatorUtils.goPage({
+            timeIndex: this.props.timeIndex,
+            slotInfo: this.props.timeIndex?this.props.slotData[index]:this.props.slotData[0],
+            isEdit: true,
+            refresh: function () {
+                _this.props.initData()
+            }
+        }, 'LongTime')
+    }
     render(){
         const {slotData} = this.props;
         return(
@@ -499,147 +571,227 @@ class DateDetail extends Component{
                             </View>
                         :
                             <View>
-                                <View style={CommonStyle.flexStart}>
-                                    <AntDesign
-                                        name={'clockcircle'}
-                                        size={12}
-                                        style={{color: '#CFD0D1'}}
-                                    />
-                                    <Text style={{color: '#333',fontWeight: "bold",marginLeft: 10}}>
-                                        {
-                                            slotData
-                                                ?
-                                                slotData.begin_date.split('-')[1]+'月'+slotData.begin_date.split('-')[2]+'日'+slotData.begin_time
-                                                :
-                                                ''
-                                        }
-                                        -
-                                        {
-                                            slotData
-                                                ?
-                                                slotData.end_date.split('-')[1]+'月'+slotData.end_date.split('-')[2]+'日'+slotData.end_time
-                                                :
-                                                ''
-                                        }
-                                    </Text>
-                                </View>
-                                <View style={[CommonStyle.flexStart,{
-                                    marginTop: 25
-                                }]}>
-                                    <Text style={styles.detailTitle}>体验人数</Text>
-                                    <Text style={{color: '#333',marginLeft: 20,fontSize: 13}}>{slotData?slotData.max_person_num:0}人</Text>
-                                </View>
-                                <View style={[CommonStyle.flexStart,{
-                                    marginTop: 25,
-                                    alignItems:'flex-start'
-                                }]}>
-                                    <Text style={styles.detailTitle}>价格</Text>
-                                    <View style={{marginLeft: 20}}>
-                                        <View style={CommonStyle.flexStart}>
-                                            <Text style={styles.normalText}>标准</Text>
-                                            {
-                                                slotData?
-                                                parseFloat(slotData.price_discount)===0 || parseFloat(slotData.price_discount)===10
+                                {
+                                    slotData&&slotData.length>0
+                                    ?
+                                    slotData.map((item, index) => {
+                                        return <View key={index} style={{
+                                            marginTop: index===0?0: 20
+                                        }}>
+                                            <View style={CommonStyle.flexStart}>
+                                                <AntDesign
+                                                    name={'clockcircle'}
+                                                    size={12}
+                                                    style={{color: '#CFD0D1'}}
+                                                />
+                                                {
+                                                    this.props.timeIndex&&item.date!='1970-01-01'
                                                     ?
-                                                    null
+                                                        <Text style={{color: '#333',fontWeight: "bold",marginLeft: 10}}>
+                                                            {item.date} {item.begin_time} -- {item.end_time}
+                                                        </Text>
                                                     :
-                                                    <View style={[CommonStyle.flexStart,{marginLeft: 15}]}>
-                                                        <AntDesign
-                                                            name={'tago'}
-                                                            size={12}
-                                                            style={{color:'#333'}}
-                                                        />
-                                                        <Text style={[styles.normalText,{marginLeft:3}]}>{parseFloat(slotData.price_discount)}折</Text>
-                                                    </View>
-                                                 :
-                                                    null
-                                            }
-                                            <Text style={[styles.normalText,{marginLeft:15}]}>
-                                                ¥{
-                                                slotData?
-                                                parseFloat(slotData.price_discount)===0 || parseFloat(slotData.price_discount)===10
-                                                    ?
-                                                    parseFloat(slotData.price_origin)
-                                                    :
-                                                    parseFloat(slotData.price)
-                                                :
-                                                null
-                                            }/人
-                                            </Text>
-                                        </View>
-                                        <View style={[CommonStyle.flexStart,{
-                                            marginTop: 19.5
-                                        }]}>
-                                            <Text style={styles.normalText}>儿童</Text>
-                                            {
-                                                slotData?
-                                                parseFloat(slotData.kids_price_discount)==0 || parseFloat(slotData.kids_price_discount) == 10
-                                                    ?
-                                                    null
-                                                    :
-                                                    <View style={[CommonStyle.flexStart,{marginLeft: 15}]}>
-                                                        <AntDesign
-                                                            name={'tago'}
-                                                            size={12}
-                                                            style={{color:'#333'}}
-                                                        />
-                                                        <Text style={[styles.normalText,{marginLeft:3}]}>{parseFloat(slotData.kids_price_discount)}折</Text>
-                                                    </View>
-                                                 :
-                                                    null
-                                            }
+                                                        <Text style={{color: '#333',fontWeight: "bold",marginLeft: 10}}>
+                                                            {
+                                                                item
+                                                                    ?
+                                                                    item.begin_date.split('-')[1]+'月'+item.begin_date.split('-')[2]+'日'+item.begin_time
+                                                                    :
+                                                                    ''
+                                                            }
+                                                            -
+                                                            {
+                                                                item
+                                                                    ?
+                                                                    item.end_date.split('-')[1]+'月'+item.end_date.split('-')[2]+'日'+item.end_time
+                                                                    :
+                                                                    ''
+                                                            }
+                                                        </Text>
+                                                }
 
-                                            <Text style={[styles.normalText,{marginLeft:15}]}>
-                                                ¥{
-                                                slotData?
-                                                parseFloat(slotData.kids_price_discount) === 0 || parseFloat(slotData.kids_price_discount) === 10
+                                            </View>
+                                            {
+                                                !this.props.navigation.state.params.isSingle
                                                     ?
-                                                    parseFloat(slotData.kids_price_origin)
+                                                    <Text style={{
+                                                        color:this.props.theme,
+                                                        fontSize: 12,
+                                                        marginTop: 10
+                                                    }}>注：当前为多天体验，修改内容将会对应到当前多天体验的每一天</Text>
                                                     :
-                                                    parseFloat(slotData.kids_price)
-                                                :
-                                                null
-                                            }/人
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={[CommonStyle.flexStart,{
-                                    alignItems:'flex-start',
-                                    marginTop: 25
-                                }]}>
-                                    <View>
-                                        <Text style={styles.detailTitle}>套餐</Text>
-                                    </View>
-                                    <View style={{marginLeft: 15}}>
-                                        {
-                                            slotData
-                                            ?
-                                                slotData.combine.map((item, index) => {
-                                                    return <View key={index} style={[styles.packageItem,CommonStyle.spaceRow,{
-                                                        marginTop:index===0?0:10
+                                                    null
+                                            }
+                                            <View style={[CommonStyle.flexStart,{
+                                                marginTop: 20
+                                            }]}>
+                                                <Text style={styles.detailTitle}>体验人数</Text>
+                                                <Text style={{color: '#333',marginLeft: 20,fontSize: 13}}>{item?item.max_person_num:0}人</Text>
+                                            </View>
+                                            <View style={[CommonStyle.flexStart,{
+                                                marginTop: 25,
+                                                alignItems:'flex-start'
+                                            }]}>
+                                                <Text style={styles.detailTitle}>价格</Text>
+                                                <View style={{marginLeft: 20}}>
+                                                    <View style={CommonStyle.flexStart}>
+                                                        <Text style={styles.normalText}>标准</Text>
+                                                        {
+                                                            item&&item.is_discount
+                                                                ?
+                                                                <View style={[CommonStyle.flexStart,{marginLeft: 15}]}>
+                                                                    <AntDesign
+                                                                        name={'tago'}
+                                                                        size={12}
+                                                                        style={{color:'#333'}}
+                                                                    />
+                                                                    <Text style={[styles.normalText,{marginLeft:3}]}>{parseFloat(item.price_discount)}折</Text>
+                                                                </View>
+                                                                :
+                                                                null
+                                                        }
+                                                        <Text style={[styles.normalText,{marginLeft:15}]}>
+                                                            ¥{
+                                                            item?
+                                                                parseFloat(item.price_discount)===0 || parseFloat(item.price_discount)===10
+                                                                    ?
+                                                                    parseFloat(item.price_origin)
+                                                                    :
+                                                                    parseFloat(item.price)
+                                                                :
+                                                                null
+                                                        }/人
+                                                        </Text>
+                                                    </View>
+                                                    <View style={[CommonStyle.flexStart,{
+                                                        marginTop: 19.5
                                                     }]}>
-                                                        <View style={[CommonStyle.flexStart]}>
-                                                            <Text style={styles.normalText}>{item.type===1?'亲子':item.name}</Text>
-                                                            <Text style={[styles.normalText,{marginLeft:3}]}>
-                                                                {item.adult}{item.type===1?'成':null}人{item.type===1?item.kids+'儿童':null}
-                                                            </Text>
-                                                        </View>
-                                                        <Text style={{color:'#033333',fontSize:13}}>¥{parseFloat(item.price)}</Text>
-                                                    </View>
-                                                })
-                                            :
-                                                null
-                                        }
+                                                        <Text style={styles.normalText}>儿童</Text>
+                                                        {
+                                                            item&&item.is_discount
+                                                                ?
+                                                                <View style={[CommonStyle.flexStart,{marginLeft: 15}]}>
+                                                                    <AntDesign
+                                                                        name={'tago'}
+                                                                        size={12}
+                                                                        style={{color:'#333'}}
+                                                                    />
+                                                                    <Text style={[styles.normalText,{marginLeft:3}]}>{parseFloat(item.kids_price_discount)}折</Text>
+                                                                </View>
+                                                                :
+                                                                null
+                                                        }
 
-                                    </View>
-                                </View>
-                                <View style={[CommonStyle.flexEnd,{
-                                    marginTop: 20
-                                }]}>
-                                    <Text style={{color:'#a4a4a4',marginRight: 15}}>编辑</Text>
-                                    <Text style={{color:'#a4a4a4'}}>删除</Text>
-                                </View>
+                                                        <Text style={[styles.normalText,{marginLeft:15}]}>
+                                                            ¥{
+                                                            item?
+                                                                parseFloat(item.kids_price_discount) === 0 || parseFloat(item.kids_price_discount) === 10
+                                                                    ?
+                                                                    parseFloat(item.kids_price_origin)
+                                                                    :
+                                                                    parseFloat(item.kids_price)
+                                                                :
+                                                                null
+                                                        }/人
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                            {
+                                                item&&item.combine.length>0
+                                                    ?
+                                                    <View style={[CommonStyle.flexStart,{
+                                                        alignItems:'flex-start',
+                                                        marginTop: 25
+                                                    }]}>
+                                                        <View>
+                                                            <Text style={styles.detailTitle}>套餐</Text>
+                                                        </View>
+                                                        <View style={{marginLeft: 15}}>
+                                                            {/*亲子*/}
+                                                            {
+                                                                item
+                                                                    ?
+                                                                    item.combine.map((items, index) => {
+                                                                        return <View key={index}>
+                                                                            {
+                                                                                items.type===1
+                                                                                ?
+                                                                                    <View style={[styles.packageItem,CommonStyle.spaceRow,{
+                                                                                        marginTop:index===0?0:10
+                                                                                    }]}>
+                                                                                        <View style={[CommonStyle.flexStart]}>
+                                                                                            <Text style={styles.normalText}>{items.type===1?'亲子':items.name}</Text>
+                                                                                            <Text style={[styles.normalText,{marginLeft:3}]}>
+                                                                                                {items.adult}{items.type===1?'成':null}人{items.type===1?items.kids+'儿童':null}
+                                                                                            </Text>
+                                                                                        </View>
+                                                                                        <Text style={{color:'#033333',fontSize:13}}>¥{parseFloat(items.price)}</Text>
+                                                                                    </View>
+                                                                                :
+                                                                                    null
+                                                                            }
+                                                                        </View>
+                                                                    })
+                                                                    :
+                                                                    null
+                                                            }
+                                                            {
+                                                                item
+                                                                    ?
+                                                                    item.combine.map((items, index) => {
+                                                                        return <View key={index}>
+                                                                            {
+                                                                                items.type===2
+                                                                                ?
+                                                                                    <View key={index} style={[styles.packageItem,CommonStyle.spaceRow,{
+                                                                                        marginTop:index===0?0:10
+                                                                                    }]}>
+                                                                                        <View style={[CommonStyle.flexStart]}>
+                                                                                            <Text style={styles.normalText}>{items.type===1?'亲子':items.name}</Text>
+                                                                                            <Text style={[styles.normalText,{marginLeft:3}]}>
+                                                                                                {items.adult}{items.type===1?'成':null}人{items.type===1?items.kids+'儿童':null}
+                                                                                            </Text>
+                                                                                        </View>
+                                                                                        <Text style={{color:'#033333',fontSize:13}}>¥{parseFloat(items.price)}</Text>
+                                                                                    </View>
+                                                                                :
+                                                                                    null
+                                                                            }
+                                                                        </View>
+                                                                    })
+                                                                    :
+                                                                    null
+                                                            }
+
+                                                        </View>
+                                                    </View>
+                                                    :
+                                                    null
+                                            }
+
+                                            <View style={[CommonStyle.flexEnd,{
+                                                marginTop: 20
+                                            }]}>
+                                                <Text
+                                                    style={{color:'#a4a4a4',marginRight: 15}}
+                                                    onPress={() => {
+                                                        this.editInfo(index)
+                                                    }}
+                                                >编辑</Text>
+                                                <Text
+                                                    style={{color:'#a4a4a4'}}
+                                                    onPress={()=>{
+                                                        this.delInfo(index)
+                                                    }}
+                                                >删除</Text>
+                                            </View>
+                                        </View>
+                                    })
+                                   :
+                                    null
+                                }
+
                             </View>
                     }
 

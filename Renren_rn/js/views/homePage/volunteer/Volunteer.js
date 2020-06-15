@@ -18,25 +18,23 @@ import action from '../../../action'
 import HttpUrl from '../../../utils/Http';
 import NoData from '../../../common/NoData';
 import LazyImage from 'animated-lazy-image';
-import Loading from '../../../common/Loading';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
-import NewHttp from '../../../utils/NewHttp';
 import Screening from '../../../model/screen';
 import RNEasyAddressPicker from 'react-native-easy-address-picker';
 const {width} = Dimensions.get('window')
-export default class Volunteer extends Component{
+class Volunteer extends Component{
     constructor(props) {
         super(props);
         this.tabNames = [
             {
                 title:'排序',
-                data:[{title:'评分优先'},{title:'点赞优先'},{title:'留言优先'},{title:'粉丝优先'}],
+                data:[{title:'全部', id:0},{title:'评分降序',id:1},{title:'点赞降序',id:2},{title:'留言降序',id:5},{title:'粉丝总数降序',id:6}],
                 type: 1
             },
             {
                 title:'语言',
-                data:[{title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
+                data:[{title:'全部',id: 0},{title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
                 type: 1
             },
             {
@@ -46,7 +44,13 @@ export default class Volunteer extends Component{
             },
         ];
         this.state = {
-            screenIndex: ''
+            screenIndex: '',
+            customData: '',
+            sort: '',
+            language: '',
+            country: '',
+            province: '',
+            city: '',
         }
     }
     getLeftButton(){
@@ -68,11 +72,59 @@ export default class Volunteer extends Component{
     getCustom() {
 
     }
-    _itemOnpress() {
-
+    _itemOnpress(tIndex, index, data) {
+        if(tIndex===0) {
+            this.setState({
+                sort: data.id
+            },() => {
+                this.loadData()
+            })
+        }else if(tIndex===1) {
+            this.setState({
+                language: data.id
+            },() => {
+                this.loadData()
+            })
+        }
     }
-    _clickConfirmBtn() {
-
+    _clickCancelBtn() {
+        this.screen.openOrClosePanel(this.state.screenIndex)
+    }
+    _clickConfirmBtn(data) {
+        this.screen.openOrClosePanel(this.state.screenIndex);
+        this.setState({
+            country: data.country,
+            province: data.province,
+            city: data.city,
+            customData: data.country+data.province+data.city
+        },() => {
+            this.loadData();
+        })
+    }
+    _initCustomData() {
+        this.setState({
+            customData: '',
+            country: '',
+            province: '',
+            city: '',
+        },() => {
+            this.loadData()
+        })
+    }
+    loadData() {
+        const {onLoadVolunteer} = this.props;
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords','');
+        formData.append('sort', this.state.sort);
+        formData.append('page',1);
+        formData.append('country',this.state.country);
+        formData.append('province', this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', "");
+        formData.append('language', this.state.language);
+        formData.append('score', "");
+        onLoadVolunteer('volunteer', HttpUrl + 'User/user_list', formData, false, 0)
     }
     render(){
         return(
@@ -91,9 +143,10 @@ export default class Volunteer extends Component{
                             screenIndex: index
                         })
                     }}
+                    initCustomData={() => {this._initCustomData()}}
                     selectIndex={[0,0,0]}
                     customContent={this.getCustom()}
-                    customData={[]}
+                    customData={this.state.customData}
                     customFunc={()=>{
                         this.picker.showPicker()
                     }}
@@ -102,13 +155,14 @@ export default class Volunteer extends Component{
                     }}
                 >
                     <View style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start'}]}>
-                        <VolunteerContentMap  showFlash={(data)=>this._showFlash(data)}/>
+                        <VolunteerContentMap  showFlash={(data)=>this._showFlash(data)} {...this.state}/>
                         <RNEasyAddressPicker
                             hasCountry={true}
                             ref={picker => this.picker = picker}
                             selectCountry={(index) => {}}
                             selectCity={(index) => {}}
                             clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                            clickCancelBtn={() => {this._clickCancelBtn()}}
                         />
                         <FlashMessage position="top" />
                     </View>
@@ -117,6 +171,13 @@ export default class Volunteer extends Component{
         )
     }
 }
+const mapState = state => ({
+    token: state.token.token
+});
+const mapDispatch = dispatch => ({
+    onLoadVolunteer: (storeName, url, data,refreshType, oNum, callback) => dispatch(action.onLoadVolunteer(storeName, url, data,refreshType, oNum, callback)),
+})
+export default connect(mapState, mapDispatch)(Volunteer)
 const styles = StyleSheet.create({
     back_icon: {
         paddingLeft: width*0.03
@@ -150,13 +211,13 @@ class VolunteerContent extends Component{
         let formData=new FormData();
         formData.append('token', token);
         formData.append('keywords','');
-        formData.append('sort', "");
+        formData.append('sort', this.props.sort);
         formData.append('page',1);
-        formData.append('country','');
-        formData.append('province', "");
-        formData.append('city', "");
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
         formData.append('region', "");
-        formData.append('language', "");
+        formData.append('language', this.props.language);
         formData.append('score', "");
         if(val){
             onLoadVolunteer(this.storeName, HttpUrl + 'User/user_list', formData, refreshType, store.items.data.data.total, callback => {
@@ -173,13 +234,13 @@ class VolunteerContent extends Component{
         let formData = new FormData();
         formData.append('token', token);
         formData.append('keywords','');
-        formData.append('sort', "");
+        formData.append('sort', this.props.sort);
         formData.append('page',this.step);
-        formData.append('country','');
-        formData.append('province', "");
-        formData.append('city', "");
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
         formData.append('region', "");
-        formData.append('language', "");
+        formData.append('language', this.props.language);
         formData.append('score', "");
         onLoadMoreVolunteer(this.storeName, HttpUrl + 'User/user_list', formData , store.items, callback => {
 
@@ -249,16 +310,16 @@ class VolunteerContent extends Component{
                                 showsVerticalScrollIndicator = {false}
                                 renderItem={data=>this.renderItem(data)}
                                 keyExtractor={(item, index) => index.toString()}
-                                refreshControl={
-                                    <RefreshControl
-                                        title={'loading'}
-                                        titleColor={theme}
-                                        colors={[theme]}
-                                        refreshing={store.isLoading}
-                                        onRefresh={() => {this.loadData(true)}}
-                                        tintColor={theme}
-                                    />
-                                }
+                                // refreshControl={
+                                //     <RefreshControl
+                                //         title={'loading'}
+                                //         titleColor={theme}
+                                //         colors={[theme]}
+                                //         refreshing={store.isLoading}
+                                //         onRefresh={() => {this.loadData(true)}}
+                                //         tintColor={theme}
+                                //     />
+                                // }
                                 ListFooterComponent={() => this.genIndicator()}
                                 onEndReachedThreshold={0.1}
                                 onEndReached={() => {

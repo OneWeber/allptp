@@ -8,7 +8,7 @@ import {
     Dimensions,
     ActivityIndicator,
     FlatList,
-    RefreshControl,
+    RefreshControl, TouchableOpacity,
 } from 'react-native';
 import {connect} from 'react-redux'
 import Fetch from '../../expand/dao/Fetch';
@@ -21,13 +21,15 @@ import languageType from '../../json/languageType';
 import Viewswiper from '../../model/Viewswiper';
 import NewHttp from '../../utils/NewHttp';
 import NoData from '../../common/NoData';
+import NavigatorUtils from '../../navigator/NavigatorUtils';
 const {width, height} = Dimensions.get('window');
 class UserInfo extends Component{
     constructor(props) {
         super(props);
         this.user_id = this.props.navigation.state.params.user_id;
         this.state = {
-            userInfo: ''
+            userInfo: '',
+            tabIndex: 0
         }
     }
     componentDidMount() {
@@ -47,8 +49,21 @@ class UserInfo extends Component{
         })
     }
     render(){
-        const {userInfo} = this.state;
+        const {userInfo, tabIndex} = this.state;
         return <SafeAreaView style={{flex: 1}}>
+            <View style={[CommonStyle.flexStart,{
+                height: 50
+            }]}>
+                <TouchableOpacity onPress={()=>{
+                    NavigatorUtils.backToUp(this.props)
+                }}>
+                    <AntDesign
+                        name={'left'}
+                        size={20}
+                        style={{color:'#333',paddingLeft: width*0.03}}
+                    />
+                </TouchableOpacity>
+            </View>
             <ScrollView style={{width:'100%'}} showsVerticalScrollIndicator={false}>
                 <View style={CommonStyle.flexCenter}>
                     <UserHeader {...this.props} {...this.state}/>
@@ -66,22 +81,56 @@ class UserInfo extends Component{
                         </Text>
                     </View>
                     <UserList {...this.props} {...this.state}/>
-                    <Viewswiper titleList={['最新动态','体验','故事']} style={{marginTop:27,flex: 1}}>
-                        <View style={{width:width}}>
+                    <View style={[CommonStyle.flexStart,CommonStyle.commonWidth,{
+                        marginTop: 27
+                    }]}>
+                        <TouchableOpacity onPress={()=>{
+                            this.setState({
+                                tabIndex: 0
+                            })
+                        }}>
+                            <Text style={{
+                                color:tabIndex===0?this.props.theme:'#333',
+                                fontWeight: 'bold'
+                            }}>最新动态</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{
+                            marginLeft: 15
+                        }} onPress={()=>{
+                            this.setState({
+                                tabIndex: 1
+                            })
+                        }}>
+                            <Text style={{
+                                color:tabIndex===1?this.props.theme:'#333',
+                                fontWeight: 'bold'
+                            }}>体验</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{
+                            marginLeft: 15
+                        }} onPress={()=>{
+                            this.setState({
+                                tabIndex: 2
+                            })
+                        }}>
+                            <Text style={{
+                                color:tabIndex===2?this.props.theme:'#333',
+                                fontWeight: 'bold'
+                            }}>故事</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {
+                        tabIndex===0
+                        ?
                             <RecentNews {...this.props} user_id={this.user_id}/>
-                        </View>
-                        <View style={{width:width}}>
+                        :
+                            tabIndex===1
+                        ?
                             <Active {...this.props} user_id={this.user_id} {...this.state}/>
-                        </View>
-                        <View style={{width:width}}>
+                        :
                             <Story {...this.props} user_id={this.user_id} {...this.state}/>
-                        </View>
-                    </Viewswiper>
-
-
+                    }
                 </View>
-
-
             </ScrollView>
         </SafeAreaView>
     }
@@ -97,7 +146,7 @@ class UserHeader extends Component{
         const {userInfo} = this.props
         return(
             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
-                marginTop: 30
+                marginTop: 10
             }]}>
                 <LazyImage
                     source={userInfo&&userInfo.headimage&&userInfo.headimage.domain&&userInfo.headimage.image_url?
@@ -105,85 +154,103 @@ class UserHeader extends Component{
                         require('../../../assets/images/touxiang.png')}
                     style={{width:60,height:60,borderRadius: 30}}
                 />
-                <View style={[CommonStyle.spaceCol,{
-                    height: 60,
-                    width:width*0.94 - 214,
-                    alignItems:'flex-start',
+                <View style={[CommonStyle.spaceRow,{
+                    width: width*0.94-70
                 }]}>
-                    <Text style={{
-                        color:'#333',
-                        fontSize: 18,
-                        fontWeight:'600'}}>
-                        {
-                            userInfo.family_name||userInfo.middle_name||userInfo.name
-                            ?
-                                userInfo.family_name+userInfo.middle_name+userInfo.name
-                            :
-                                '匿名用户'
-                        }
-                    </Text>
-                    <View style={CommonStyle.flexStart}>
-                        {
-                            userInfo.isvolunteer && userInfo.audit_idcard == 1
+                    <View style={[CommonStyle.spaceCol,{
+                        height: 60,
+                        width:width*0.94 - 214,
+                        alignItems:'flex-start',
+                    }]}>
+                        <Text style={{
+                            color:'#333',
+                            fontSize: 18,
+                            fontWeight:'600'}}>
+                            {
+                                userInfo.family_name||userInfo.middle_name||userInfo.name
+                                    ?
+                                    userInfo.family_name+userInfo.middle_name+userInfo.name
+                                    :
+                                    '匿名用户'
+                            }
+                            {
+                                this.props.navigation.state.params.user_id == this.props.user.userid
                                 ?
-                                <LinearGradient colors={['#14BBCA', '#14c5ca']} style={[styles.role_item,CommonStyle.flexCenter,{
+                                    '(我)'
+                                :
+                                    null
+                            }
+                        </Text>
+                        <View style={CommonStyle.flexStart}>
+                            {
+                                userInfo.isvolunteer && userInfo.audit_idcard == 1
+                                    ?
+                                    <LinearGradient colors={['#14BBCA', '#14c5ca']} style={[styles.role_item,CommonStyle.flexCenter,{
+                                        marginRight: 10
+                                    }]}>
+                                        <Text style={{color:'#fff',fontSize:11}}>
+                                            志愿者
+                                        </Text>
+                                    </LinearGradient>
+                                    :
+                                    null
+                            }
+                            {
+                                userInfo.isplanner && userInfo.audit_face==2
+                                    ?
+                                    <LinearGradient colors={['#19CBBC', '#1ACBC9']} style={[styles.role_item,CommonStyle.flexCenter,{
+                                        marginRight:10
+                                    }]}>
+                                        <Text style={{color:'#fff',fontSize:11}}>
+                                            策划者
+                                        </Text>
+                                    </LinearGradient>
+                                    :
+                                    null
+                            }
+                        </View>
+                    </View>
+                    {
+                        this.props.navigation.state.params.user_id == this.props.user.userid
+                            ?
+                            <View style={CommonStyle.flexEnd}></View>
+                            :
+                            <View style={CommonStyle.flexEnd}>
+                                <View style={[CommonStyle.flexCenter,{
+                                    width: 49,
+                                    height: 24,
+                                    borderRadius: 12,
+                                    borderWidth: 1,
+                                    borderColor: this.props.theme,
+                                    flexDirection: 'row',
                                     marginRight: 10
                                 }]}>
-                                    <Text style={{color:'#fff',fontSize:11}}>
-                                        志愿者
-                                    </Text>
-                                </LinearGradient>
-                                :
-                                null
-                        }
-                        {
-                            userInfo.isplanner && userInfo.audit_face==2
-                                ?
-                                <LinearGradient colors={['#19CBBC', '#1ACBC9']} style={[styles.role_item,CommonStyle.flexCenter,{
-                                    marginRight:10
+                                    <AntDesign
+                                        name={'plus'}
+                                        size={12}
+                                        style={{color: this.props.theme}}
+                                    />
+                                    <Text style={{
+                                        color:this.props.theme,
+                                        fontSize: 12
+                                    }}>关注</Text>
+                                </View>
+                                <View style={[CommonStyle.flexCenter,{
+                                    width: 65,
+                                    height: 24,
+                                    borderRadius: 12,
+                                    borderWidth: 1,
+                                    borderColor: this.props.theme
                                 }]}>
-                                    <Text style={{color:'#fff',fontSize:11}}>
-                                        策划者
-                                    </Text>
-                                </LinearGradient>
-                                :
-                                null
-                        }
-                    </View>
+                                    <Text style={{
+                                        color:this.props.theme,
+                                        fontSize: 12
+                                    }}>添加好友</Text>
+                                </View>
+                            </View>
+                    }
                 </View>
-                <View style={CommonStyle.flexEnd}>
-                    <View style={[CommonStyle.flexCenter,{
-                        width: 49,
-                        height: 24,
-                        borderRadius: 12,
-                        borderWidth: 1,
-                        borderColor: this.props.theme,
-                        flexDirection: 'row',
-                        marginRight: 10
-                    }]}>
-                        <AntDesign
-                            name={'plus'}
-                            size={12}
-                            style={{color: this.props.theme}}
-                        />
-                        <Text style={{
-                            color:this.props.theme,
-                            fontSize: 12
-                        }}>关注</Text>
-                    </View>
-                    <View style={[CommonStyle.flexCenter,{
-                        width: 65,
-                        height: 24,
-                        borderRadius: 12,
-                        borderWidth: 1,
-                        borderColor: this.props.theme
-                    }]}>
-                        <Text style={{
-                            color:this.props.theme,
-                            fontSize: 12
-                        }}>添加好友</Text>
-                    </View>
-                </View>
+
             </View>
         )
     }
@@ -250,156 +317,159 @@ class RecentNews extends Component{
     }
     render() {
         let dynamic = [];
-        for(let i=0;i<this.state.dynamicList.length;i++) {
-            dynamic.push(
-                <View style={{
-                    padding: 14,
-                    backgroundColor:'#fff',
-                    marginTop: 15
-                }}>
-                    <View style={[CommonStyle.flexStart]}>
-                        <LazyImage
-                            source={this.state.dynamicList[i]&&this.state.dynamicList[i].domain&&this.state.dynamicList[i].image_url?
-                                {uri:this.state.dynamicList[i].domain+this.state.dynamicList[i].image_url}:
-                                require('../../../assets/images/touxiang.png')}
-                            style={{width:40,height:40,borderRadius: 20}}
-                        />
-                        <View style={[CommonStyle.spaceCol,{
-                            height:40,
-                            marginLeft: 12,
-                            alignItems:'flex-start'
-                        }]}>
-                            <View style={CommonStyle.flexStart}>
-                                {
-                                    this.props.user_id === this.props.user.userid
-                                        ?
-                                        <Text style={{color:'#333'}}>你</Text>
-                                        :
-                                        this.state.dynamicList[i].family_name||this.state.dynamicList[i].middle_name||this.state.dynamicList[i].name
+        if(this.state.dynamicList&&this.state.dynamicList.length>0) {
+            for(let i=0;i<this.state.dynamicList.length;i++) {
+                dynamic.push(
+                    <View style={{
+                        padding: 14,
+                        backgroundColor:'#fff',
+                        marginTop: 15
+                    }}>
+                        <View style={[CommonStyle.flexStart]}>
+                            <LazyImage
+                                source={this.state.dynamicList[i]&&this.state.dynamicList[i].domain&&this.state.dynamicList[i].image_url?
+                                    {uri:this.state.dynamicList[i].domain+this.state.dynamicList[i].image_url}:
+                                    require('../../../assets/images/touxiang.png')}
+                                style={{width:40,height:40,borderRadius: 20}}
+                            />
+                            <View style={[CommonStyle.spaceCol,{
+                                height:40,
+                                marginLeft: 12,
+                                alignItems:'flex-start'
+                            }]}>
+                                <View style={CommonStyle.flexStart}>
+                                    {
+                                        this.props.user_id === this.props.user.userid
                                             ?
-                                            <Text style={{color:'#333'}}>
-                                               {this.state.dynamicList[i].family_name+this.state.dynamicList[i].middle_name+this.state.dynamicList[i].name}
-                                            </Text>
+                                            <Text style={{color:'#333'}}>你</Text>
                                             :
-                                            <Text style={{color:'#333'}}>匿名用户</Text>
-                                }
-                                <Text style={{
-                                    marginLeft: 10,
-                                    color:'#333'
-                                }}>{this.state.dynamicList[i].flag==1?'创建活动:':this.state.dynamicList[i].flag==2?'发布故事:':'转发:'}</Text>
+                                            this.state.dynamicList[i].family_name||this.state.dynamicList[i].middle_name||this.state.dynamicList[i].name
+                                                ?
+                                                <Text style={{color:'#333'}}>
+                                                    {this.state.dynamicList[i].family_name+this.state.dynamicList[i].middle_name+this.state.dynamicList[i].name}
+                                                </Text>
+                                                :
+                                                <Text style={{color:'#333'}}>匿名用户</Text>
+                                    }
+                                    <Text style={{
+                                        marginLeft: 10,
+                                        color:'#333'
+                                    }}>{this.state.dynamicList[i].flag==1?'创建活动:':this.state.dynamicList[i].flag==2?'发布故事:':'转发:'}</Text>
+                                </View>
+                                <Text style={{color:'#666',fontSize: 12}}>{this.state.dynamicList[i].create_time}</Text>
                             </View>
-                            <Text style={{color:'#666',fontSize: 12}}>{this.state.dynamicList[i].create_time}</Text>
                         </View>
-                    </View>
-                    <View style={{marginTop: 15}}>
-                        {
-                            this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length === 1
-                                ?
-                                <LazyImage
-                                    source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
-                                    style={{width:'100%',height:150}}
-                                />
-                                :
-                            this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length === 2
+                        <View style={{marginTop: 15}}>
+                            {
+                                this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image&&this.state.dynamicList[i].datas.image.length === 1
                                     ?
-                                    <View style={CommonStyle.spaceRow}>
-                                        <LazyImage
-                                            source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
-                                            style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
-                                        />
-                                        <LazyImage
-                                            source={{uri:this.state.dynamicList[i].datas.image[1].domain+this.state.dynamicList[i].datas.image[1].image_url}}
-                                            style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
-                                        />
-                                    </View>
+                                    <LazyImage
+                                        source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
+                                        style={{width:'100%',height:150}}
+                                    />
                                     :
-                                this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image.length >=3
-                                ?
-                                    <View style={CommonStyle.spaceRow}>
-                                        <LazyImage
-                                            source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
-                                            style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
-                                        />
-                                        <View style={[CommonStyle.spaceCol,{
-                                            width:(width*0.94 - 5 -28)/2,
-                                            height: 150
-                                        }]}>
+                                    this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image&&this.state.dynamicList[i].datas.image.length === 2
+                                        ?
+                                        <View style={CommonStyle.spaceRow}>
+                                            <LazyImage
+                                                source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
+                                                style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
+                                            />
                                             <LazyImage
                                                 source={{uri:this.state.dynamicList[i].datas.image[1].domain+this.state.dynamicList[i].datas.image[1].image_url}}
-                                                style={{width:(width*0.94 - 5 -28)/2,height:72.5,borderRadius: 2}}
-                                            />
-                                            <LazyImage
-                                                source={{uri:this.state.dynamicList[i].datas.image[2].domain+this.state.dynamicList[i].datas.image[2].image_url}}
-                                                style={{width:(width*0.94 - 5 -28)/2,height:72.5,borderRadius: 2}}
+                                                style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
                                             />
                                         </View>
-                                    </View>
-                                :
-                                    null
-                        }
-                    </View>
-                    <Text style={{
-                        color:'#999',
-                        fontSize: 12,
-                        marginTop: 12
-                    }}>{this.state.dynamicList[i].datas.country+this.state.dynamicList[i].datas.province+this.state.dynamicList[i].datas.city+this.state.dynamicList[i].datas.region}</Text>
-                    <Text style={{
-                        color:'#333',
-                        fontWeight: "bold",
-                        marginTop: 10.5
-                    }}>{this.state.dynamicList[i].datas.title}</Text>
-                    {
-                        this.state.dynamicList[i].flag===2
-                        ?
-                            <Text numberOfLines={2} ellipsizeMode={'tail'}
-                                  style={{
-                                      lineHeight: 20,
-                                      color:'#333',
-                                      fontSize: 13,
-                                      marginTop: 9
-                                  }}>{this.state.dynamicList[i].datas.content}</Text>
-                        :
-                            null
-                    }
-
-                    <View style={[CommonStyle.flexStart,{
-                        marginTop: 18
-                    }]}>
-                        <View style={CommonStyle.flexStart}>
-                            <Text style={{color:'#999',fontSize: 12}}>评论</Text>
-                            <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.leaving_num}</Text>
+                                        :
+                                        this.state.dynamicList[i]&&this.state.dynamicList[i].datas&&this.state.dynamicList[i].datas.image&&this.state.dynamicList[i].datas.image.length >=3
+                                            ?
+                                            <View style={CommonStyle.spaceRow}>
+                                                <LazyImage
+                                                    source={{uri:this.state.dynamicList[i].datas.image[0].domain+this.state.dynamicList[i].datas.image[0].image_url}}
+                                                    style={{width:(width*0.94 - 5 -28)/2,height:150,borderRadius: 2}}
+                                                />
+                                                <View style={[CommonStyle.spaceCol,{
+                                                    width:(width*0.94 - 5 -28)/2,
+                                                    height: 150
+                                                }]}>
+                                                    <LazyImage
+                                                        source={{uri:this.state.dynamicList[i].datas.image[1].domain+this.state.dynamicList[i].datas.image[1].image_url}}
+                                                        style={{width:(width*0.94 - 5 -28)/2,height:72.5,borderRadius: 2}}
+                                                    />
+                                                    <LazyImage
+                                                        source={{uri:this.state.dynamicList[i].datas.image[2].domain+this.state.dynamicList[i].datas.image[2].image_url}}
+                                                        style={{width:(width*0.94 - 5 -28)/2,height:72.5,borderRadius: 2}}
+                                                    />
+                                                </View>
+                                            </View>
+                                            :
+                                            null
+                            }
                         </View>
-                        <View style={[CommonStyle.flexStart,{
-                            marginLeft: 15
-                        }]}>
-                            <Text style={{color:'#999',fontSize: 12}}>收藏</Text>
-                            <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.collection_num}</Text>
-                        </View>
+                        <Text style={{
+                            color:'#999',
+                            fontSize: 12,
+                            marginTop: 12
+                        }}>{this.state.dynamicList[i].datas.country+this.state.dynamicList[i].datas.province+this.state.dynamicList[i].datas.city+this.state.dynamicList[i].datas.region}</Text>
+                        <Text style={{
+                            color:'#333',
+                            fontWeight: "bold",
+                            marginTop: 10.5
+                        }}>{this.state.dynamicList[i].datas.title}</Text>
                         {
-                            this.state.dynamicList[i].flag === 2
+                            this.state.dynamicList[i].flag===2
                                 ?
-                                <View style={[CommonStyle.flexStart,{
-                                    marginLeft: 15
-                                }]}>
-                                    <Text style={{color:'#999',fontSize: 12}}>赞</Text>
-                                    <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.praise_num}</Text>
-                                </View>
+                                <Text numberOfLines={2} ellipsizeMode={'tail'}
+                                      style={{
+                                          lineHeight: 20,
+                                          color:'#333',
+                                          fontSize: 13,
+                                          marginTop: 9
+                                      }}>{this.state.dynamicList[i].datas.content}</Text>
                                 :
                                 null
                         }
+
+                        <View style={[CommonStyle.flexStart,{
+                            marginTop: 18
+                        }]}>
+                            <View style={CommonStyle.flexStart}>
+                                <Text style={{color:'#999',fontSize: 12}}>评论</Text>
+                                <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.leaving_num}</Text>
+                            </View>
+                            <View style={[CommonStyle.flexStart,{
+                                marginLeft: 15
+                            }]}>
+                                <Text style={{color:'#999',fontSize: 12}}>收藏</Text>
+                                <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.collection_num}</Text>
+                            </View>
+                            {
+                                this.state.dynamicList[i].flag === 2
+                                    ?
+                                    <View style={[CommonStyle.flexStart,{
+                                        marginLeft: 15
+                                    }]}>
+                                        <Text style={{color:'#999',fontSize: 12}}>赞</Text>
+                                        <Text style={{color:'#999',fontSize: 12,marginLeft: 3}}>{this.state.dynamicList[i].datas.praise_num}</Text>
+                                    </View>
+                                    :
+                                    null
+                            }
+                        </View>
+
+
                     </View>
-
-
-                </View>
-            )
+                )
+            }
         }
+
         return(
             <View style={CommonStyle.flexCenter}>
                 <View style={CommonStyle.commonWidth}>
                     {
                         this.state.isLoading
                         ?
-                            <ActivityIndicator size={'small'} color={this.props.theme}/>
+                            <ActivityIndicator size={'small'} color={this.props.theme} style={{marginTop: 20}}/>
                         :
                             this.state.dynamicList.length > 0
                         ?
@@ -460,7 +530,7 @@ class Story extends Component{
     render(){
         const {story_list} = this.props.userInfo;
         let story = [];
-        if(story_list) {
+        if(story_list&&story_list.length>0) {
             for(let i=0;i<story_list.length;i++) {
                 story.push(
                     <View style={[{

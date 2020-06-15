@@ -6,10 +6,15 @@ import NewHttp from '../../../utils/NewHttp';
 import action from '../../../action';
 import HttpUrl from '../../../utils/Http';
 class SystemWebview extends Component{
-    componentDidMount() {
-
-    }
-
+    // componentDidMount() {
+    //     const {onLoadSystemMsg} = this.props;
+    //     this.storeName = 'systemmsg'
+    //     this.step = 1
+    //     let formData=new FormData();
+    //     formData.append('token', this.props.token);
+    //     formData.append('page', 1);
+    //     onLoadSystemMsg(this.storeName, NewHttp+'sysmsgl', formData)
+    // }
     render(){
         return(
             <View>
@@ -22,7 +27,6 @@ const mapStateToProps = state => ({
     token: state.token.token
 });
 const mapDispatchToProps = dispatch => ({
-    onLoadNoRead: (storeName, url, data) => dispatch(action.onLoadNoRead(storeName, url, data)),
-    onLoadMoreSystemMsg: (storeName, url, data, oItems) => dispatch(action.onLoadMoreSystemMsg(storeName, url, data, oItems))
+    onLoadSystemMsg: (storeName, url, data) => dispatch(action.onLoadSystemMsg(storeName, url, data)),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(SystemWebview)

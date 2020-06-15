@@ -51,3 +51,12 @@ export function changeAccImageId(arr) {
 export function changeDate(arr) {
     return {type:Types.CHANGE_DATE, arr}
 }
+export function changeDateValue(arr) {
+    return {type:Types.CHANGE_DATEVALUE, arr}
+}
+export function changeNewDate(arr) {
+    return {type:Types.CHANGE_NEWDATE, arr}
+}
+export function changeType(types) {
+    return {type:Types.CHANGE_TYPE, types}
+}

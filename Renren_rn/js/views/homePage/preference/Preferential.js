@@ -6,49 +6,99 @@ import {connect} from 'react-redux'
 import holiday from '../../../json/holiday';
 import CommonStyle from '../../../../assets/css/Common_css';
 import Screening from '../../../model/screen';
+import Fetch from '../../../expand/dao/Fetch';
+import NewHttp from '../../../utils/NewHttp';
+import {removeDuplicatedItem, objRemoveDuplicated} from '../../../utils/auth';
 const {width, height} = Dimensions.get('window')
 class Preferential extends Component{
     constructor(props) {
         super(props);
-        this.tabNames = ['节假日特惠','低至3折','低至5折']
+        this.tabNames = ['节假日特惠','低至3折','低至5折'];
+        this.state = {
+            discount: [],
+            tabNames: []
+        }
+    }
+    componentDidMount() {
+        this.loadData()
+    }
+    loadData() {
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('version', '2.0')
+        Fetch.post(NewHttp+'DiscountTwo', formData).then(res => {
+            if(res.code === 1) {
+                let data = res.data;
+                let disData = this.state.discount;
+                for(let i=0;i<data.length;i++){
+                    disData.push(parseFloat(data[i].price_discount))
+                }
+                disData = removeDuplicatedItem(disData)
+                this.setState({
+                    discount: disData.sort()
+                },() => {
+                    const {discount} = this.state;
+                    let data = this.state.tabNames;
+                    data.push(discount[0]);
+                    data.push(discount[discount.length/2]);
+                    data.push(discount[discount.length-1]);
+                    this.setState({
+                        tabNames: data
+                    })
+                })
+            }
+        })
     }
     render(){
         const {theme} = this.props;
         return(
             <View style={{flex: 1,backgroundColor:'#fff'}}>
-                <ScrollableTabView
-                    renderTabBar={() => (<CustomeTabBar
-                        backgroundColor={'rgba(0,0,0,0)'}
-                        locked={true}
-                        sabackgroundColor={'#fff'}
-                        scrollWithoutAnimation={true}
-                        tabUnderlineDefaultWidth={25}
-                        tabUnderlineScaleX={6} // default 3
-                        activeColor={'#333'}
-                        isWishLarge={true}
-                        navigation={this.props.navigation}
-                        inactiveColor={'#b5b5b5'}
-                        isPreferential={true}
-                        lineColor={theme}
-                    />)}>
-                    {
-                        this.tabNames.map((item, index) => {
-                            return <PreferentialItem key={index} tabLabel={item} />
-                        })
-                    }
-                </ScrollableTabView>
+                {
+                    this.state.tabNames.length>0
+                    ?
+                        <ScrollableTabView
+                            initialPage={this.props.navigation.state.params.initPage?this.props.navigation.state.params.initPage:0}
+                            renderTabBar={() => (<CustomeTabBar
+                                backgroundColor={'rgba(0,0,0,0)'}
+                                locked={true}
+                                sabackgroundColor={'#fff'}
+                                scrollWithoutAnimation={true}
+                                tabUnderlineDefaultWidth={25}
+                                tabUnderlineScaleX={6} // default 3
+                                activeColor={'#333'}
+                                isWishLarge={true}
+                                navigation={this.props.navigation}
+                                inactiveColor={'#b5b5b5'}
+                                isPreferential={true}
+                                lineColor={theme}
+                            />)}>
+                            {
+                                this.state.tabNames.map((item, index) => {
+                                    return <PreferentialItem
+                                        key={index}
+                                        tabLabel={'低至'+JSON.stringify(item)+'折'}
+                                        item={item}
+                                        {...this.props}
+                                    />
+                                })
+                            }
+                        </ScrollableTabView>
+                    :
+                        null
+                }
+
             </View>
         )
     }
 }
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    token: state.token.token
 })
 export default connect(mapStateToProps)(Preferential)
 class PreferentialItem extends Component{
     constructor(props) {
         super(props);
-        this.calendar = holiday;
         this.tabNames = [
             {
                 title:'类型',
@@ -70,7 +120,62 @@ class PreferentialItem extends Component{
                 data:[],
                 type: 3
             }
-        ]
+        ];
+        this.state = {
+            customData: '',
+            kind_id: '',
+            sort: '',
+            country: '',
+            province: '',
+            city: '',
+            region: '',
+            activeList: []
+        }
+    }
+    componentDidMount() {
+        this.loadData()
+    }
+    loadData() {
+        const {item} = this.props;
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords', '');
+        formData.append('sort', this.state.sort);
+        formData.append('page', 1);
+        formData.append('price_low', '');
+        formData.append('price_high','');
+        formData.append('country',this.state.country);
+        formData.append('province', this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', '');
+        formData.append('activ_begin_time', '');
+        formData.append('activ_end_time', '');
+        formData.append('laguage', '');
+        formData.append('kind_id',this.state.kind_id);
+        formData.append('is_volunteen', '');
+        formData.append('max_person_num', '');
+        Fetch.post(NewHttp+'ActivityListUserTwo', formData).then(res => {
+            if(res.code === 1) {
+                console.log('item', item)
+                let resData = res.data.data;
+                console.log('resData', resData)
+                let data = [];
+                for(let i=0;i<resData.length; i++) {
+                    let concat = []
+                    if(resData[i].price_discount_concat) {
+                        concat = resData[i].price_discount_concat.split(',');
+                        for(let j=0;j<concat.length;j++){
+                            if(item>=parseFloat(concat[j])) {
+                                data.push(resData[i])
+                            }
+                        }
+                    }
+                }
+                data = objRemoveDuplicated(data);
+                console.log(data)
+
+            }
+        })
     }
     getCustom(){
 
@@ -78,31 +183,6 @@ class PreferentialItem extends Component{
     render(){
         const {tabLabel} = this.props
         return <View style={{flex: 1}}>
-            {
-                tabLabel==='节假日特惠'
-                ?
-                    <View style={{marginTop: 20,height:35}}>
-                        <ScrollView
-                            ref={refScrollView=>this.refScrollView=refScrollView}
-                            horizontal = {true}
-                            showsHorizontalScrollIndicator = {false}
-                            pagingEnabled = {true}
-                        >
-                            {
-                                this.calendar.map((item, index) => {
-                                    return <TouchableOpacity key={index} style={[styles.calendarItem, CommonStyle.flexCenter,{
-                                        marginLeft:index===0?width*0.03:20,
-                                        marginRight: index === this.calendar.length-1?width*0.03:0
-                                    }]}>
-                                        <Text style={{color:'#333',fontSize: 12}}>{item.month}月/{item.title}</Text>
-                                    </TouchableOpacity>
-                                })
-                            }
-                        </ScrollView>
-                    </View>
-                :
-                    null
-            }
             <Screening
                 ref={screen => this.screen = screen}
                 screenData={this.tabNames}
@@ -113,7 +193,7 @@ class PreferentialItem extends Component{
                 }}
                 selectIndex={[0,0,0,0]}
                 customContent={this.getCustom()}
-                customData={[]}
+                customData={this.state.customData}
                 customFunc={()=>{
 
                 }}

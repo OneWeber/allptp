@@ -47,11 +47,17 @@ class Language extends Component{
         }
     }
     componentDidMount() {
-        const {activity_id} = this.props;
+        const {activity_id, changeType} = this.props;
         if(activity_id === '') {
             return
         } else {
             this.initData()
+        }
+        if(this.props.navigation.state.params.type) {
+            console.log(1212121)
+            changeType(1)
+        }else{
+            changeType(0)
         }
     }
     initData() {
@@ -64,6 +70,7 @@ class Language extends Component{
         formData.append("activity_id",this.props.activity_id);
         Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
             if(res.code === 1) {
+                console.log('数据', res.data)
                 this.setState({
                     languageIndex: res.data.main_laguage,
                     selectOther: res.data.other_laguage===''?[]:res.data.other_laguage.split(','),
@@ -396,6 +403,7 @@ const mapDispatchToProps = dispatch => ({
     changeOtherLanguage: data => dispatch(action.changeOtherLanguage(data)),
     changeActivityId: id => dispatch(action.changeActivityId(id)),
     onLoadUncommit:(storeName, url, data) => dispatch(action.onLoadUncommit(storeName, url, data)),
-    changeStatus: arr => dispatch(action.changeStatus(arr))
+    changeStatus: arr => dispatch(action.changeStatus(arr)),
+    changeType: types => dispatch(action.changeType(types))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(Language)

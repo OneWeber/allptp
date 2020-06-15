@@ -17,26 +17,52 @@ export default class GuidePage extends Component{
     }
     render(){
         const pageArray = [{
-            title: 'Page 1',
-            description: 'Description 1',
-            img: 'https://goo.gl/Bnc3XP',
+            title: '成为策划人',
+            description: '玩乐收益两不误',
+            img: require('../../assets/images/guide/cwchr.png'),
             imgStyle: {
-                height: 80 * 2.5,
+                height: 150 * 2.5,
                 width: 109 * 2.5,
+                marginTop: 30
             },
-            backgroundColor: '#fa931d',
-            fontColor: '#fff',
+            backgroundColor: '#fff',
+            fontColor: '#333',
             level: 10,
         }, {
-            title: 'Page 2',
-            description: 'Description 2',
-            img: 'https://goo.gl/Bnc3XP',
+            title: '加入志愿者',
+            description: '发现更多有趣体验',
+            img: require('../../assets/images/guide/jrzyz.png'),
             imgStyle: {
-                height: 93 * 2.5,
-                width: 103 * 2.5,
+                height: 150 * 2.5,
+                width: 109 * 2.5,
+                marginTop: 30
             },
-            backgroundColor: '#a4b602',
-            fontColor: '#fff',
+            backgroundColor: '#fff',
+            fontColor: '#333',
+            level: 10,
+        },{
+            title: '发布故事',
+            description: '分析旅途回忆',
+            img: require('../../assets/images/guide/fbgs.png'),
+            imgStyle: {
+                height: 150 * 2.5,
+                width: 109 * 2.5,
+                marginTop: 30
+            },
+            backgroundColor: '#fff',
+            fontColor: '#333',
+            level: 10,
+        },{
+            title: '参与体验',
+            description: '变身玩乐达人',
+            img: require('../../assets/images/guide/cyty.png'),
+            imgStyle: {
+                height: 150 * 2.5,
+                width: 109 * 2.5,
+                marginTop: 30
+            },
+            backgroundColor: '#fff',
+            fontColor: '#333',
             level: 10,
         }];
         NavigatorUtils.navigation = this.props.navigation

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, Dimensions, TouchableOpacity, FlatList} from 'react-native';
+import {StyleSheet, View, Text, Dimensions, TouchableOpacity, FlatList, ScrollView,ActivityIndicator} from 'react-native';
 import {connect} from 'react-redux'
 import CommonStyle from '../../../assets/css/Common_css';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
@@ -7,11 +7,18 @@ import NavigatorUtils from '../../navigator/NavigatorUtils';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Loading from '../../common/Loading';
 import action from '../../action';
+import {getAll} from '../../utils/auth'
+import Fetch from '../../expand/dao/Fetch';
+import NewHttp from '../../utils/NewHttp';
+import Modal from 'react-native-modalbox';
+import Toast from 'react-native-easy-toast';
 const {width, height} = Dimensions.get('window')
 class SingleDay extends Component{
     constructor(props) {
         super(props);
-        this.days=['日','一','二','三','四','五','六']
+        this.days=['日','一','二','三','四','五','六'];
+        this.vol = this.props.navigation.state.params.vol;
+        this.isMe = this.props.navigation.state.params.isMe;
         this.state = {
             monthList: [],
             selected: [],
@@ -19,7 +26,8 @@ class SingleDay extends Component{
             topIndex:-1,
             date:'',
             isSlotView: false,
-            slotList: []
+            slotList: [],
+            detailLoading: false
         }
     }
     componentDidMount(){
@@ -28,11 +36,14 @@ class SingleDay extends Component{
     initSlot(){
         let slot = this.props.slot,monthArr=[];
         for(let i=0;i<slot.length;i++){
-            monthArr.push({
-                y:parseFloat(slot[i].day.split('-')[0]),
-                m:parseFloat(slot[i].day.split('-')[1]),
-                date:this.parseDate(slot[i].day.split('-')[0]+'-'+slot[i].day.split('-')[1]+'-1')
-            })
+            let slotDay = getAll(slot[i].date, slot[i].date)
+            for(let k=0;k<slotDay.length; k++) {
+                monthArr.push({
+                    y:parseFloat(slotDay[k].split('-')[0]),
+                    m:parseFloat(slotDay[k].split('-')[1]),
+                    date:this.parseDate(slotDay[k].split('-')[0]+'-'+slotDay[k].split('-')[1]+'-1')
+                })
+            }
         }
         monthArr=this.objRemoveDuplicated(monthArr);
         monthArr=monthArr.sort(function (a, b) {
@@ -53,8 +64,11 @@ class SingleDay extends Component{
                     selectArr.push(1);
                     selecting.push(0)
                     for(let k=0;k<slot.length;k++){
-                        if(this.parseDate(monthList[i].y+"-"+monthList[i].m+"-"+j)==this.parseDate(slot[k].day)- 8.64e7){
-                            selectArr[j]=slot[k].status
+                        let slotDay = getAll(slot[k].date, slot[k].date)
+                        for(let l=0;l<slotDay.length; l++) {
+                            if(this.parseDate(monthList[i].y+"-"+monthList[i].m+"-"+j)==this.parseDate(slotDay[l])- 8.64e7){
+                                selectArr[j]=slot[k].status
+                            }
                         }
                     }
                 }
@@ -168,7 +182,7 @@ class SingleDay extends Component{
     selectDay(status,date,i,index){
         this.setState({
             topIndex: i,
-            date: date
+            date: date,
         })
         const {calendarArr} = this.state
         const {slot} = this.props
@@ -184,80 +198,284 @@ class SingleDay extends Component{
         //isSlotView
         if(status === 0) {
             this.setState({
-                isSlotView: true
+                detailLoading: true
             }, () => {
-                for(let i=0; i<slot.length; i++) {
-                    if(this.parseDate(date) === this.parseDate(slot[i].day)) {
+                this.refs.list.open()
+                const {join} = this.props;
+                let formData = new FormData();
+                formData.append('token', this.props.token);
+                formData.append('version', '2.0');
+                formData.append('activity_id', join.activity_id);
+                formData.append('date', date);
+                Fetch.post(NewHttp+'ActivitySlotDetailTwo', formData).then(res => {
+                    if(res.code === 1) {
                         this.setState({
-                            slotList: slot[i].list
+                            detailLoading: false,
+                            slotList: res.data
                         })
                     }
-                }
+                })
             })
         }
     }
-    toNext(price,slot_id,beginTme,endTime){
-        const {issatay} = this.props.navigation.state.params
-        if(issatay){
-            alert(111)
-            return
+    _joinItem(slot_id,is_discount,price_origin,price,kids_price,kids_price_origin,begin_time,end_time,combine, max_person_num,order_person_num) {
+        this.refs.list.close();
+        const {initJoin, join} = this.props;
+        let data = {
+            activity_id: join.activity_id,
+            slot_id: slot_id,
+            person: [],
+            house: this.props.navigation.state.params.house,
+            houseid:[],
+            adult_price_origin: price_origin,
+            adult_price:price,
+            kids_price_origin: kids_price_origin,
+            kids_price:kids_price,
+            age_limit: '',
+            date: this.state.date,
+            begin_time: begin_time,
+            end_time: end_time,
+            is_discount: is_discount,
+            combine: combine,
+            title: this.props.navigation.state.params.title,
+            kids_stand_low: this.props.navigation.state.params.kids_stand_low,
+            kids_stand_high: this.props.navigation.state.params.kids_stand_high,
+            selectCombine: [],
+            longday:1,
+            begin_date: '',
+            end_date: ''
         }
-        const {join, initJoin} = this.props
-        let datas = join;
-        datas.price = price
-        datas.slot_id = slot_id;
-        datas.date = this.state.date
-        datas.slot_time = beginTme+"-"+endTime
-        initJoin(datas)
-        NavigatorUtils.goPage({}, 'Requirements', 'navigate')
+        initJoin(data);
+        NavigatorUtils.goPage({max_person_num: max_person_num,order_person_num:order_person_num}, 'ConfirmVisitors')
+    }
+    toSignUp(slot_id) {
+        let _this = this;
+        const {join} = this.props;
+        this.refs.list.close();
+        NavigatorUtils.goPage({
+            slot_id: slot_id,
+            activity_id: join.activity_id,
+            refresh:function () {
+                _this.refs.toast.show('申请已成功提交')
+            }
+        }, 'SignUp')
     }
     _renderList(data){
         const {isMe, vol} = this.props.navigation.state.params
         return (
-            <View style={[CommonStyle.flexCenter,{paddingTop: 10, paddingBottom: 10}]}>
-                <View style={[CommonStyle.commonWidth, CommonStyle.spaceRow]}>
-                    <View style={[CommonStyle.spaceCol,{height: 40,width: width*0.94 - 80,alignItems: 'flex-start'}]}>
-                        <Text numberOfLines={1} ellipsizeMode={'tail'} style={{color:"#333333",fontWeight: "bold"}}>
-                            {data.item.time[0]} - {data.item.time[1]}
-                        </Text>
-                        {
-                            vol
-                            ?
-                                <Text style={{color: '#999'}}>志愿者无需付费</Text>
-                            :
-                                <Text style={{color: '#999'}}>
-                                    <Text style={{color:this.props.theme,fontWeight:'bold'}}>¥{data.item.price}/人起 </Text>
-                                    还剩{data.item.personNum-data.item.order_person_num}个名额
-                                </Text>
-                        }
+            <View style={[CommonStyle.flexCenter]}>
+                <View style={[CommonStyle.commonWidth,{
+                    borderBottomColor: '#f5f5f5',
+                    borderBottomWidth: 1,
+                    paddingBottom: 15
+                }]}>
+                    <View style={[CommonStyle.commonWidth, CommonStyle.spaceRow,{
+                        paddingTop: 15,
+                        paddingBottom: 15,
+                    }]}>
+                       <View style={{
+                           width: width*0.95-95
+                       }}>
+                            <Text style={{
+                                color:'#333',
+                                fontWeight: 'bold',
+                                fontSize: 15
+                            }}>{data.item.begin_time} -- {data.item.end_time}</Text>
+                           <View style={[CommonStyle.flexStart,{
+                               marginTop: 15
+                           }]}>
+                               <Text style={{
+                                   fontSize: 12,
+                                   color:'#333'
+                               }}>标准</Text>
+                               <Text style={{
+                                   marginLeft: 10,
+                                   fontSize: 12,
+                                   color:'#333'}}>
+                                   {data.item.is_discount?'¥'+data.item.price:'¥'+data.item.price_origin}
+                               </Text>
+                               {
+                                   data.item.is_discount
+                                   ?
+                                       <View style={[CommonStyle.flexCenter,{
+                                           position:'relative',
+                                           marginLeft: 10,
+                                       }]}>
+                                           <Text style={{
+                                               fontSize: 12,
+                                               color:'#999'
+                                           }}>
+                                               {data.item.price_origin}
+                                           </Text>
+                                           <View style={{
+                                               position:'absolute',
+                                               left:0,
+                                               right:0,
+                                               top: 7,
+                                               borderTopWidth: 1,
+                                               borderTopColor: "#999"
+                                           }}></View>
+                                       </View>
+                                   :
+                                    null
+                               }
+                           </View>
+                           <View style={[CommonStyle.flexStart,{
+                               marginTop: 15
+                           }]}>
+                               <Text style={{
+                                   fontSize: 12,
+                                   color:'#333'
+                               }}>儿童</Text>
+                               <Text style={{
+                                   marginLeft: 10,
+                                   fontSize: 12,
+                                   color:'#333'}}>
+                                   {data.item.is_discount?'¥'+data.item.kids_price:'¥'+data.item.kids_price_origin}
+                               </Text>
+                               {
+                                   data.item.is_discount
+                                       ?
+                                       <View style={[CommonStyle.flexCenter,{
+                                           position:'relative',
+                                           marginLeft: 10,
+                                       }]}>
+                                           <Text style={{
+                                               fontSize: 12,
+                                               color:'#999'
+                                           }}>
+                                               {data.item.kids_price_origin}
+                                           </Text>
+                                           <View style={{
+                                               position:'absolute',
+                                               left:0,
+                                               right:0,
+                                               top: 7,
+                                               borderTopWidth: 1,
+                                               borderTopColor: "#999"
+                                           }}></View>
+                                       </View>
+                                       :
+                                       null
+                               }
+                           </View>
+                       </View>
+
+                       <View style={{
+                           width: 75
+                       }}>
+                           {
+                               this.isMe
+                               ?
+                                   null
+                               :
+                               this.vol
+                               ?
+                                   <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                       width: 75,
+                                       height: 40,
+                                       backgroundColor: this.props.theme,
+                                       borderRadius: 6
+                                   }]}
+                                   onPress={()=>{
+                                       this.toSignUp(data.item.slot_id)
+                                   }}
+                                   >
+                                       <Text style={{
+                                           color:'#fff'
+                                       }}>报名</Text>
+                                   </TouchableOpacity>
+                               :
+                                   <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                       width: 75,
+                                       height: 40,
+                                       backgroundColor: this.props.theme,
+                                       borderRadius: 6
+                                   }]}
+                                    onPress={() => {
+                                        this._joinItem(
+                                            data.item.slot_id,
+                                            data.item.is_discount,
+                                            data.item.price_origin,
+                                            data.item.price,
+                                            data.item.kids_price,
+                                            data.item.kids_price_origin,
+                                            data.item.begin_time,
+                                            data.item.end_time,
+                                            data.item.combine,
+                                            data.item.max_person_num,
+                                            data.item.order_person_num
+                                        )
+                                    }}
+                                   >
+                                       <Text style={{
+                                           color:'#fff'
+                                       }}>选择</Text>
+                                   </TouchableOpacity>
+                           }
+                           {
+                               this.vol
+                               ?
+                                   <Text style={{
+                                       color:this.props.theme,
+                                       fontSize: 12,
+                                       marginTop: 8
+                                   }}>
+                                       志愿者参与体验免费
+                                   </Text>
+                               :
+                                   <Text style={{
+                                       color:this.props.theme,
+                                       fontSize: 12,
+                                       marginTop: 8
+                                   }}>仅剩{parseFloat(data.item.max_person_num) - parseFloat(data.item.order_person_num)}个名额</Text>
+                           }
+
+                       </View>
                     </View>
                     {
-                        isMe
+                        data.item.combine.length>0
                         ?
-                            null
-                        :
-                        data.item.online === 1 || data.item.status === 1 || data.item.status === 2
-                        ?
-                            <View style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: '#ff5673'}]}>
-                                <Text style={{color: '#fff', fontWeight: 'bold'}}>{
-                                    data.item.online === 1 ? '已取消' : data.item.status === 1 ? '已删除' : '已过期'
-                                }</Text>
+                            <View>
+                                <Text style={{color:'#666',fontSize: 12}}>包含套餐</Text>
+                                <View style={[CommonStyle.flexStart,{flexWrap: 'wrap'}]}>
+                                    {
+                                        data.item.combine.map((item, index) => {
+                                            return <View
+                                                key={index}
+                                                style={[CommonStyle.flexStart,{
+                                                    padding: 9.5,
+                                                    backgroundColor: '#f5f7fa',
+                                                    borderRadius: 6,
+                                                    marginTop:12,
+                                                    marginRight: 10
+                                                }]}
+                                            >
+                                                <Text style={{color:'#333',fontSize: 12}}>{item.type===1?'亲子':item.name}</Text>
+                                                <Text style={{
+                                                    color:'#333',
+                                                    fontSize: 12,
+                                                    marginLeft: 10
+                                                }}>
+                                                    {item.adult}成人{item.kids}儿童
+                                                </Text>
+                                                <Text style={{
+                                                    color:'#333',
+                                                    fontSize: 12,
+                                                    marginLeft: 10
+                                                }}>
+                                                    ¥{data.item.price}
+                                                </Text>
+                                            </View>
+                                        })
+                                    }
+                                </View>
                             </View>
                         :
-                            vol
-                            ?
-                            <TouchableOpacity style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: this.props.theme}]}>
-                                <Text style={{color: '#fff', fontWeight: 'bold'}}>报名</Text>
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                                style={[styles.select_btn,CommonStyle.flexCenter,{backgroundColor: this.props.theme}]}
-                                onPress={() => this.toNext(data.item.price,data.item.slot_id,data.item.time[0],data.item.time[1])}
-                            >
-                                <Text style={{color: '#fff', fontWeight: 'bold'}}>选择</Text>
-                            </TouchableOpacity>
+                            null
                     }
                 </View>
+
             </View>
         )
     }
@@ -265,7 +483,7 @@ class SingleDay extends Component{
         let Day = <View style={CommonStyle.flexCenter}>
             <View style={[CommonStyle.flexStart,CommonStyle.commonWidth]}>
                 {this.days.map((item, index) => {
-                    return <View style={[styles.day_item,CommonStyle.flexCenter,{
+                    return <View key={index} style={[styles.day_item,CommonStyle.flexCenter,{
                         marginLeft:index===0?0:10
                     }]}>
                         <Text style={{color: '#333',fontWeight: 'bold', fontSize: 16}}>{item}</Text>
@@ -274,16 +492,18 @@ class SingleDay extends Component{
             </View>
         </View>
         const {theme} = this.props
-        const {calendarArr, topIndex, isSlotView, slotList} = this.state
+        const {calendarArr, topIndex, isSlotView, slotList,detailLoading} = this.state
         let single = [];
         for(let i=0;i<calendarArr.length;i++) {
             single.push(
-                <View style={[CommonStyle.commonWidth]} key={i}>
+                <View style={[CommonStyle.commonWidth,{
+                    marginBottom:i===calendarArr.length-1?200:0
+                }]} key={i}>
                     <Text style={styles.year_title}>{calendarArr[i].y}年{calendarArr[i].m}月</Text>
                     <View style={[CommonStyle.flexStart,{flexWrap: 'wrap'}]}>
                         {calendarArr[i].list.map((item, index) => {
                             return(
-                                <View>
+                                <View key={index}>
                                     {
                                         calendarArr[i].select[index] === 0
                                         ?
@@ -315,13 +535,17 @@ class SingleDay extends Component{
 
         return(
             <View style={[CommonStyle.flexCenter,{flex: 1,backgroundColor:'#fff',justifyContent:'flex-start',position: 'relative'}]}>
+                <Toast ref="toast" position='center' positionValue={0}/>
                 <RNEasyTopNavBar
-                    title={'单天体验'}
+                    title={'选择日期-单天体验'}
                     backgroundTheme={'#fff'}
                     titleColor={'#333'}
                     leftButton={this.getLeftButton()}
                 />
                 {Day}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                >
                 {
                     calendarArr.length > 0
                     ?
@@ -329,21 +553,59 @@ class SingleDay extends Component{
                     :
                        <Loading></Loading>
                 }
-                {
-                    isSlotView
-                    ?
-                        <View style={styles.slot_modal}>
-                            <FlatList
-                                data={slotList}
-                                horizontal={false}
-                                renderItem={(data)=>this._renderList(data)}
-                                showsHorizontalScrollIndicator = {false}
-                                keyExtractor={(item, index) => index.toString()}
-                            />
-                        </View>
-                    :
-                        null
-                }
+                </ScrollView>
+                <Modal
+                    style={{height:350,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"list"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={styles.slot_modal}>
+                        {
+                            detailLoading
+                                ?
+                                <View style={[CommonStyle.flexCenter,{flex: 1}]}>
+                                    <ActivityIndicator size={'small'} color={this.props.theme}/>
+                                </View>
+                                :
+                                <FlatList
+                                    data={slotList}
+                                    horizontal={false}
+                                    renderItem={(data)=>this._renderList(data)}
+                                    showsHorizontalScrollIndicator = {false}
+                                    keyExtractor={(item, index) => index.toString()}
+                                />
+                        }
+
+                    </View>
+                </Modal>
+                {/*{*/}
+                {/*    isSlotView*/}
+                {/*    ?*/}
+                {/*        <View style={styles.slot_modal}>*/}
+                {/*            {*/}
+                {/*                detailLoading*/}
+                {/*                ?*/}
+                {/*                    <View style={[CommonStyle.flexCenter,{flex: 1}]}>*/}
+                {/*                        <ActivityIndicator size={'small'} color={this.props.theme}/>*/}
+                {/*                    </View>*/}
+                {/*                :*/}
+                {/*                    <FlatList*/}
+                {/*                        data={slotList}*/}
+                {/*                        horizontal={false}*/}
+                {/*                        renderItem={(data)=>this._renderList(data)}*/}
+                {/*                        showsHorizontalScrollIndicator = {false}*/}
+                {/*                        keyExtractor={(item, index) => index.toString()}*/}
+                {/*                    />*/}
+                {/*            }*/}
+
+                {/*        </View>*/}
+                {/*    :*/}
+                {/*        null*/}
+                {/*}*/}
             </View>
         )
     }
@@ -374,14 +636,10 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     },
     slot_modal:{
-        position:'absolute',
-        left: 0,
-        right: 0,
-        bottom:0,
         borderTopWidth: 1,
         borderTopColor: '#f5f5f5',
-        minHeight: 150,
-        maxHeight: 400
+        height:350,
+        backgroundColor: '#fff'
     },
     select_btn: {
         width: 75,
@@ -390,9 +648,10 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = state => ({
-    slot: state.slot.slot.slot,
+    slot: state.slot.slot,
     theme: state.theme.theme,
-    join: state.join.join
+    join: state.join.join,
+    token: state.token.token
 })
 const mapDispatchToProps = dispatch => ({
     initJoin: join => dispatch(action.initJoin(join))

@@ -22,6 +22,7 @@ import HttpUrl from '../../../../../utils/Http';
 import NavigatorUtils from '../../../../../navigator/NavigatorUtils';
 import action from '../../../../../action';
 import NewHttp from '../../../../../utils/NewHttp';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 const {width} = Dimensions.get('window');
 class Booking extends Component{
     constructor(props) {
@@ -130,6 +131,7 @@ class Booking extends Component{
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
                     })}}/>
+                    <KeyboardAwareScrollView>
                     <ScrollView>
                         <View style={[CommonStyle.flexCenter,{
                             backgroundColor:'#fff',
@@ -212,7 +214,8 @@ class Booking extends Component{
                                                 </View>
                                                 <TextInput
                                                     placeholder="输入包场价格"
-                                                    defaultValue={this.state.low_price}
+                                                    defaultValue={this.state.low_price?JSON.stringify(parseFloat(this.state.low_price)):''}
+                                                    keyboardType='numeric'
                                                     onChangeText={(text)=>{
                                                         this.setState({
                                                             low_price: text
@@ -233,6 +236,7 @@ class Booking extends Component{
                             </View>
                         </View>
                     </ScrollView>
+                    </KeyboardAwareScrollView>
                     <SafeAreaView style={[CommonStyle.bot_btn,CommonStyle.flexCenter]}>
                         <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:49}]}>
                             <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{

@@ -3,17 +3,28 @@ import {StyleSheet, View, Text, TouchableOpacity, Image} from 'react-native';
 import LazyImage from 'animated-lazy-image';
 import CommonStyle from '../../assets/css/Common_css';
 import {connect} from 'react-redux'
+import NavigatorUtils from '../navigator/NavigatorUtils';
 class Ractive extends Component{
     constructor(props) {
         super(props);
-        this.tabs=['3折起','返差价','多套餐']
+    }
+    goDetail(table_id) {
+        NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
     }
     render(){
-        const {data_r, data_index, theme} = this.props
+        const {data_r, data_index, theme, isShow} = this.props
         return(
-            <TouchableOpacity style={[CommonStyle.commonWidth,{marginTop: data_index===0?0:30}]}>
+            <TouchableOpacity
+                style={[CommonStyle.commonWidth,{
+                    marginTop: data_index===0?15:30,
+                    marginBottom: data_index===this.props.total-1?isShow?130:25:0
+                }]}
+                onPress={() => {this.goDetail(data_r.activity_id || data_r.activity_id==0?data_r.activity_id:data_r.table_id)}}
+            >
                 <LazyImage
-                    source={data_r.url}
+                    source={data_r.domain&&data_r.image_url?{
+                        uri: data_r.domain + data_r.image_url
+                    }:require('../../assets/images/error.png')}
                     style={[CommonStyle.commonWidth,{
                         height: 180,
                         borderRadius: 4,
@@ -23,26 +34,58 @@ class Ractive extends Component{
                     color:'#127D80',
                     fontSize: 10,
                     marginTop: 9.5
-                }]}>{data_r.province}{data_r.city==='直辖市'?null:data_r.city}{data_r.region}</Text>
+                }]}>{data_r.province}{data_r.city}{data_r.region}</Text>
+
                 <Text numberOfLines={2} ellipsizeMode={'tail'}
                       style={[styles.common_weight,styles.common_color,{
-                          marginTop: 8,
-                          fontSize:16
+                          marginTop: 4.5,
+                          marginBottom: 5
                       }]}>{data_r.title}</Text>
-                <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 5}]}>
-                    {this.tabs.map((item, index) => {
-                        return <View key={index} style={[styles.tab_item,{
-                            backgroundColor:index===0?'#EEFFFF':'#F5F6F8',
-                            marginTop: 10
-                        }]}>
-                            <Text style={{
-                                fontSize: 10,
-                                color:index===0?theme:'#626467'
-                            }}>{item}</Text>
-                        </View>
-                    })}
+                <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 2}]}>
+                    {
+                        data_r.price_discount_concat&&data_r.price_discount_concat.split(',').length>1
+                            ?
+                            <View style={[styles.tab_item,{
+                                backgroundColor:'#EEFFFF',
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:theme
+                                }}>{parseFloat(data_r.price_discount_concat.split(',')[1])}折起</Text>
+                            </View>
+                            :
+                            null
+                    }
+                    {
+                        data_r.is_differ
+                            ?
+                            <View style={[styles.tab_item,{
+                                backgroundColor:'#F5F6F8',
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:'#626467'
+                                }}>返差价</Text>
+                            </View>
+                            :
+                            null
+                    }
+                    {
+                        data_r.is_combine
+                            ?
+                            <View style={[styles.tab_item,{
+                                backgroundColor:'#F5F6F8',
+                            }]}>
+                                <Text style={{
+                                    fontSize: 10,
+                                    color:'#626467'
+                                }}>含套餐</Text>
+                            </View>
+                            :
+                            null
+                    }
                 </View>
-                <View style={[CommonStyle.spaceRow,{marginTop: 5}]}>
+                <View style={[CommonStyle.spaceRow,{marginTop: 10}]}>
                     <View style={[CommonStyle.spaceCol,{height: 40,alignItems:'flex-start'}]}>
                         <View style={[CommonStyle.flexStart]}>
                             <Image
@@ -58,9 +101,9 @@ class Ractive extends Component{
                             }]}>{parseFloat(data_r.score)>0?data_r.score:'暂无评分'}</Text>
                             <Text style={[{color:'#626467',fontSize: 11,marginLeft: 10}]}>
                                 {
-                                    data_r.leaving_num
+                                    data_r.comment_num
                                         ?
-                                        data_r.leaving_num + '点评'
+                                        data_r.comment_num + '点评'
                                         :
                                         '暂无点评'
                                 }

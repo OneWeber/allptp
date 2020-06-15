@@ -36,9 +36,9 @@ const photoOptions={
     cameraType: 'back',
     mediaType: 'photo',
     videoQuality: 'medium',  // 图片质量
-    durationLimit: 10,  //
-    maxWidth: 500, // 图片大小
-    maxHeight: 500, // 图片大小
+    durationLimit: 100,  //
+    maxWidth: 100000, // 图片大小
+    maxHeight: 100000, // 图片大小
     quality: 0.8,
     angle: 0,
     allowsEditing: false,
@@ -67,7 +67,8 @@ class Photo extends Component{
             isIphone: false,
             lodingImages: false,
             isLoading: false,
-            initImage: []
+            initImage: [],
+            loadingImg: false
         }
     }
     componentDidMount(){
@@ -152,6 +153,9 @@ class Photo extends Component{
     }
     uploadImage(uri){
         //alert(uri)
+        this.setState({
+            loadingImg: true
+        })
         let formData=new FormData();
         let file={uri:uri,type:'multipart/form-data',name:'image.png'};
         formData.append('token',this.props.token);
@@ -159,11 +163,16 @@ class Photo extends Component{
         //alert(JSON.stringify(formData))
         Fetch.post(HttpUrl+'Upload/upload',formData).then(
             result=>{
+                this.setState({
+                    loadingImg: false
+                })
                 if(result.code==1){
                     this.setState({
                         coverId:result.data.image_id,
                         coverUri:result.data.domain+result.data.image_url
                     })
+                }else{
+                    this.refs.toast.show(result.msg)
                 }
             }
         )
@@ -211,7 +220,8 @@ class Photo extends Component{
                     this.setState({
                         lodingImages: false
                     })
-                    this.refs.toast.show('第'+(i+1)+'张图片上传失败')
+                    // this.refs.toast.show('第'+(i+1)+'张图片上传失败')
+                    this.refs.toast.show(res.msg)
                 }
             }
         )
@@ -313,7 +323,7 @@ class Photo extends Component{
                         <AntDesign
                             name={'close'}
                             size={14}
-                            style={{color:'#fff'}}
+                            style={{color:'#999'}}
                         />
                     </TouchableOpacity>
                     {
@@ -383,7 +393,7 @@ class Photo extends Component{
                                 <Text style={[styles.main_title,{marginTop:25}]}>
                                     封面照片
                                 </Text>
-                                <Text style={styles.main_prompt}>请为体验挑选一张最具有代表性的照片，这回事参与者浏览体验时看到的第一张照片</Text>
+                                <Text style={styles.main_prompt}>请为体验挑选一张最具有代表性的照片，这会是参与者浏览体验时看到的第一张照片</Text>
                                 <TouchableOpacity
                                     style={[styles.cover_img_btn,CommonStyle.flexCenter]}
                                     onPress={()=>{this.coverImg()}}
@@ -409,18 +419,25 @@ class Photo extends Component{
                                         top:0,
                                         bottom:0
                                     }]}>
-                                        <AntDesign
-                                            name={'plus'}
-                                            size={20}
-                                            style={{color:coverUri?'#fff':'#666'}}
-                                        />
+                                        {
+                                            this.state.loadingImg
+                                            ?
+                                                <ActivityIndicator size={'small'} color={'#999'}/>
+                                            :
+                                                <AntDesign
+                                                    name={'plus'}
+                                                    size={20}
+                                                    style={{color:coverUri?'#fff':'#666'}}
+                                                />
+                                        }
+
                                     </View>
                                 </TouchableOpacity>
                                 <Text style={[styles.main_title,{marginTop:25}]}>
                                     更多活动内容照片或视频
                                 </Text>
                                 <Text style={styles.main_prompt}>
-                                    请为体验挑选活动照片或视频，这回事参与者浏览体验时看到的照片或视频
+                                    请为体验挑选活动照片或视频，这会是参与者浏览体验时看到的照片或视频
                                 </Text>
                                 <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginBottom: 100}]}>
                                     <TouchableOpacity
@@ -430,7 +447,7 @@ class Photo extends Component{
                                         {
                                             lodingImages
                                             ?
-                                                <ActivityIndicator size={'small'} color={'#f5f5f5'}/>
+                                                <ActivityIndicator size={'small'} color={'#999'}/>
                                             :
                                                 <AntDesign
                                                     name={'plus'}

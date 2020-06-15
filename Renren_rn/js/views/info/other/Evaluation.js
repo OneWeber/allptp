@@ -602,6 +602,9 @@ class BackContainer extends Component{
             formData.append('content',this.state.message);
             Fetch.post(HttpUrl+'Comment/save_leavemsg', formData).then(res => {
                 if(res.code === 1) {
+                    this.setState({
+                        message: ''
+                    })
                     this.refs.backContainer.close();
                     this.props.initData()
                 }
@@ -655,7 +658,7 @@ class BackContainer extends Component{
                                 <View style={[CommonStyle.spaceRow]}>
                                     <TextInput
                                         ref={'textinput'}
-                                        placeholder={'回复某某'}
+                                        placeholder={'回复'}
                                         multiline={true}
                                         autoFocus={true}
                                         defaultValue={this.state.message}

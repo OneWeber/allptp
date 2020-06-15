@@ -9,8 +9,16 @@ import action from '../../action'
 import HttpUrl from '../../utils/Http';
 import NoData from '../../common/NoData';
 import LazyImage from 'animated-lazy-image';
+import Modal from 'react-native-modalbox';
+import Fetch from '../../expand/dao/Fetch';
 const {width, height} = Dimensions.get('window')
 class Contact extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            f_user_id: ''
+        }
+    }
     componentDidMount() {
         this.loadData()
     }
@@ -21,6 +29,17 @@ class Contact extends Component{
         formData.append('token', token);
         formData.append('page',1);
         onLoadContact(this.storeName, HttpUrl+'Friend/myfriend', formData)
+    }
+    delFriend() {
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('f_user_id', this.state.f_user_id);
+        Fetch.post(HttpUrl+'Friend/del', formData).then(res => {
+            if(res.code === 1) {
+                this.refs.del.close();
+                this.loadData()
+            }
+        })
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -36,9 +55,21 @@ class Contact extends Component{
         </TouchableOpacity>
     }
     renderItem(data) {
-        return <View style={[CommonStyle.spaceRow,{
+        return <TouchableOpacity style={[CommonStyle.spaceRow,{
             marginTop: data.index===0?24:40
-        }]}>
+        }]}
+        onPress={()=>{
+            NavigatorUtils.goPage({user_id: data.item.f_user_id},'UserInfo')
+        }}
+        onLongPress={() => {
+            this.setState({
+                f_user_id: data.item.f_user_id
+            },() => {
+                this.refs.del.open();
+            })
+
+        }}
+        >
             <LazyImage
                 source={data.item.user&&data.item.user.headimage&&data.item.user.headimage.domain&&data.item.user.headimage.image_url?
                     {uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:require('../../../assets/images/touxiang.png')}
@@ -66,7 +97,7 @@ class Contact extends Component{
                 }
 
             </View>
-        </View>
+        </TouchableOpacity>
     }
     render(){
         const {contact} = this.props;
@@ -118,12 +149,36 @@ class Contact extends Component{
                                         />
                                     </View>
                                 :
-                                    <NoData></NoData>
+                                    <View style={{marginTop: 100}}>
+                                        <NoData></NoData>
+                                    </View>
                             }
                         </View>
                     </View>
-
                 </ScrollView>
+                <Modal
+                    style={{height:60,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"del"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height: 60,
+                        backgroundColor: '#fff'
+                    }]}
+                    onPress={() => {
+                        this.delFriend()
+                    }}
+                    >
+                        <Text style={{
+                            color:'red'
+                        }}>删除好友</Text>
+                    </TouchableOpacity>
+                </Modal>
+
             </View>
         )
     }

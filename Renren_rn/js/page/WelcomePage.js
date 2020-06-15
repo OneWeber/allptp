@@ -4,27 +4,37 @@ import NavigatorUtils from '../navigator/NavigatorUtils';
 import CommonStyle from '../../assets/css/Common_css';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {connect} from 'react-redux'
+import AsyncStorage from '@react-native-community/async-storage';
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
 class WelcomePage extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            timer_number: 5
+            timer_number: 5,
+            status: ''
         }
     }
     componentDidMount(){
-        const {timer_number} = this.state
-        let num = timer_number
-        this.timer = setInterval(() => {
-            num --;
+        AsyncStorage.getItem('status',(error,result)=>{
             this.setState({
-                timer_number: num
+                status: result
+            },() => {
+                const {timer_number, status} = this.state
+                let num = timer_number
+                this.timer = setInterval(() => {
+                    num --;
+                    this.setState({
+                        timer_number: num
+                    })
+                    if(num === 0) {
+                        NavigatorUtils.goPage({}, status=='true'?'Main':'Guide')
+                    }
+                }, 1000)
             })
-            if(num === 0) {
-                NavigatorUtils.goPage({}, 'Guide')
-            }
-        }, 1000)
+        })
+
+
     }
     componentWillUnmount() {
         this.timer && clearInterval(this.timer)
@@ -33,7 +43,7 @@ class WelcomePage extends Component{
     render() {
         NavigatorUtils.navigation = this.props.navigation
         const {theme} = this.props
-        const {timer_number} = this.state
+        const {timer_number, status} = this.state
         return (
             <View style={styles.container}>
                 <ImageBackground
@@ -43,7 +53,7 @@ class WelcomePage extends Component{
                     <SafeAreaView>
                         <TouchableOpacity
                             style={[styles.wel_btn, CommonStyle.flexCenter, {flexDirection:'row'}]}
-                            onPress={()=>{NavigatorUtils.goPage({}, 'Guide')}}
+                            onPress={()=>{NavigatorUtils.goPage({}, status=='true'?'Main':'Guide')}}
                         >
                             <Text style={[styles.timer_num,{color:theme}]}>{timer_number}</Text>
                             <Text style={{marginLeft:5,color:'#999'}}>跳过</Text>

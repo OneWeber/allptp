@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     FlatList,
     Image,
-    ScrollView,
+    ScrollView, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import CommonStyle from '../../../../assets/css/Common_css';
@@ -23,13 +23,13 @@ import Loading from '../../../common/Loading';
 import Screening from '../../../model/screen';
 import RNEasyAddressPicker from 'react-native-easy-address-picker';
 const {width} = Dimensions.get('window')
-export default class StoryList extends Component{
+class StoryList extends Component{
     constructor(props) {
         super(props);
         this.tabNames = [
             {
                 title:'排序',
-                data:[{title:'价格低到高',},{title:'评分优先'},{title:'评论优先'},{title:'收藏优先'}],
+                data:[{title:'全部', id: 0},{title:'点赞降序', id: 2},{title:'收藏降序', id: 3},{title:'留言降序', id: 5}],
                 type: 1
             },
             {
@@ -39,7 +39,12 @@ export default class StoryList extends Component{
             },
         ];
         this.state = {
-            screenIndex: ''
+            screenIndex: '',
+            customData: '',
+            sort: '',
+            country: '',
+            province: '',
+            city: '',
         }
     }
     getLeftButton(){
@@ -68,14 +73,55 @@ export default class StoryList extends Component{
             />
         </TouchableOpacity>
     }
-    _clickConfirmBtn() {
+    _clickCancelBtn() {
         this.screen.openOrClosePanel(this.state.screenIndex)
+    }
+    _clickConfirmBtn(data) {
+        this.screen.openOrClosePanel(this.state.screenIndex);
+        this.setState({
+            country: data.country,
+            province: data.province,
+            city: data.city,
+            customData: data.country+data.province+data.city
+        },() => {
+            this.loadData();
+        })
     }
     getCustom() {
 
     }
-    _itemOnpress() {
-
+    _itemOnpress(tIndex, index, data) {
+        if(tIndex===0) {
+            this.setState({
+                sort: data.id
+            },() => {
+                this.loadData()
+            })
+        }
+    }
+    _initCustomData() {
+        this.setState({
+            customData: '',
+            country: '',
+            province: '',
+            city: '',
+        },() => {
+            this.loadData()
+        })
+    }
+    loadData() {
+        const {onLoadStoryList} = this.props;
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords','');
+        formData.append('sort',this.state.sort);
+        formData.append('page',1);
+        formData.append('kind_id','');
+        formData.append('country',this.state.country);
+        formData.append('province', this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', '');
+        onLoadStoryList('storylist', HttpUrl + 'Story/story_list', formData)
     }
     render(){
         return(
@@ -124,10 +170,11 @@ export default class StoryList extends Component{
                     }}
                     selectIndex={[0,0]}
                     customContent={this.getCustom()}
-                    customData={[]}
+                    customData={this.state.customData}
                     customFunc={()=>{
                         this.picker.showPicker()
                     }}
+                    initCustomData={() => {this._initCustomData()}}
                     itemOnpress={(tIndex, index, data) => {
                         this._itemOnpress(tIndex, index, data)
                     }}
@@ -140,6 +187,7 @@ export default class StoryList extends Component{
                             selectCountry={(index) => {}}
                             selectCity={(index) => {}}
                             clickConfirmBtn={(data) => {this._clickConfirmBtn(data)}}
+                            clickCancelBtn={() => {this._clickCancelBtn()}}
                         />
                     </View>
                 </Screening>
@@ -147,6 +195,13 @@ export default class StoryList extends Component{
         )
     }
 }
+const mapState = state => ({
+    token: state.token.token
+})
+const mapDispatch = dispatch => ({
+    onLoadStoryList: (storeName, url, data) => dispatch(action.onLoadStoryList(storeName, url, data)),
+})
+export default connect(mapState, mapDispatch)(StoryList)
 const styles = StyleSheet.create({
     back_icon: {
         paddingLeft: width*0.03
@@ -171,19 +226,33 @@ class StoryListContent extends Component{
     componentDidMount() {
         this.loadData()
     }
-    loadData(){
-        const {token, onLoadStoryList} = this.props
-        this.storeName='storylist'
+    loadData(val){
+        const {token, onLoadStoryList, storylist} = this.props
+        this.storeName='storylist';
+        let store = storylist[this.storeName]
+        this.step = 1;
+        let refreshType = false;
+        if(val) {
+            refreshType = true
+        } else {
+            refreshType = false
+        }
         let formData=new FormData();
         formData.append('token', token);
         formData.append('keywords','');
-        formData.append('sort','');
+        formData.append('sort',this.props.sort);
         formData.append('page',1);
         formData.append('kind_id','');
-        formData.append('country','');
-        formData.append('province', '');
-        formData.append('city', '');
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
         formData.append('region', '');
+        if(val){
+            onLoadStoryList(this.storeName, HttpUrl + 'Story/story_list', formData, refreshType, store.items.data.data.total, callback => {
+
+            })
+            return
+        }
         onLoadStoryList(this.storeName, HttpUrl + 'Story/story_list', formData)
     }
     _renderStory(data){
@@ -198,7 +267,9 @@ class StoryListContent extends Component{
             }}
         >
             <LazyImage
-                source={{uri: data.item.cover.domain + data.item.cover.image_url}}
+                source={data.item.cover&&data.item.cover.domain&&data.item.cover.image_url?{
+                    uri: data.item.cover.domain + data.item.cover.image_url
+                }:require('../../../../assets/images/error.png')}
                 style={styles.cityitem_img}
             />
             {
@@ -242,8 +313,33 @@ class StoryListContent extends Component{
             </View>
         </TouchableOpacity>
     }
-    render(){
+    genIndicator(){
         const {storylist} = this.props
+        let store = storylist[this.storeName]
+        return store.hideMoreshow || store.hideMoreshow === undefined ?null:
+            <View style={[CommonStyle.flexCenter, {width: '100%',marginTop: 10,marginBottom: 10}]}>
+                <ActivityIndicator size={'small'} color={'#999'}/>
+            </View>
+    }
+    onLoadMore() {
+        const {token, onLoadMoreStory, storylist} = this.props;
+        const store = storylist[this.storeName]
+        this.step++;
+        let formData=new FormData();
+        formData.append('token', token);
+        formData.append('keywords','');
+        formData.append('sort',this.props.sort);
+        formData.append('page',this.step);
+        formData.append('kind_id','');
+        formData.append('country',this.props.country);
+        formData.append('province', this.props.province);
+        formData.append('city', this.props.city);
+        formData.append('region', '');
+        onLoadMoreStory(this.storeName, HttpUrl + 'Story/story_list', formData, store.items, callback => {
+        })
+    }
+    render(){
+        const {storylist, theme} = this.props
         let store = storylist[this.storeName]
         if(!store){
             store={
@@ -252,7 +348,7 @@ class StoryListContent extends Component{
             }
         }
         return(
-            <View>
+            <View style={CommonStyle.commonWidth}>
                 {
                     store.isLoading
                     ?
@@ -260,7 +356,7 @@ class StoryListContent extends Component{
                     :
                     store.items && store.items.data && store.items.data.data && store.items.data.data.data && store.items.data.data.data.length > 0
                     ?
-                        <View style={{flex: 1}}>
+                        <View>
                             <FlatList
                                 data={store.items.data.data.data}
                                 horizontal={false}
@@ -269,6 +365,17 @@ class StoryListContent extends Component{
                                 showsHorizontalScrollIndicator = {false}
                                 showsVerticalScrollIndicator = {false}
                                 keyExtractor={(item, index) => index.toString()}
+                                ListFooterComponent={() => this.genIndicator()}
+                                onEndReachedThreshold={0.1}
+                                onEndReached={() => {
+                                    if(this.canLoadMore) {
+                                        this.onLoadMore();
+                                        this.canLoadMore = false;
+                                    }
+                                }}
+                                onMomentumScrollBegin={() => {
+                                    this.canLoadMore = true; //fix 初始化时页调用onEndReached的问题
+                                }}
                             />
                         </View>
                     :
@@ -284,6 +391,7 @@ const mapStateToProps = state => ({
     theme: state.theme.theme
 })
 const mapDispatchToProps = dispatch => ({
-    onLoadStoryList: (storeName, url, data) => dispatch(action.onLoadStoryList(storeName, url, data))
+    onLoadStoryList: (storeName, url, data) => dispatch(action.onLoadStoryList(storeName, url, data)),
+    onLoadMoreStory: (storeName, url, data, oItems, callback) => dispatch(action.onLoadMoreStory(storeName, url, data, oItems, callback))
 })
 const ActiveListContentMap = connect(mapStateToProps, mapDispatchToProps)(StoryListContent)

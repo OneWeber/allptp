@@ -1,5 +1,14 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Dimensions} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    TextInput,
+    Dimensions,
+    RefreshControl, FlatList,
+} from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import CommonStyle from '../../../../assets/css/Common_css';
 import NavigatorUtils from '../../../navigator/NavigatorUtils';
@@ -18,13 +27,30 @@ class WithDrawal extends Component{
             card: [],
             balanceData: '',
             money: '',
-            Msg: ''
+            Msg: '',
+            bank_id: '',
+            bankIndex: 0
         }
     }
     componentDidMount() {
-        this.getBalance()
+        this.getBalance();
+        this.initBankId()
     }
-
+    initBankId() {
+        const {bank} = this.props;
+        let store = bank['bank'];
+        if(!store) {
+            store={
+                items: [],
+                isLoading: false
+            }
+        }
+        if(store.items&&store.items.data&&store.items.data.data&&store.items.data.data.length>0) {
+            this.setState({
+                bank_id: store.items.data.data[this.state.bankIndex].bank_id
+            })
+        }
+    }
     getLeftButton(){
         return <TouchableOpacity
             style={CommonStyle.back_icon}
@@ -106,12 +132,65 @@ class WithDrawal extends Component{
         return inputItem;
     };
     onEnd() {
-
+        // this.refs.drawal.close();
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('bank_id', this.state.bank_id);
+        formData.append('amount', this.state.money);
+        formData.append('pay_password', this.state.Msg);
+        Fetch.post(NewHttp+'Draw', formData).then(res => {
+            this.refs.drawal.close();
+            if(res.code === 1) {
+                NavigatorUtils.backToUp(this.props, true)
+            }else{
+                this.refs.toast.show('提现失败,'+res.msg)
+            }
+        })
     }
     _onClose() {
         this.setState({
             Msg: ''
         })
+    }
+    clickBank(index, bank_id) {
+        this.setState({
+            bank_id: bank_id,
+            bankIndex: index
+        },() => {
+            this.refs.bank.close()
+        })
+    }
+    renderBank(data) {
+        return <TouchableOpacity style={[CommonStyle.spaceRow,{
+            paddingBottom: 23,
+            paddingTop: 23,
+            borderBottomWidth: 1,
+            borderBottomColor: '#f5f5f5',
+            paddingLeft: width*0.03,
+            paddingRight: width*0.03
+        }]}
+         onPress={() => {
+             this.clickBank(data.index, data.item.bank_id)
+         }}
+        >
+            <View style={CommonStyle.flexStart}>
+                <View style={{
+                    width:18,
+                    height:18,
+                    borderRadius: 9,
+                    backgroundColor:'blue'}}></View>
+                <Text style={{
+                    marginLeft: 13,
+                    color:'#333',
+                    fontWeight: 'bold'
+                }}>{data.item.bank_name}({this.regCard(data.item.card_number).split(' ')[this.regCard(data.item.card_number).split(' ').length-1]})</Text>
+            </View>
+            <AntDesign
+                name={'right'}
+                size={14}
+                style={{color:'#666'}}
+            />
+        </TouchableOpacity>
     }
     render(){
         const {bank} = this.props;
@@ -122,7 +201,7 @@ class WithDrawal extends Component{
                 isLoading: false
             }
         }
-        const {balanceData, money} = this.state;
+        const {balanceData, money, bankIndex} = this.state;
         return(
             <View style={{flex: 1,backgroundColor: '#fff'}}>
                 <RNEasyTopNavBar
@@ -143,7 +222,11 @@ class WithDrawal extends Component{
                                         paddingTop: 23,
                                         borderBottomWidth: 1,
                                         borderBottomColor: '#f5f5f5'
-                                    }]}>
+                                    }]}
+                                    onPress={() => {
+                                        this.refs.bank.open()
+                                    }}
+                                    >
                                         <View style={CommonStyle.flexStart}>
                                             <View style={{
                                                 width:18,
@@ -154,7 +237,7 @@ class WithDrawal extends Component{
                                                 marginLeft: 13,
                                                 color:'#333',
                                                 fontWeight: 'bold'
-                                            }}>{store.items.data.data[0].bank_name}({this.regCard(store.items.data.data[0].card_number).split(' ')[this.regCard(store.items.data.data[0].card_number).split(' ').length-1]})</Text>
+                                            }}>{store.items.data.data[bankIndex].bank_name}({this.regCard(store.items.data.data[bankIndex].card_number).split(' ')[this.regCard(store.items.data.data[bankIndex].card_number).split(' ').length-1]})</Text>
                                         </View>
                                         <AntDesign
                                             name={'right'}
@@ -180,6 +263,7 @@ class WithDrawal extends Component{
                                 <Text style={{color:'#333',fontWeight: 'bold'}}>¥</Text>
                                 <TextInput
                                     placeholder={'>=200.00'}
+                                    keyboardType='numeric'
                                     style={{
                                         width: width*0.94 - 100
                                     }}
@@ -247,6 +331,54 @@ class WithDrawal extends Component{
                         </View>
                     </View>
                 </ScrollView>
+                <Modal
+                    style={{height:300,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"bank"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.5)'}
+                    swipeToClose={true}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        height:300,
+                        backgroundColor: '#fff'
+                    }}>
+                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#f5f5f5'
+                        }]}
+                        onPress={() => {
+                            this.refs.bank.close();
+                            NavigatorUtils.goPage({}, 'AddCard')
+                        }}
+                        >
+                            <View style={[CommonStyle.commonWidth,CommonStyle.flexStart,{
+                                height: 50
+                            }]}>
+                                <AntDesign
+                                    name={'plus'}
+                                    size={20}
+                                    style={{color:this.props.theme}}
+                                />
+                                <Text style={{color:this.props.theme}}>添加银行卡</Text>
+                            </View>
+                        </TouchableOpacity>
+                        {
+                            store.items&&store.items.data&&store.items.data.data&&store.items.data.data.length>0
+                            ?
+                                <FlatList
+                                    data={store.items.data.data}
+                                    showsVerticalScrollIndicator = {false}
+                                    renderItem={data=>this.renderBank(data)}
+                                    keyExtractor={(item, index) => index.toString()}
+                                />
+                            :
+                                null
+                        }
+
+                    </View>
+                </Modal>
                 <Modal
                     style={{height:210,borderRadius:5,width:'85%',backgroundColor:'rgba(0,0,0,0)'}}
                     ref={"drawal"}

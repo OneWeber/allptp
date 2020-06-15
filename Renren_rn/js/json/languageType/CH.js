@@ -37,7 +37,7 @@ export default {
         all_msg: '全部私信'
     },
     my: {
-        Personal_home: '个人主页',
+        Personal_home: '个人资料',
         credibility: '信誉值',
         volunteer: '志愿者',
         focus: '关注',

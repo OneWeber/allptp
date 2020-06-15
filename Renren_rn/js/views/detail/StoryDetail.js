@@ -363,7 +363,8 @@ const mapStateToProps = state => ({
     token: state.token.token,
     theme: state.theme.theme,
     colwish: state.colwish,
-    netconnect: state.netconnect.netInfo
+    netconnect: state.netconnect.netInfo,
+    user: state.user.user
 })
 const mapDispatchToProps = dispatch => ({
     onLoadColWish: (storeName, url, data) => dispatch(action.onLoadColWish(storeName, url, data))
@@ -375,6 +376,14 @@ class Bot extends Component{
         this.state = {
             isLoading: false,
             praiseList: []
+        }
+    }
+    checkLoginRoute(route, data){
+        const {token, user} = this.props;
+        if(token && user && user.username && user.userid){
+            NavigatorUtils.goPage(data?data:{}, route)
+        } else {
+            NavigatorUtils.goPage({}, 'Login')
         }
     }
     componentDidMount() {
@@ -445,15 +454,23 @@ class Bot extends Component{
                         <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
                             height: 50
                         }]}>
-                            <View style={[CommonStyle.flexStart,{
+                            <TouchableOpacity style={[CommonStyle.flexStart,{
                                 height:35,
                                 width:250,
                                 backgroundColor:'#f5f5f5',
                                 borderRadius: 3,
                                 paddingLeft: 10
-                            }]}>
+                            }]}
+                            onPress={()=>{
+                                this.checkLoginRoute('TextInput', {
+                                    table_id: this.props.story_id,
+                                    flag: 2,
+                                    t_id: this.props.story_id,
+                                })
+                            }}
+                            >
                                 <Text style={{color:'#999'}}>说点什么吧</Text>
-                            </View>
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={[CommonStyle.flexEnd]}
                                 onPress={()=>{storyData.is_praise?this.cancelPraise():this.onPraise()}}
@@ -524,7 +541,8 @@ class StoryContent extends Component{
             reportLoading: false,
             attention: '',
             userInfo: '',
-            focusLoading: false
+            focusLoading: false,
+            table_id: ''
         }
     }
     componentWillMount() {
@@ -607,6 +625,24 @@ class StoryContent extends Component{
             })
         })
 
+    }
+    _showBackModal(data) {
+
+        this.setState({
+            table_id: data.msg_id
+        },() => {
+            this.refs.content.open()
+        })
+
+    }
+    commentsBack() {
+        this.refs.content.close();
+        NavigatorUtils.goPage({
+            table_flag: 2,
+            flag: 5,
+            table_id: this.state.table_id,
+            t_id: this.props.story_id
+        }, 'TextInput')
     }
     render(){
         const {storyData, praiseList} = this.props
@@ -729,13 +765,47 @@ class StoryContent extends Component{
                         marginTop: 40
                     }]}>评价</Text>
                     {/*评价*/}
-                    <Comments {...this.props}/>
+                    <Comments showBackModal={(data)=>{
+                        this._showBackModal(data)
+                    }} {...this.props}/>
                     <Text style={[styles.story_title,{
                         marginTop: 40
                     }]}>你可能还会想看</Text>
                     {/*相似故事*/}
                     <SameStory {...this.props}/>
                 </View>
+                <Modal
+                    style={{height:140,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"content"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{height: 120,alignItems:'center'}}>
+                        <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                            height: 50,
+                            backgroundColor: '#fff',
+                            borderRadius: 5
+                        }]}
+                            onPress={()=>{
+                                this.commentsBack()
+                            }}
+                        >
+                            <Text style={{color:'#333'}}>回复</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                            height: 50,
+                            backgroundColor: '#fff',
+                            borderRadius: 5,
+                            marginTop: 10,
+                            marginBottom: 10
+                        }]}>
+                            <Text style={{color:'red'}}>举报</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View>
         )
     }
@@ -777,7 +847,12 @@ class Comments extends Component{
     render(){
         return(
             <View>
-                <Comment table_id={this.props.story_id} flag={2} type={'detail'}/>
+                <Comment
+                    table_id={this.props.story_id}
+                    flag={2}
+                    type={'detail'}
+                    showBackModal={(data)=>{this.props.showBackModal(data)}}
+                />
             </View>
         )
     }

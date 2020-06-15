@@ -49,7 +49,13 @@ class ActiveDetail extends Component{
             isLoading:false,
             opacity: 0,
             isFull: false,
-            isOverdue:false
+            isOverdue:false,
+            discountList: [],
+            differList: [],
+            discount: [],
+            table_id: '',
+            houseData: '',
+            isMe:0
         }
     }
     componentDidMount(){
@@ -57,8 +63,10 @@ class ActiveDetail extends Component{
             isLoading:true
         }, () => {
             this.loadData();
-            this.loadDiscount();
+            this.getDifferList();
             this.getWishList();
+            this.getAboutHouse();
+            this.getDiscount();
         })
 
     }
@@ -68,7 +76,10 @@ class ActiveDetail extends Component{
         formData.append('token',token);
         formData.append('activity_id',this.table_id);
         formData.append('visit',1);
-        Fetch.post(HttpUrl + 'Activity/get_activity', formData).then(res => {
+        formData.append('version', '2.0');
+        formData.append('translate_id', '');
+        formData.append('language', 0);
+        Fetch.post(NewHttp + 'ActivityDetailTwo', formData).then(res => {
             this.setState({
                 isLoading:false
             })
@@ -76,28 +87,77 @@ class ActiveDetail extends Component{
                 this.setState({
                     data: res.data
                 },() => {
+                  if(this.state.data.user.user_id === this.props.user.userid) {
+                    this.setState({
+                        isMe: 1
+                    })
+                  }else{
+                      this.setState({
+                          isMe: 0
+                      })
+                  }
+                  this.getSlot();
                   let imgArr= this.bannerImg(this.state.data.image);
                   let bannerArr = this.bannerImg(this.state.data.image).slice(0, 5)
                     this.setState({
                         activeImgs:imgArr,
                         banner: bannerArr
-                    },() => {
-                        console.log('banner', this.state.banner)
-                        this.checkStatus(this.state.data)
                     })
                 })
             }
         })
     }
-    loadDiscount() {
+    getAboutHouse() {
         const {token} = this.props
+        let formData=new FormData();
+        formData.append('token',token);
+        formData.append('activity_id',this.table_id);
+        formData.append('version','2.0');
+        Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    houseData: res.data
+                })
+            }
+        })
+    }
+    getDiscount() {
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('activity_id',this.table_id);
+        formData.append('version','2.0');
+        Fetch.post(NewHttp + 'ActivityDiscountTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    discount: res.data
+                })
+            }
+        })
+    }
+    getDifferList(){
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('activity_id',this.table_id);
+        formData.append('version','2.0');
+        Fetch.post(NewHttp + 'DifferListTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    differList: res.data
+                })
+            }
+        })
+    }
+
+    getSlot() {
+        const {token, initSlot} = this.props
         let formData=new FormData();
         formData.append('token',token);
         formData.append('version','2.0');
         formData.append('activity_id',this.table_id);
-        Fetch.post(NewHttp+'ActivityDiscountTwo', formData).then(res => {
+        Fetch.post(NewHttp + 'ActivitySlotUserTwo', formData).then(res => {
             if(res.code === 1) {
-                console.log('discount', res)
+                initSlot(res.data);
+                this.checkStatus(res.data)
             }
         })
     }
@@ -122,35 +182,10 @@ class ActiveDetail extends Component{
         return totalImg
     }
     checkStatus(data){//查看该活动是否满员或者过期
-        if(data.long_day === 1) {
+
             let arr = []
-            for(let i=0;i<data.slot.length;i++){
-                for(let k=0;k<data.slot[i].list.length;k++){
-                    if(data.slot[i].list[k].personNum>data.slot[i].list[k].order_person_num){
-                        this.setState({
-                            isFull:false
-                        })
-                    }else{
-                        this.setState({
-                            isFull:true
-                        })
-                    }
-                }
-                arr.push(data.slot[i].status)
-                if(arr.indexOf(0)>-1){
-                    this.setState({
-                        isOverdue:false
-                    })
-                }else{
-                    this.setState({
-                        isOverdue:true
-                    })
-                }
-            }
-        } else {
-            let arr = []
-            for(let i=0;i<data.slot.length;i++){
-                if(data.slot[i].max_person_num > data.slot[i].order_person_num){
+            for(let i=0;i<data.length;i++){
+                if(data[i].max_person_num > data[i].order_person_num){
                     this.setState({
                         isFull:false
                     })
@@ -159,7 +194,7 @@ class ActiveDetail extends Component{
                         isFull:true
                     })
                 }
-                arr.push(data.slot[i].status)
+                arr.push(data[i].status)
                 if(arr.indexOf(0)>-1){
                     this.setState({
                         isOverdue:false
@@ -170,7 +205,7 @@ class ActiveDetail extends Component{
                     })
                 }
             }
-        }
+
     }
     _onScroll(e){
         let y = e.nativeEvent.contentOffset.y;
@@ -183,33 +218,44 @@ class ActiveDetail extends Component{
         })
     }
     goDay(vol, isMe, long_day, table_id) {
+        console.log('vol', vol)
         const {isOverdue, data} = this.state
         if(isOverdue || !data.price) {
             this.refs.toast.show('该体验暂已过期')
         } else {
             if(long_day === 1){
-                const {initJoin, join, initSlot} = this.props
-                initSlot({
-                    slot: this.state.data.slot
-                })
+                const {initJoin, join} = this.props
                 let datas = join
                 datas.activity_id = table_id;
                 datas.age_limit = data.age_limit;
                 datas.house = data.house
                 initJoin(datas)
-                NavigatorUtils.goPage({vol: vol, isMe: isMe, issatay: data.issatay},'SingleDay', 'navigate')
+                NavigatorUtils.goPage({
+                    vol: vol,
+                    isMe: isMe,
+                    issatay: data.issatay,
+                    title: data.title,
+                    kids_stand_low: data.kids_stand_low,
+                    kids_stand_high: data.kids_stand_high,
+                    house:this.state.houseData.house
+                },'SingleDay', 'navigate')
             } else {
-                const {initJoin, join, initSlot} = this.props;
-                initSlot({
-                    slot: this.state.data.slot
-                });
+                const {initJoin, join} = this.props;
                 let datas = join
                 datas.activity_id = table_id;
                 datas.age_limit = data.age_limit;
                 datas.house = data.house
                 initJoin(datas)
 
-                NavigatorUtils.goPage({},'ManyDay', 'navigate')
+                NavigatorUtils.goPage({
+                    vol: vol,
+                    isMe: isMe,
+                    issatay: data.issatay,
+                    title: data.title,
+                    kids_stand_low: data.kids_stand_low,
+                    kids_stand_high: data.kids_stand_high,
+                    house:this.state.houseData.house
+                },'ManyDay', 'navigate')
             }
         }
 
@@ -235,16 +281,42 @@ class ActiveDetail extends Component{
             if(res.code === 1) {
                 this.getWishList();
                 this.loadData()
-            }else{
-                console.log(res.msg)
             }
         })
     }
     _closeModal() {
         this.refs.share.close()
     }
+    _showBackModal(data) {
+        this.setState({
+            table_id: data.msg_id
+        },() => {
+            this.refs.content.open()
+        })
+    }
+    commentsBack() {
+        this.refs.content.close();
+        NavigatorUtils.goPage({
+            table_flag: 1,
+            flag: 4,
+            table_id: this.state.table_id,
+            t_id: this.table_id
+        }, 'TextInput')
+    }
+    toTranslate() {
+        let _this = this;
+        this.refs.translate.close();
+        NavigatorUtils.goPage({
+            introduce:this.state.data.introduce,
+            descripte:this.state.data.descripte,
+            activity_id:this.table_id,
+            // refresh: function () {
+            //     _this.refs.toast.show('翻译成功')
+            // }
+        }, 'Translate')
+    }
     render(){
-        const {data, onTouchEnd, isLoading, opacity, isOverdue, isFull} = this.state
+        const {data, onTouchEnd, isLoading, opacity, isOverdue, isFull,discount} = this.state
         const {theme, user, netconnect} = this.props
         const nav = <View style={styles.nav_con}>
             <SafeAreaView style={{
@@ -357,12 +429,22 @@ class ActiveDetail extends Component{
                                 {
                                     data.is_volunteen === 1
                                     ?
-                                        <VolunteerApply isMe={data.user.user_id === user.userid?1:0} goDaySelect={(val) => this.goDay(val,data.user.user_id === user.userid?1:0, data.long_day, this.table_id )} />
+                                        <VolunteerApply isMe={data.user.user_id == user.userid?1:0} goDaySelect={(val) => {
+                                            if(data.user.user_id == user.userid) {
+                                                NavigatorUtils.goPage({
+                                                    activity_id: data.activity_id,
+                                                    long_day: data.long_day,
+                                                    // create_time: this.state.create_time
+                                                }, 'InviteVol')
+                                            }else{
+                                                this.goDay(1,data.user.user_id === user.userid?1:0, data.long_day, this.table_id )
+                                            }
+                                        }} />
                                     :
                                         null
                                 }
                                 <View style={{marginTop: data.is_volunteen === 1?0:10}}>
-                                    <Preferential />
+                                    <Preferential {...this.props} {...this.state}/>
                                 </View>
                                 <View style={[aboutStyles.content_con,CommonStyle.flexCenter]}>
                                     <View style={CommonStyle.commonWidth}>
@@ -383,7 +465,12 @@ class ActiveDetail extends Component{
                                         <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:35}}>体验内容</Text>
                                         <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.descripte}</Text>
                                         <Text style={aboutStyles.translate_btn}>查看翻译</Text>
-                                        <TouchableOpacity style={[aboutStyles.apply_btn,CommonStyle.flexCenter,{height:50,marginTop:10}]}>
+                                        <TouchableOpacity
+                                            style={[aboutStyles.apply_btn,CommonStyle.flexCenter,{height:50,marginTop:10}]}
+                                            onPress={()=>{
+                                                this.refs.translate.open()
+                                            }}
+                                        >
                                             <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
                                                 <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>志愿者翻译</Text>
                                                 <AntDesign
@@ -453,7 +540,13 @@ class ActiveDetail extends Component{
                                     </View>
                                 </View>
 
-                                <Comments {...this.state} {...this.props} table_id={this.table_id}/>
+                                <Comments
+                                    showBackModal={(data)=>{
+                                        this._showBackModal(data)
+                                    }}
+                                    {...this.state}
+                                    {...this.props}
+                                    table_id={this.table_id}/>
                                 <AboutOther {...this.state} {...this.props}/>
                                 <SameActiveMap {...this.state} {...this.props} table_id={this.table_id}/>
                             </View>
@@ -475,7 +568,7 @@ class ActiveDetail extends Component{
                                     {
                                         data.price && !isOverdue
                                             ?
-                                            <Text style={{fontWeight: 'bold',color:'#333',fontSize: 15}}>¥{data.price}/人</Text>
+                                            <Text style={{fontWeight: 'bold',color:'#333',fontSize: 15}}>¥{data.price}/人起</Text>
                                             :
                                             <Text style={{fontWeight: 'bold',color:'#999',fontSize: 15}}>暂已过期</Text>
                                     }
@@ -508,7 +601,7 @@ class ActiveDetail extends Component{
                                         :
                                         <TouchableOpacity
                                             style={[styles.bot_btn,CommonStyle.flexCenter,{backgroundColor: theme}]}
-                                            onPress={()=>this.goDay(0,data.user.user_id === user.userid?1:0, data.long_day, this.table_id)}
+                                            onPress={()=>this.goDay(0,data.user.user_id == user.userid?1:0, data.long_day, this.table_id)}
                                         >
                                             <Text style={{color: '#fff',fontWeight: 'bold'}}>
                                                 {
@@ -535,6 +628,82 @@ class ActiveDetail extends Component{
                     }
 
                 </SafeAreaView>
+                <Modal
+                    style={{height:195,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"translate"}
+                    animationDuration={200}
+                    position={"center"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        width: width*0.85,
+                        height:195,
+                        backgroundColor:'#fff',
+                        marginLeft: width*0.075,
+                    }}>
+                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                            height:65,
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#f5f5f5'
+                        }]}
+                        onPress={()=>{
+                            this.toTranslate()
+                        }}
+                        >
+                            <Text style={{color:'#333'}}>翻译内容</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                            height:65,
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#f5f5f5'
+                        }]}>
+                            <Text style={{color:'#333'}}>查看翻译内容</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                            height:65,
+                        }]}
+                        onPress={() => {
+                            this.refs.translate.close()
+                        }}
+                        >
+                            <Text style={{color:'#333'}}>取消</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
+                <Modal
+                    style={{height:140,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"content"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{height: 120,alignItems:'center'}}>
+                        <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                            height: 50,
+                            backgroundColor: '#fff',
+                            borderRadius: 5
+                        }]}
+                                          onPress={()=>{
+                                              this.commentsBack()
+                                          }}
+                        >
+                            <Text style={{color:'#333'}}>回复</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                            height: 50,
+                            backgroundColor: '#fff',
+                            borderRadius: 5,
+                            marginTop: 10,
+                            marginBottom: 10
+                        }]}>
+                            <Text style={{color:'red'}}>举报</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
                 <Modal
                     style={{height:180,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
                     ref={"share"}
@@ -975,7 +1144,15 @@ class Preferential extends Component{
                                 <Text style={[aboutStyles.p_tabs_txt,{color:'#f4648d'}]}>折扣</Text>
                             </View>
                             <View style={aboutStyles.p_tabs_con}>
-                                <Text style={{color:'#222',lineHeight:20}}>3月8日-4月5日时间内折扣5%；5 月4日-9月4日时间内折扣9%；</Text>
+                                <Text style={{color:'#222',lineHeight:20}}>
+                                    {
+                                        this.props.discount&&this.props.discount.length>0
+                                        ?
+                                            <Text>有折扣</Text>
+                                        :
+                                            <Text>此体验暂无折扣</Text>
+                                    }
+                                </Text>
                             </View>
                         </View>
                         {/*返差价*/}
@@ -984,7 +1161,24 @@ class Preferential extends Component{
                                 <Text style={[aboutStyles.p_tabs_txt,{color:'#F37948'}]}>返差价</Text>
                             </View>
                             <View style={aboutStyles.p_tabs_con}>
-                                <Text style={{color:'#222',lineHeight:20}}>时间段内体验结束时满10人返预付 10%；满20人返25%；</Text>
+                                {
+                                    this.props.differList&&this.props.differList.length>0
+                                    ?
+                                        <Text style={{color:'#222',lineHeight:20}}>
+                                            时间段内体验结束时
+                                            {
+                                                this.props.differList.map((item, index) => {
+                                                    return <Text key={index}>
+                                                        满{item.num}人返预付的{parseFloat(item.refund_rate)}%{index===this.props.differList.length-1?null:','}
+                                                    </Text>
+                                                })
+                                            }
+                                        </Text>
+                                    :
+                                        <Text style={{color:'#222',lineHeight:20}}>
+                                            次体验暂无返差价
+                                        </Text>
+                                }
                                 <View style={[CommonStyle.flexStart,{marginTop: 5}]}>
                                     <Text style={{color:'#666',fontSize:12}}>返差价说明</Text>
                                     <MaterialIcons
@@ -1001,92 +1195,18 @@ class Preferential extends Component{
                                 <Text style={[aboutStyles.p_tabs_txt,{color:'#1E8C8C'}]}>套餐</Text>
                             </View>
                             <View style={aboutStyles.p_tabs_con}>
-                                <Text style={{color:'#222',lineHeight:20}}>该活动包含亲子价套餐和综合套餐</Text>
+                                <Text style={{color:'#222',lineHeight:20}}>
+                                    {
+                                        this.props.data.is_combine
+                                        ?
+                                            '包含亲子和组合套餐'
+                                        :
+                                            '未包含亲子和组合套餐'
+                                    }
+                                </Text>
                             </View>
                         </View>
                     </View>
-                </View>
-            </View>
-        )
-    }
-}
-//体验内容
-class ActiveContent extends Component{
-    constructor(props) {
-        super(props);
-        this.ASPECT_RATIO = screen.width / screen.height;
-        this.LATITUDE =0;
-        this.LONGITUDE = 0;
-        this.LATITUDE_DELTA = 0.0922;
-        this.LONGITUDE_DELTA = this.LATITUDE_DELTA * this.ASPECT_RATIO;
-    }
-    render(){
-        const {data} = this.props
-        return(
-            <View style={[aboutStyles.content_con,CommonStyle.flexCenter]}>
-                <View style={CommonStyle.commonWidth}>
-                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>
-                        策划者{data.user && (data.user.family_name || data.user.middle_name || data.user.name)?
-                        data.user.family_name+' '+data.user.middle_name+' '+data.user.name
-                        :'匿名用户'
-                    }
-                    </Text>
-                    <LazyImage
-                        source={data.user&&data.user.headimage?
-                            {uri:data.user.headimage.domain+data.user.headimage.image_url}:
-                        require('../../../assets/images/touxiang.png')}
-                        style={aboutStyles.headimage}
-                    />
-                    <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.introduce}</Text>
-                    <Text style={aboutStyles.translate_btn}>查看翻译</Text>
-                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:35}}>体验内容</Text>
-                    <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.descripte}</Text>
-                    <Text style={aboutStyles.translate_btn}>查看翻译</Text>
-                    <TouchableOpacity style={[aboutStyles.apply_btn,CommonStyle.flexCenter,{height:50,marginTop:10}]}>
-                        <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow]}>
-                            <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>志愿者翻译</Text>
-                            <AntDesign
-                                name={'right'}
-                                size={16}
-                                style={{color:'#333'}}
-                            />
-                        </View>
-                    </TouchableOpacity>
-                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:10}}>体验地点</Text>
-                    <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>
-                        体验地点是{data.country}{data.province}{data.city==='市辖区'?null:data.city}{data.region},
-                        另外在活动中我们还将去到{data.go_place}
-                    </Text>
-                    <View style={aboutStyles.active_map}>
-                        <MapView
-                            initialRegion={{
-                                latitude: this.LATITUDE,
-                                longitude: this.LONGITUDE,
-                                latitudeDelta: this.LATITUDE_DELTA,
-                                longitudeDelta: this.LONGITUDE_DELTA,
-                            }}
-                            style={{
-                                width:'100%',
-                                height: 180
-                            }}
-                        >
-
-                        </MapView>
-                        <TouchableOpacity style={{
-                            position:'absolute',
-                            left:0,
-                            right:0,
-                            bottom:0,
-                            top:0,
-                        }} onPress={()=>{
-                            NavigatorUtils.goPage({
-                                set_address_lat: data.set_address_lat,
-                                set_address_lng: data.set_address_lng,
-                                set_address: data.set_address,
-                            },'Map')
-                        }}></TouchableOpacity>
-                    </View>
-
                 </View>
             </View>
         )
@@ -1098,8 +1218,15 @@ class Comments extends Component{
         return(
             <View style={[aboutStyles.content_con,CommonStyle.flexCenter]}>
                 <View style={CommonStyle.commonWidth}>
-                    <Text style={{color:'#333',fontSize:16,fontWeight:'bold'}}>评价</Text>
-                    <Comment table_id={this.props.table_id} flag={1} type={'detail'}/>
+                    <Text
+                        style={{color:'#333',fontSize:16,fontWeight:'bold'}}
+                    >评价</Text>
+                    <Comment
+                        table_id={this.props.table_id}
+                        flag={1}
+                        type={'detail'}
+                        showBackModal={(data)=>{this.props.showBackModal(data)}}
+                    />
                 </View>
             </View>
         )
@@ -1166,51 +1293,51 @@ class AboutOther extends Component{
                     </TouchableOpacity>
                 </View>
                 {/*体验房源*/}
-                {
-                    data.issatay !== 0
-                        ?
-                        <View style={[CommonStyle.flexCenter, {width:width}]}>
-                            <View style={[CommonStyle.commonWidth]}>
-                                <Text style={{color:'#333',fontSize:16,marginTop:15}}>体验房源</Text>
-                                <Text style={{color:'#999',fontSize:12,marginTop: 10}}>{data.issatay===1?'需购买':'体验自带'}</Text>
-                            </View>
-                            {
-                                data.issatay === 1
-                                    ?
-                                    data.house.length > 0
-                                    ?
-                                    <View style={{width: '100%'}}>
-                                        <FlatList
-                                            data={data.house}
-                                            horizontal={true}
-                                            renderItem={(data,index)=>this._renderHouse(data)}
-                                            showsHorizontalScrollIndicator = {false}
-                                            keyExtractor={(item, index) => index.toString()}
-                                        />
-                                    </View>
-                                    :
-                                        <NoData></NoData>
-                                    :
-                                    <View style={{width: '100%'}}>
-                                        {
-                                            data && data.houseimage && data.houseimage.length > 0
-                                            ?
-                                                <FlatList
-                                                    data={data.houseimage}
-                                                    horizontal={true}
-                                                    renderItem={(data,index)=>this._renderImage(data)}
-                                                    showsHorizontalScrollIndicator = {false}
-                                                    keyExtractor={(item, index) => index.toString()}
-                                                />
-                                            :
-                                                <NoData></NoData>
-                                        }
-                                    </View>
-                            }
-                        </View>
-                        :
-                        null
-                }
+                {/*{*/}
+                {/*    data.issatay !== 0*/}
+                {/*        ?*/}
+                {/*        <View style={[CommonStyle.flexCenter, {width:width}]}>*/}
+                {/*            <View style={[CommonStyle.commonWidth]}>*/}
+                {/*                <Text style={{color:'#333',fontSize:16,marginTop:15}}>体验房源</Text>*/}
+                {/*                <Text style={{color:'#999',fontSize:12,marginTop: 10}}>{data.issatay===1?'需购买':'体验自带'}</Text>*/}
+                {/*            </View>*/}
+                {/*            {*/}
+                {/*                data.issatay === 1*/}
+                {/*                    ?*/}
+                {/*                    data.house.length > 0*/}
+                {/*                    ?*/}
+                {/*                    <View style={{width: '100%'}}>*/}
+                {/*                        <FlatList*/}
+                {/*                            data={data.house}*/}
+                {/*                            horizontal={true}*/}
+                {/*                            renderItem={(data,index)=>this._renderHouse(data)}*/}
+                {/*                            showsHorizontalScrollIndicator = {false}*/}
+                {/*                            keyExtractor={(item, index) => index.toString()}*/}
+                {/*                        />*/}
+                {/*                    </View>*/}
+                {/*                    :*/}
+                {/*                        <NoData></NoData>*/}
+                {/*                    :*/}
+                {/*                    <View style={{width: '100%'}}>*/}
+                {/*                        {*/}
+                {/*                            data && data.houseimage && data.houseimage.length > 0*/}
+                {/*                            ?*/}
+                {/*                                <FlatList*/}
+                {/*                                    data={data.houseimage}*/}
+                {/*                                    horizontal={true}*/}
+                {/*                                    renderItem={(data,index)=>this._renderImage(data)}*/}
+                {/*                                    showsHorizontalScrollIndicator = {false}*/}
+                {/*                                    keyExtractor={(item, index) => index.toString()}*/}
+                {/*                                />*/}
+                {/*                            :*/}
+                {/*                                <NoData></NoData>*/}
+                {/*                        }*/}
+                {/*                    </View>*/}
+                {/*            }*/}
+                {/*        </View>*/}
+                {/*        :*/}
+                {/*        null*/}
+                {/*}*/}
             </View>
         )
     }

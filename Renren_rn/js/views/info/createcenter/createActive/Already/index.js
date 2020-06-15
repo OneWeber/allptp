@@ -23,7 +23,7 @@ class Already extends Component{
     toActiveDetail(activity_id) {
         const {changeActivityId} = this.props;
         changeActivityId(activity_id);
-        NavigatorUtils.goPage({},'Language')
+        NavigatorUtils.goPage({type:'已完成'},'Language')
     }
     renderItem(data){
         return <TouchableOpacity style={[CommonStyle.flexCenter,{padding: 10,

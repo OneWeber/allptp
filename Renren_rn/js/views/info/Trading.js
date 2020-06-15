@@ -9,17 +9,15 @@ import {
     FlatList,
     ActivityIndicator, SafeAreaView, ScrollView,
 } from 'react-native';
-import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {connect} from 'react-redux'
-import ScrollableTabView , { DefaultTabBar } from 'react-native-scrollable-tab-view';
-import CustomeTabBar from '../../model/CustomeTabBar';
 import action from '../../action'
 import NewHttp from '../../utils/NewHttp';
 import NoData from '../../common/NoData';
 import CommonStyle from '../../../assets/css/Common_css';
 import Fetch from '../../expand/dao/Fetch';
+import Toast from 'react-native-easy-toast';
 const {width, height} = Dimensions.get('window')
 class Trading extends Component{
     constructor(props) {
@@ -48,7 +46,7 @@ class Trading extends Component{
         let formData=new FormData();
         formData.append('token',token);
         formData.append('page',1);
-        Fetch.post(NewHttp+'balance',formData).then(
+        Fetch.post(NewHttp+'BalanceTwo',formData).then(
             result=>{
                 if(result.code==1){
                     this.setState({
@@ -96,6 +94,15 @@ class Trading extends Component{
             this._startTimer()
         })
     }
+    goWithDrawal() {
+        let _this = this;
+        NavigatorUtils.goPage({
+            refresh: function () {
+                _this.getBalance();
+                _this.refs.toast.show('提现成功')
+            }
+        }, 'WithDrawal')
+    }
     render(){
         const {theme,bank} = this.props;
         const {balanceData} = this.state;
@@ -108,6 +115,7 @@ class Trading extends Component{
         }
         return(
             <SafeAreaView style={styles.container}>
+                <Toast ref="toast" position='center' positionValue={0}/>
                 <View style={CommonStyle.flexCenter}>
                     <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
                         height:50
@@ -150,7 +158,7 @@ class Trading extends Component{
                                 borderWidth: 1,
                                 borderColor:'#f3f5f8'
                             }]} onPress={()=>{
-                                NavigatorUtils.goPage({}, 'WithDrawal')
+                                this.goWithDrawal()
                             }}>
                                 <Text style={{color:'#fff',fontWeight:'bold',fontSize:12}}>提现</Text>
                             </TouchableOpacity>

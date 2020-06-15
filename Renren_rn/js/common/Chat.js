@@ -126,27 +126,39 @@ class Chat extends Component{
                                     <Text style={{lineHeight:20,color:'#333'}}>{data.item.content}</Text>
                                 </TouchableOpacity>
                             </View>
-                            <LazyImage
-                                source={data.item.user&&data.item.user.headimage?{uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:
-                                require('../../assets/images/touxiang.png')}
-                                style={{
-                                    width:40,
-                                    height:40,
-                                    borderRadius: 5
+                            <TouchableOpacity
+                                onPress={()=>{
+                                    NavigatorUtils.goPage({user_id: this.props.user.userid},'UserInfo')
                                 }}
-                            />
+                            >
+                                <LazyImage
+                                    source={data.item.user&&data.item.user.headimage?{uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:
+                                    require('../../assets/images/touxiang.png')}
+                                    style={{
+                                        width:40,
+                                        height:40,
+                                        borderRadius: 5
+                                    }}
+                                />
+                            </TouchableOpacity>
                         </View>
                     :
                         <View style={[CommonStyle.flexStart,styles.messageItem]}>
-                            <LazyImage
-                                source={data.item.user&&data.item.user.headimage?{uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:
-                                    require('../../assets/images/touxiang.png')}
-                                style={{
-                                    width:40,
-                                    height:40,
-                                    borderRadius: 5
-                                }}
-                            />
+                            <TouchableOpacity
+                            onPress={()=>{
+                                NavigatorUtils.goPage({user_id: this.props.navigation.state.params.user_id},'UserInfo')
+                            }}
+                            >
+                                <LazyImage
+                                    source={data.item.user&&data.item.user.headimage?{uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:
+                                        require('../../assets/images/touxiang.png')}
+                                    style={{
+                                        width:40,
+                                        height:40,
+                                        borderRadius: 5
+                                    }}
+                                />
+                            </TouchableOpacity>
                             <View style={{marginLeft: 15}}>
                                 <TouchableOpacity style={styles.messageContent}>
                                     <Text style={{lineHeight:20,color:'#333'}}>{data.item.content}</Text>

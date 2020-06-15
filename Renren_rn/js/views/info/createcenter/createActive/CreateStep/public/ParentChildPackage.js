@@ -1,18 +1,27 @@
 import React,{Component} from 'react';
-import {StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Dimensions, SafeAreaView} from 'react-native';
+import {StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Dimensions, SafeAreaView,Alert} from 'react-native';
 import CommonStyle from '../../../../../../../assets/css/Common_css';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import {connect} from 'react-redux'
 import action from '../../../../../../action'
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import NavigatorUtils from '../../../../../../navigator/NavigatorUtils';
-const {width} = Dimensions.get('window')
+import Fetch from '../../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../../utils/NewHttp';
+const {width} = Dimensions.get('window');
+const title = "";
+const message = '套餐应用到'
 class ParentChildPackage extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            showBot: false
+            showBot: false,
+            isAdd: false,
+            packageList: this.props.parenChildPackage,
+            selectPackage: []
         }
+        this.isEdit = this.props.navigation.state.params.isEdit?this.props.navigation.state.params.isEdit:false;
+        this.data = this.props.navigation.state.params.data?this.props.navigation.state.params.data:false;
     }
     getLeftButton(){
         return <TouchableOpacity
@@ -27,13 +36,38 @@ class ParentChildPackage extends Component{
             />
         </TouchableOpacity>
     }
+    componentDidMount(){
+        this.getParentPackageList();
+    }
+
+    getParentPackageList() {
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('version', '2.0');
+        formData.append('activity_id', this.props.activity_id);
+        formData.append('type', 1);
+        Fetch.post(NewHttp+'CombineUsedTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    packageList: res.data
+                })
+            }
+        })
+    }
     getRightButton(){
-        const {parenChildPackage} = this.props
+        const {packageList} = this.state;
         return <View style={{paddingRight: width*0.03}}>
             {
-                parenChildPackage.length > 0
+                packageList.length > 0 && !this.isEdit && !this.state.isAdd
                 ?
-                    <Text style={{color:this.props.theme,fontSize: 16}}>新添加</Text>
+                    <Text
+                        style={{color:this.props.theme,fontSize: 16}}
+                        onPress={() => {
+                            this.setState({
+                                isAdd: true
+                            })
+                        }}
+                    >新添加</Text>
                 :
                     null
             }
@@ -44,10 +78,34 @@ class ParentChildPackage extends Component{
             showBot: val
         })
     }
+    usePackage() {
+        const {changeParentChildPackage} = this.props;
+        changeParentChildPackage(this.state.selectPackage);
+        NavigatorUtils.goPage({ }, 'LongTime')
+    }
+    alertUse() {
+        Alert.alert(
+            title,
+            message,
+            [
+                {text: '当前选择日期', onPress: () => {this.usePackage()}},
+                {text: '所有日期', onPress: () => console.log('OK Pressed')},
+                {text: '自定义日期', onPress: () => console.log('送伞')},
+                {text: '取消', onPress: () => console.log('送伞'),style: 'cancel'},
+            ],
+            {
+                cancelable: true,
+                onDismiss: () => {
+
+                }
+            }
+        )
+
+    }
     render(){
-        const {parenChildPackage} = this.props
+        const {packageList} = this.state;
         return(
-            <View style={{flex: 1,position:'relative',backgroundColor: parenChildPackage.length>0?'#fff':"#f5f5f5"}}>
+            <View style={{flex: 1,position:'relative',backgroundColor: packageList.length>0?'#fff':"#f5f5f5"}}>
                 <RNEasyTopNavBar
                     title={'添加亲子套餐'}
                     backgroundTheme={'#fff'}
@@ -58,14 +116,25 @@ class ParentChildPackage extends Component{
                 <ScrollView>
                     <View style={CommonStyle.flexCenter}>
                         {
-                            parenChildPackage.length > 0
+                            packageList.length > 0 && !this.isEdit && !this.state.isAdd
                             ?
                                 <View style={{width:'100%'}}>
-                                    <PackageList changeBot={(val)=>this._changeBot(val)} {...this.props}/>
+                                    <PackageList
+                                        changeBot={(val)=>this._changeBot(val)}
+                                        {...this.props}
+                                        {...this.state}
+                                        changePackage={(data) => {
+                                            this.setState({
+                                                selectPackage: data
+                                            },() => {
+                                                console.log(this.state.selectPackage)
+                                            })
+                                        }}
+                                    />
                                 </View>
                             :
                                 <View style={CommonStyle.commonWidth}>
-                                    <AddPCPackage {...this.props}/>
+                                    <AddPCPackage {...this.props} data={this.data} isEdit={this.isEdit} {...this.state}/>
                                 </View>
                         }
 
@@ -76,12 +145,30 @@ class ParentChildPackage extends Component{
                     ?
                         <SafeAreaView style={[CommonStyle.bot_btn,CommonStyle.flexCenter]}>
                             <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{height:49}]}>
-                                <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
-                                    backgroundColor:this.props.theme
-                                }]}
-                                >
-                                    <Text style={{color:'#fff'}}>应用到当前选择日期</Text>
-                                </TouchableOpacity>
+                                {
+                                    this.props.navigation.state.params.timeIndex
+                                    ?
+                                        <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
+                                            backgroundColor:this.props.theme
+                                        }]}
+                                        onPress={() => {
+                                            this.alertUse()
+                                        }}
+                                        >
+                                            <Text style={{color:'#fff'}}>应用到</Text>
+                                        </TouchableOpacity>
+                                    :
+                                        <TouchableOpacity style={[CommonStyle.btn,CommonStyle.flexCenter,{
+                                            backgroundColor:this.props.theme
+                                        }]}
+                                          onPress={() => {
+                                              this.usePackage()
+                                          }}
+                                        >
+                                            <Text style={{color:'#fff'}}>应用到当前选择日期</Text>
+                                        </TouchableOpacity>
+                                }
+
                             </View>
                         </SafeAreaView>
                     :
@@ -94,7 +181,9 @@ class ParentChildPackage extends Component{
 }
 const mapStateToProps = state => ({
     theme: state.theme.theme,
-    parenChildPackage: state.steps.parenChildPackage
+    parenChildPackage: state.steps.parenChildPackage,
+    token: state.token.token,
+    activity_id: state.steps.activity_id,
 })
 const mapDispatchToProps = dispatch => ({
     changeParentChildPackage: data => dispatch(action.changeParentChildPackage(data))
@@ -109,6 +198,17 @@ class AddPCPackage extends Component{
             totalPrice: ''
         }
     }
+    componentDidMount(){
+        if(this.props.isEdit) {
+            console.log(this.props.data)
+            this.setState({
+                adultNum:typeof(this.props.data.adult)=='string'?this.props.data.adult:JSON.stringify(this.props.data.adult),
+                childNum:typeof(this.props.data.kids)=='string'?this.props.data.kids:JSON.stringify(this.props.data.kids),
+                totalPrice: this.props.data.price
+            })
+        }
+    }
+
     addPackage(){
         const {changeParentChildPackage, parenChildPackage} = this.props;
         let list = parenChildPackage;
@@ -125,7 +225,25 @@ class AddPCPackage extends Component{
         changeParentChildPackage(list);
         NavigatorUtils.goPage({}, 'LongTime')
     }
+    saveChange() {
+        const {parenChildPackage, changeParentChildPackage} = this.props;
+        let data = parenChildPackage;
+        let index = this.props.navigation.state.params.index;
+        data[index] = {
+            combine_id: data[index].combine_id,
+            adult: this.state.adultNum,
+            kids: this.state.childNum,
+            price: this.state.totalPrice,
+            name: '',
+            type: 1,
+            flag: 1,
+            date: []
+        }
+        changeParentChildPackage(data);
+        NavigatorUtils.goPage({ }, 'LongTime')
+    }
     render(){
+        const {isEdit} = this.props
         return(
             <View>
                 <Text style={{
@@ -153,6 +271,8 @@ class AddPCPackage extends Component{
                         <View style={CommonStyle.flexEnd}>
                             <TextInput
                                 onChangeText={(text)=>this.setState({adultNum:text})}
+                                defaultValue={this.state.adultNum}
+                                keyboardType={"number-pad"}
                                 style={{
                                     width:170,
                                     height:60,
@@ -178,6 +298,8 @@ class AddPCPackage extends Component{
                         <View style={CommonStyle.flexEnd}>
                             <TextInput
                                 onChangeText={(text)=>this.setState({childNum:text})}
+                                defaultValue={this.state.childNum}
+                                keyboardType={"number-pad"}
                                 style={{
                                     width:170,
                                     height:60,
@@ -208,6 +330,8 @@ class AddPCPackage extends Component{
                     <View style={CommonStyle.flexEnd}>
                         <TextInput
                             onChangeText={(text)=>this.setState({totalPrice:text})}
+                            defaultValue={this.state.totalPrice?JSON.stringify(parseFloat(this.state.totalPrice)):''}
+                            keyboardType='numeric'
                             style={{
                                 width:170,
                                 height:60,
@@ -225,23 +349,46 @@ class AddPCPackage extends Component{
                 {
                     this.state.adultNum && this.state.childNum && this.state.totalPrice
                         ?
-                        <TouchableOpacity style={[CommonStyle.flexCenter,{
-                            height:40,
-                            marginTop: 45,
-                            backgroundColor:this.props.theme,
-                            borderRadius: 5
-                        }]} onPress={()=>this.addPackage()}>
-                            <Text style={{color:'#fff'}}>确认添加</Text>
-                        </TouchableOpacity>
+                        isEdit
+                            ?
+                            <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                height:40,
+                                marginTop: 45,
+                                backgroundColor:this.props.theme,
+                                borderRadius: 5
+                            }]} onPress={()=>{this.saveChange()}}>
+                                <Text style={{color:'#fff'}}>保存</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                height:40,
+                                marginTop: 45,
+                                backgroundColor:this.props.theme,
+                                borderRadius: 5
+                            }]} onPress={()=>this.addPackage()}>
+                                <Text style={{color:'#fff'}}>确认添加</Text>
+                            </TouchableOpacity>
                         :
-                        <View style={[CommonStyle.flexCenter,{
-                            height:40,
-                            marginTop: 45,
-                            backgroundColor:'#d5d5d5',
-                            borderRadius: 5
-                        }]}>
-                            <Text style={{color:'#fff'}}>确认添加</Text>
-                        </View>
+                        isEdit
+                            ?
+                            <View style={[CommonStyle.flexCenter,{
+                                height:40,
+                                marginTop: 45,
+                                backgroundColor:'#d5d5d5',
+                                borderRadius: 5
+                            }]}>
+                                <Text style={{color:'#fff'}}>保存</Text>
+                            </View>
+                            :
+                            <View style={[CommonStyle.flexCenter,{
+                                height:40,
+                                marginTop: 45,
+                                backgroundColor:'#d5d5d5',
+                                borderRadius: 5
+                            }]}>
+                                <Text style={{color:'#fff'}}>确认添加</Text>
+                            </View>
+
                 }
             </View>
         )
@@ -251,13 +398,13 @@ class PackageList extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            status: []
+            status: [],
         }
     }
     componentDidMount() {
-        const {parenChildPackage} = this.props;
+        const {packageList} = this.props;
         let list = []
-        for(let i=0; i<parenChildPackage.length; i++){
+        for(let i=0; i<packageList.length; i++){
             list.push(0)
         }
         this.setState({
@@ -274,15 +421,22 @@ class PackageList extends Component{
         this.setState({
             status: list
         },() => {
+            let data = [];
+            for(let i=0;i<list.length;i++) {
+                if(list[i] === 1) {
+                    data.push(this.props.packageList[i])
+                }
+            }
             if(list.indexOf(1) > -1){
-                this.props.changeBot(true)
+                this.props.changeBot(true);
+                this.props.changePackage(data)
             } else {
                 this.props.changeBot(false)
             }
         })
     }
     render(){
-        const {parenChildPackage} = this.props;
+        const {packageList} = this.props;
         return(
             <View style={[CommonStyle.flexCenter,{
                 borderTopWidth: 10,
@@ -296,17 +450,19 @@ class PackageList extends Component{
                         color:'#333',
                         fontSize: 15,
                         fontWeight: 'bold'
-                    }}>已经添加{parenChildPackage.length}个亲子套餐</Text>
+                    }}>创建过{packageList.length}个亲子套餐</Text>
                     {
-                        parenChildPackage.map((item, index) => {
-                            return <TouchableOpacity key={index} style={[CommonStyle.spaceRow,{
+                        packageList.map((item, index) => {
+                            return <View key={index} style={[CommonStyle.spaceRow,{
                                 marginTop: 20
-                            }]} onPress={()=>{this.clickItem(index)}}>
-                                <View style={[styles.roll,CommonStyle.flexCenter,{
+                            }]} >
+                                <TouchableOpacity style={[styles.roll,CommonStyle.flexCenter,{
                                     borderWidth: this.state.status[index]?0:1,
                                     borderColor:'#aaaaaa',
                                     backgroundColor: this.state.status[index]?this.props.theme:'#fff'
-                                }]}>
+                                }]}
+                                  onPress={()=>{this.clickItem(index)}}
+                                >
                                     {
                                         this.state.status[index]
                                         ?
@@ -318,7 +474,7 @@ class PackageList extends Component{
                                         :
                                             null
                                     }
-                                </View>
+                                </TouchableOpacity>
                                 <View style={[CommonStyle.spaceRow,{
                                     width:width*0.94-28,
                                     height: 40,
@@ -329,15 +485,14 @@ class PackageList extends Component{
                                 }]}>
                                     <View style={CommonStyle.flexStart}>
                                         <Text style={{color:'#333',fontWeight:'bold'}}>亲子</Text>
-                                        <Text style={{marginLeft: 5}}>{item.adultNum}成人{item.childNum}儿童</Text>
-                                        <Text style={{color:this.props.theme,marginLeft: 20}}>¥{item.totalPrice}</Text>
+                                        <Text style={{marginLeft: 5}}>{item.adult}成人{item.kids}儿童</Text>
+                                        <Text style={{color:this.props.theme,marginLeft: 20}}>¥{item.price}</Text>
                                     </View>
                                     <View style={CommonStyle.flexEnd}>
-                                        <Text style={{color:'#A4A4A4'}}>编辑</Text>
                                         <Text style={{color:'#A4A4A4',marginLeft: 15}}>删除</Text>
                                     </View>
                                 </View>
-                            </TouchableOpacity>
+                            </View>
                         })
                     }
 

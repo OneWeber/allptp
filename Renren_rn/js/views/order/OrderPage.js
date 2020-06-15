@@ -109,7 +109,7 @@ class OrderComponent extends Component{
         } else {
             refreshType = false
         }
-        let url = this.storeName !== '退款'? NewHttp + 'orderl' : NewHttp + 'RefundLUser'
+        let url = this.storeName !== '退款'? NewHttp + 'OrderLTwo' : NewHttp + 'RefundLUserTwo'
         let formData=new FormData();
         if(this.storeName !== '退款') {
             formData.append('token',token);
@@ -125,21 +125,10 @@ class OrderComponent extends Component{
             formData.append('token',token);
             formData.append('page',1);
         }
+        formData.append('version', '2.0')
         if(val){
             onLoadOrder(this.storeName, url, formData, refreshType, store.items.data.data.total, callback => {
-                if(callback) {
-                    this.props.showFlash({
-                        message: '已为您更新'+callback+'个订单',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                } else {
-                    this.props.showFlash({
-                        message: '当前订单没有新增',
-                        type: 'success',
-                        backgroundColor: theme
-                    })
-                }
+
             })
             return
         }
@@ -157,7 +146,7 @@ class OrderComponent extends Component{
         console.log(e.layout.y)
     }
     renderItem(data){
-        return <OrderItem data_o={data.item} data_index={data.index}/>
+        return <OrderItem initData={()=>this.loadData()} storeName={this.storeName} data_o={data.item} data_index={data.index}/>
     }
     genIndicator() {
         const {order} = this.props
@@ -173,7 +162,7 @@ class OrderComponent extends Component{
         const {order} = this.props
         let store = order[this.storeName]
         this.step ++;
-        let url = this.storeName != '退款'? NewHttp + 'orderl' : NewHttp + 'RefundLUser'
+        let url = this.storeName != '退款'? NewHttp + 'OrderLTwo' : NewHttp + 'RefundLUserTwo'
         let formData=new FormData();
         if(this.storeName !== '退款') {
             formData.append('token',token);
@@ -190,11 +179,6 @@ class OrderComponent extends Component{
             formData.append('page',this.step);
         }
         onLoadMoreOrderData(this.storeName, url, formData, store.items, callback => {
-            this.props.showFlash({
-                message: '暂无更多订单',
-                type: 'info',
-                backgroundColor: '#c0c0c0'
-            })
 
         })
     }

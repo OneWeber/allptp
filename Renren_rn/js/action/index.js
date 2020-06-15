@@ -5,15 +5,15 @@ import {onLoadOrder,onLoadMoreOrder} from './order'
 import {onLoadWish} from './wish'
 import {onLoadColWish} from './wish/colwish'
 import {onLoadWishDetail} from './wishdetail'
-import {initJoin} from './join'
+import {initJoin, changePerson} from './join'
 import {initSlot} from './slot'
 import {onLoadComming} from './comming'
 import {onLoadHotCity} from './hotcity'
 import {onLoadCityItem} from './cityitem'
 import {onLoadSelectStory} from './selectstory'
 import {onLoadHistory} from './histroy'
-import {onLoadActiveList} from './activelist'
-import {onLoadStoryList} from './storylist'
+import {onLoadActiveList, onLoadMoreActive} from './activelist'
+import {onLoadStoryList, onLoadMoreStory} from './storylist'
 import {onLoadVolunteer, onLoadMoreVolunteer} from './volunteer'
 import {onLoadCreater, onLoadMoreCreater} from './creater'
 import {onLoadFocus, onLoadMoreFocus} from './focus'
@@ -39,7 +39,10 @@ import {
     changeFull,
     changeAccommodation,
     changeAccImageId,
-    changeDate
+    changeDate,
+    changeDateValue,
+    changeNewDate,
+    changeType
 } from './info/steps'
 import {onLoadBank} from './info/bank'
 import {changeNet} from "./netinfo"
@@ -51,7 +54,13 @@ import {onLoadSystemMsg,onLoadMoreSystemMsg} from './info/systemmsg'
 import {onLoadNoRead} from './info/noread'
 import {onLoadUserInfo} from './info/userinfo'
 import {changeMainLanguage} from './language'
-
+import {onLoadActiveComments, onLoadStoryComments} from './comments'
+import {onLoadVolApply} from './info/volapply'
+import {onLoadRefundApply} from './info/refundapply'
+import {onLoadPEvaluate} from './info/pevaluate'
+import {onLoadPInvite} from './info/pinvite'
+import {initBalance} from './info/balance'
+import {onLoadFriendApply} from './msg/friendapply'
 export default {
     InitUser,
     InitToken,
@@ -109,5 +118,19 @@ export default {
     changeAccommodation,
     changeAccImageId,
     changeMainLanguage,
-    changeDate
+    changeDate,
+    changeDateValue,
+    onLoadMoreActive,
+    onLoadMoreStory,
+    onLoadActiveComments,
+    onLoadStoryComments,
+    changePerson,
+    onLoadVolApply,
+    onLoadRefundApply,
+    onLoadPEvaluate,
+    onLoadPInvite,
+    changeNewDate,
+    changeType,
+    initBalance,
+    onLoadFriendApply
 }
