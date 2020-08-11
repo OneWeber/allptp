@@ -133,7 +133,7 @@ class VapplyDetail extends Component{
                                 color:'#333',
                                 fontSize: 15,
                                 fontWeight: 'bold'
-                            }}>邀请志愿时间</Text>
+                            }}>申请志愿时间</Text>
                             {
                                 this.data.slot_id.map((item, index) => {
                                     return <View key={index} style={{

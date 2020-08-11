@@ -7,8 +7,12 @@ import TravelPage from '../page/viewpage/TravelPage';
 import MsgPage from '../page/viewpage/MsgPage';
 import MyPage from '../page/viewpage/MyPage';
 import {connect} from 'react-redux'
-import {Image, View, StyleSheet} from 'react-native';
-
+import {Image, View, StyleSheet, Dimensions, Platform} from 'react-native';
+import JPush from "jpush-react-native";
+import AsyncStorage from '@react-native-community/async-storage';
+const {width, height} = Dimensions.get('window');
+const X_WIDTH = 375;
+const X_HEIGHT = 812;
 const styles = StyleSheet.create({
     icons: {
         width:20,
@@ -18,6 +22,9 @@ const styles = StyleSheet.create({
 class ViewBotNavigator extends Component{
     constructor(props) {
         super(props);
+        this.state = {
+            isIphoneX: false
+        }
         this.TABS = {
             HomePage: {
                 screen: HomePage,
@@ -80,6 +87,67 @@ class ViewBotNavigator extends Component{
                 }
             }
         };
+    }
+    isIphoneX(){
+        if(Platform.OS === 'ios'&&((height === X_HEIGHT && width === X_WIDTH) || (height === X_WIDTH && width === X_HEIGHT))){
+            this.setState({
+                isIphoneX:true
+            })
+        }else{
+            this.setState({
+                isIphoneX:false
+            })
+        }
+    }
+    componentWillMount(): void {
+        this.isIphoneX();
+        let that = this;
+        JPush.init();
+        //连接状态
+        this.connectListener = result => {
+            console.warn("connectListener:" + JSON.stringify(result))
+        };
+        JPush.addConnectEventListener(this.connectListener);
+        //通知回调
+        this.notificationListener = result => {
+            if (result.notificationEventType == "notificationOpened") {
+                // this.props.navigation.navigate('Activitylist')
+            }
+        };
+        JPush.addNotificationListener(this.notificationListener);
+        //本地通知回调
+        this.localNotificationListener = result => {
+            console.warn("localNotificationListener:" + JSON.stringify(result))
+        };
+        JPush.addLocalNotificationListener(this.localNotificationListener);
+        //自定义消息回调
+        this.customMessageListener = result => {
+            console.warn("customMessageListener:" + JSON.stringify(result))
+        };
+        JPush.addCustomMessagegListener(this.customMessageListener);
+        //tag alias事件回调
+        this.tagAliasListener = result => {
+            console.warn("tagAliasListener:" + JSON.stringify(result))
+        };
+        JPush.addTagAliasListener(this.tagAliasListener);
+        //手机号码事件回调
+        this.mobileNumberListener = result => {
+            console.warn("mobileNumberListener:" + JSON.stringify(result))
+        };
+        JPush.addMobileNumberListener(this.mobileNumberListener);
+    }
+    componentDidMount(): void {
+        JPush.setLoggerEnable(true)
+        JPush.getRegistrationID(result =>{
+                //alert("registerID:" + JSON.stringify(result))
+                console.log('registerID', result);
+                AsyncStorage.setItem('registerID',JSON.stringify(result.registerID),(error)=>{
+                    if(error){
+                        alert('存储失败')
+                    }
+                })
+            }
+        )
     }
     _tabNavigator() {
         if(this.Tabs) {

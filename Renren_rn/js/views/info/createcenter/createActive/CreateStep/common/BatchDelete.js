@@ -5,8 +5,11 @@ import CommonStyle from '../../../../../../../assets/css/Common_css';
 import NavigatorUtils from '../../../../../../navigator/NavigatorUtils';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import ScrollViewTab from './ScrollViewTab';
+import {connect} from 'react-redux';
+import Fetch from '../../../../../../expand/dao/Fetch';
+import NewHttp from '../../../../../../utils/NewHttp';
 const {width} = Dimensions.get('window')
-export default class BatchDelete extends Component{
+class BatchDelete extends Component{
     getLeftButton(){
         return <View style={CommonStyle.flexStart}>
             <TouchableOpacity
@@ -21,10 +24,28 @@ export default class BatchDelete extends Component{
                 />
             </TouchableOpacity>
         </View>
-
+    }
+    delAll() {
+        console.log(111)
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('version', '2.0');
+        formData.append('activity_id', this.props.activity_id);
+        formData.append('is_all', 1);
+        formData.append('slot_id', 0);
+        Fetch.post(NewHttp+'ActivitySlotDelTwo', formData).then(res => {
+            if(res.code === 1) {
+                NavigatorUtils.goPage({}, 'Time')
+            }
+        })
     }
     getRightButton() {
-        return <TouchableOpacity style={{paddingRight: width*0.03}}>
+        return <TouchableOpacity
+            style={{paddingRight: width*0.03}}
+            onPress={() => {
+                this.delAll()
+            }}
+        >
             <Text style={{color:'#666',fontSize: 16}}>删除全部</Text>
         </TouchableOpacity>
     }
@@ -61,3 +82,8 @@ export default class BatchDelete extends Component{
         )
     }
 }
+const mapStateToProps = state => ({
+    token: state.token.token,
+    activity_id: state.steps.activity_id,
+})
+export default connect(mapStateToProps)(BatchDelete)

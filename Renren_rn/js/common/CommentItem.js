@@ -4,6 +4,7 @@ import CommonStyle from '../../assets/css/Common_css';
 import LazyImage from 'animated-lazy-image';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import {connect} from 'react-redux'
+import NavigatorUtils from '../navigator/NavigatorUtils';
 const {width, height} = Dimensions.get('window')
 class CommentItem extends Component{
     showImg(index){
@@ -23,12 +24,19 @@ class CommentItem extends Component{
             <View style={styles.c_con}>
                 <View style={[CommonStyle.spaceRow,styles.ci_header]}>
                     <View style={[CommonStyle.flexStart]}>
-                        <LazyImage
-                            source={data_c.user && data_c.user.headimage && data_c.user.headimage.domain && data_c.user.headimage.image_url?
-                                {uri:data_c.user.headimage.domain + data_c.user.headimage.image_url}
-                                :require('../../assets/images/touxiang.png')}
-                            style={styles.headimage}
-                        />
+                        <TouchableOpacity
+                            style={{width: 45}}
+                            onPress={() => {
+                                NavigatorUtils.goPage({user_id: data_c.user.user_id},'UserInfo')
+                            }}
+                        >
+                            <LazyImage
+                                source={data_c.user && data_c.user.headimage && data_c.user.headimage.domain && data_c.user.headimage.image_url?
+                                    {uri:data_c.user.headimage.domain + data_c.user.headimage.image_url}
+                                    :require('../../assets/images/touxiang.png')}
+                                style={styles.headimage}
+                            />
+                        </TouchableOpacity>
                         <View style={[CommonStyle.spaceCol,{height: 45,marginLeft: 10, alignItems:'flex-start'}]}>
                             <Text  numberOfLines={1} ellipsizeMode={'tail'}
                                   style={{fontSize: 14,fontWeight:'bold',color:'#333',maxWidth: 200}}>
@@ -38,7 +46,12 @@ class CommentItem extends Component{
                             <Text style={{color:'#666',fontSize: 12}}>{data_c.create_time}</Text>
                         </View>
                     </View>
-                    <TouchableOpacity style={[CommonStyle.flexStart]}>
+                    <TouchableOpacity
+                        style={[CommonStyle.flexStart]}
+                        onPress={() => {
+                            this.props.clickPraise(data_c.is_praise, data_c.msg_id)
+                        }}
+                    >
                         <Text style={{color:data_c.is_praise===1?'#14c5ca':'#999',fontSize: 12}}>{data_c.praise_num}</Text>
                         <AntDesign
                             name={'like2'}

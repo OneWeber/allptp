@@ -22,7 +22,7 @@ class WishActiveItem extends Component{
             NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
             return
         }
-        NavigatorUtils.goPage({table_id: table_id}, 'StoryDetail')
+        NavigatorUtils.goPage({story_id: table_id}, 'StoryDetail')
     }
     cancelCollection(flag, table_id) {
         this.setState({
@@ -85,7 +85,7 @@ class WishActiveItem extends Component{
                                 return <Text key={index} style={[styles.type_txt, {color: '#127D80'}]}>{item.kind_name}</Text>
                             })
                         }
-                        <Text style={styles.act_title}>{data_w.title}</Text>
+                        <Text style={styles.act_title}>{data_w.title} {data_w.table_id}</Text>
                     </View>
                 </TouchableOpacity>
                 <Modal

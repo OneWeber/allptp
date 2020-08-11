@@ -8,7 +8,7 @@ import {
     Dimensions,
     ActivityIndicator,
     FlatList,
-    RefreshControl, TouchableOpacity,
+    RefreshControl, TouchableOpacity, TextInput,
 } from 'react-native';
 import {connect} from 'react-redux'
 import Fetch from '../../expand/dao/Fetch';
@@ -22,6 +22,8 @@ import Viewswiper from '../../model/Viewswiper';
 import NewHttp from '../../utils/NewHttp';
 import NoData from '../../common/NoData';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
+import Modal from 'react-native-modalbox';
+import Toast from 'react-native-easy-toast';
 const {width, height} = Dimensions.get('window');
 class UserInfo extends Component{
     constructor(props) {
@@ -43,7 +45,7 @@ class UserInfo extends Component{
                 this.setState({
                     userInfo: res.data
                 },() => {
-                    console.log(this.state.userInfo)
+                    console.log('userInfo', this.state.userInfo)
                 })
             }
         })
@@ -51,6 +53,7 @@ class UserInfo extends Component{
     render(){
         const {userInfo, tabIndex} = this.state;
         return <SafeAreaView style={{flex: 1}}>
+            <Toast ref="toast" position='center' positionValue={0}/>
             <View style={[CommonStyle.flexStart,{
                 height: 50
             }]}>
@@ -66,7 +69,14 @@ class UserInfo extends Component{
             </View>
             <ScrollView style={{width:'100%'}} showsVerticalScrollIndicator={false}>
                 <View style={CommonStyle.flexCenter}>
-                    <UserHeader {...this.props} {...this.state}/>
+                    <UserHeader
+                        {...this.props}
+                        {...this.state}
+                        showToast={(data) => {
+                            this.refs.toast.show(data)
+                        }}
+                        initData={()=>{this.componentDidMount()}}
+                    />
                     <View style={[CommonStyle.commonWidth,{
                         marginTop: 15
                     }]}>
@@ -142,6 +152,37 @@ const mapStateToProps = state => ({
 })
 export default connect(mapStateToProps)(UserInfo)
 class UserHeader extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            msg: ''
+        }
+    }
+    onFocus(user_id) {
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('att_user_id',user_id);
+        formData.append('type',1);
+        Fetch.post(HttpUrl+'Comment/attention', formData).then(res => {
+            if(res.code === 1) {
+                this.props.initData()
+            }
+        })
+    }
+    addFriend() {
+        this.refs.addfriend.close();
+        let formData=new FormData();
+        formData.append('token',this.props.token);
+        formData.append('f_user_id',this.props.userInfo.user_id);
+        formData.append('msg',this.state.msg);
+        Fetch.post(HttpUrl+'Friend/ask_friend', formData).then(res => {
+            if(res.code === 1) {
+                this.props.showToast('好友申请发送成功')
+            }else{
+                this.props.showToast(res.msg)
+            }
+        })
+    }
     render() {
         const {userInfo} = this.props
         return(
@@ -216,41 +257,136 @@ class UserHeader extends Component{
                             <View style={CommonStyle.flexEnd}></View>
                             :
                             <View style={CommonStyle.flexEnd}>
-                                <View style={[CommonStyle.flexCenter,{
-                                    width: 49,
-                                    height: 24,
-                                    borderRadius: 12,
-                                    borderWidth: 1,
-                                    borderColor: this.props.theme,
-                                    flexDirection: 'row',
-                                    marginRight: 10
-                                }]}>
-                                    <AntDesign
-                                        name={'plus'}
-                                        size={12}
-                                        style={{color: this.props.theme}}
-                                    />
-                                    <Text style={{
-                                        color:this.props.theme,
-                                        fontSize: 12
-                                    }}>关注</Text>
-                                </View>
-                                <View style={[CommonStyle.flexCenter,{
-                                    width: 65,
-                                    height: 24,
-                                    borderRadius: 12,
-                                    borderWidth: 1,
-                                    borderColor: this.props.theme
-                                }]}>
-                                    <Text style={{
-                                        color:this.props.theme,
-                                        fontSize: 12
-                                    }}>添加好友</Text>
-                                </View>
+                                {
+                                    userInfo.is_attention
+                                    ?
+                                        <View style={[CommonStyle.flexCenter,{
+                                            width: 49,
+                                            height: 24,
+                                            borderRadius: 12,
+                                            borderWidth: 1,
+                                            borderColor: this.props.theme,
+                                            flexDirection: 'row',
+                                            marginRight: 10
+                                        }]}>
+                                            <Text style={{
+                                                color:this.props.theme,
+                                                fontSize: 12
+                                            }}>已关注</Text>
+                                        </View>
+                                    :
+                                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                            width: 49,
+                                            height: 24,
+                                            borderRadius: 12,
+                                            borderWidth: 1,
+                                            borderColor: this.props.theme,
+                                            flexDirection: 'row',
+                                            marginRight: 10
+                                        }]}
+                                        onPress={() => {
+                                            this.onFocus(userInfo.user_id)
+                                        }}
+                                        >
+                                            <AntDesign
+                                                name={'plus'}
+                                                size={12}
+                                                style={{color: this.props.theme}}
+                                            />
+                                            <Text style={{
+                                                color:this.props.theme,
+                                                fontSize: 12
+                                            }}>关注</Text>
+                                        </TouchableOpacity>
+                                }
+
+                                {
+                                    userInfo.is_friend
+                                    ?
+                                        <View style={[CommonStyle.flexCenter,{
+                                            width: 65,
+                                            height: 24,
+                                            borderRadius: 12,
+                                            borderWidth: 1,
+                                            borderColor: this.props.theme
+                                        }]}>
+                                            <Text style={{
+                                                color:this.props.theme,
+                                                fontSize: 12
+                                            }}>已是好友</Text>
+                                        </View>
+                                    :
+                                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                            width: 65,
+                                            height: 24,
+                                            borderRadius: 12,
+                                            borderWidth: 1,
+                                            borderColor: this.props.theme
+                                        }]}
+                                        onPress={() => {
+                                            this.refs.addfriend.open()
+                                        }}
+                                        >
+                                            <Text style={{
+                                                color:this.props.theme,
+                                                fontSize: 12
+                                            }}>添加好友</Text>
+                                        </TouchableOpacity>
+                                }
                             </View>
                     }
                 </View>
-
+                <Modal
+                    style={{height:300,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"addfriend"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        height: 300,
+                        backgroundColor: '#fff'
+                    }}>
+                        <View style={[CommonStyle.commonWidth,{
+                            marginLeft: width*0.03
+                        }]}>
+                            <Text style={{
+                                marginTop: 15,
+                                color:'#333'
+                            }}>好友验证信息</Text>
+                            <TextInput
+                                placeholder={'输入验证信息'}
+                                multiline={true}
+                                defaultValue={this.state.msg}
+                                onChangeText={(text) => {this.setState({msg: text})}}
+                                style={{
+                                    height:160,
+                                    marginTop: 15,
+                                    borderWidth: 1,
+                                    borderColor: '#f5f5f5',
+                                    textAlignVertical:'top',
+                                    padding: 10
+                                }}
+                            />
+                            <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                height:40,
+                                marginTop: 15,
+                                backgroundColor: this.props.theme,
+                                borderRadius: 5
+                            }]}
+                            onPress={() => {
+                                this.addFriend()
+                            }}
+                            >
+                                <Text style={{
+                                    color:'#fff'
+                                }}>确定添加</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         )
     }
@@ -267,22 +403,44 @@ class UserList extends Component{
                 paddingLeft: 15,
                 paddingRight: 15
             }]}>
-                <View style={CommonStyle.flexCenter}>
-                    <Text style={styles.user_item_num}>15</Text>
+                <TouchableOpacity
+                    style={CommonStyle.flexCenter}
+                    onPress={() => {
+                        NavigatorUtils.goPage({
+                            collect_group:userInfo.collect_group?userInfo.collect_group:[]
+                        }, 'UserCollection')
+                    }}
+                >
+                    <Text style={styles.user_item_num}>{userInfo.collect_group?userInfo.collect_group.length:0}</Text>
                     <Text style={styles.user_item_txt}>收藏夹</Text>
-                </View>
-                <View style={CommonStyle.flexCenter}>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={CommonStyle.flexCenter}
+                    onPress={() => {
+                        NavigatorUtils.goPage({user_id: userInfo.user_id}, 'UserFans')
+                    }}
+                >
                     <Text style={styles.user_item_num}>{userInfo.fans_num?userInfo.fans_num:0}</Text>
                     <Text style={styles.user_item_txt}>粉丝</Text>
-                </View>
-                <View style={CommonStyle.flexCenter}>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={CommonStyle.flexCenter}
+                    onPress={() => {
+                        NavigatorUtils.goPage({user_id: userInfo.user_id}, 'UserFocus')
+                    }}
+                >
                     <Text style={styles.user_item_num}>{userInfo.attention_num?userInfo.attention_num:0}</Text>
                     <Text style={styles.user_item_txt}>关注</Text>
-                </View>
-                <View style={CommonStyle.flexCenter}>
-                    <Text style={styles.user_item_num}>15</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={CommonStyle.flexCenter}
+                    onPress={() => {
+                        NavigatorUtils.goPage({user_id: userInfo.user_id}, 'UserReply')
+                    }}
+                >
+                    <Text style={styles.user_item_num}>{userInfo.comment_num?userInfo.comment_num:0}</Text>
                     <Text style={styles.user_item_txt}>获得的评价</Text>
-                </View>
+                </TouchableOpacity>
             </View>
         )
     }
@@ -320,7 +478,7 @@ class RecentNews extends Component{
         if(this.state.dynamicList&&this.state.dynamicList.length>0) {
             for(let i=0;i<this.state.dynamicList.length;i++) {
                 dynamic.push(
-                    <View style={{
+                    <View key={i} style={{
                         padding: 14,
                         backgroundColor:'#fff',
                         marginTop: 15
@@ -469,13 +627,18 @@ class RecentNews extends Component{
                     {
                         this.state.isLoading
                         ?
-                            <ActivityIndicator size={'small'} color={this.props.theme} style={{marginTop: 20}}/>
+                            <ActivityIndicator size={'small'} color={'#999'} style={{marginTop: 20}}/>
                         :
                             this.state.dynamicList.length > 0
                         ?
                            dynamic
                         :
-                            <NoData></NoData>
+                                <View style={{
+                                    marginTop:30,
+                                    marginBottom: 30
+                                }}>
+                                    <NoData></NoData>
+                                </View>
                     }
 
                 </View>
@@ -519,7 +682,12 @@ class Active extends Component{
                                 {active}
                             </View>
                         :
-                            <NoData></NoData>
+                            <View style={{
+                                marginTop:30,
+                                marginBottom: 30
+                            }}>
+                                <NoData></NoData>
+                            </View>
                     }
                 </View>
             </View>
@@ -575,7 +743,12 @@ class Story extends Component{
                             ?
                             story
                             :
-                            <NoData></NoData>
+                            <View style={{
+                                marginTop:30,
+                                marginBottom: 30
+                            }}>
+                                <NoData></NoData>
+                            </View>
                     }
                 </View>
             </View>

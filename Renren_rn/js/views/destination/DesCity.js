@@ -1,11 +1,21 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions, FlatList} from 'react-native';
+import {
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    SafeAreaView,
+    Dimensions,
+    FlatList,
+    TextInput,
+    ScrollView,
+} from 'react-native';
 import CommonStyle from '../../../assets/css/Common_css';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import NavigatorUtils from '../../navigator/NavigatorUtils';
 import {connect} from 'react-redux';
 import Screening from '../../model/screen';
-import RNEasyAddressPicker from 'react-native-easy-address-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Fetch from '../../expand/dao/Fetch';
 import NewHttp from '../../utils/NewHttp';
 import NoData from '../../common/NoData';
@@ -39,7 +49,11 @@ class DesCity extends Component{
             province: '',
             city: this.city,
             kind_id: '',
-            list: []
+            list: [],
+            keywords: '',
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: 0,
         }
     }
     componentDidMount() {
@@ -48,7 +62,7 @@ class DesCity extends Component{
     loadData() {
         let formData = new FormData();
         formData.append('token', this.props.token);
-        formData.append('keywords', '');
+        formData.append('keywords', this.state.keywords);
         formData.append('sort', this.state.sort);
         formData.append('page', 1);
         formData.append('price_low', '');
@@ -59,11 +73,10 @@ class DesCity extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
+        formData.append('laguage', this.state.languageIndex>-1?this.state.languageIndex:'');
         formData.append('kind_id',this.state.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
-        console.log(formData)
+        formData.append('is_volunteen', this.state.needVol>-1?this.state.needVol:'');
+        formData.append('max_person_num', this.state.peopleNum?this.state.peopleNum:'');
         Fetch.post(NewHttp + 'ActivityListUserTwo', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
@@ -89,8 +102,46 @@ class DesCity extends Component{
     }
     getCustom() {
         return(
-            <CustomContent />
+            <CustomContent
+                {...this.props}
+                {...this.state}
+                changeLan={(data) => {
+                    this.setState({
+                        languageIndex: data
+                    })
+                }}
+                changeNeedVol={(data) => {
+                    this.setState({
+                        needVol: data
+                    })
+                }}
+                changeNum={(data) => {
+                    this.setState({
+                        peopleNum: data
+                    })
+                }}
+                cleanCon = {() => {
+                    this._cleanCon()
+                }}
+                showEnd={() => {
+                    this._showEnd()
+                }}
+            />
         )
+    }
+    _cleanCon() {
+        this.setState({
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: '',
+        })
+    }
+    _showEnd() {
+        this.loadData();
+        this._clickCancelBtn();
+    }
+    _clickCancelBtn() {
+        this.screen.openOrClosePanel(this.state.screenIndex)
     }
     _initCustomData() {
 
@@ -130,13 +181,23 @@ class DesCity extends Component{
                                     fontWeight: 'bold'
                                 }}>{this.props.navigation.state.params.city}</Text>
                             </View>
-                            <TouchableOpacity style={[CommonStyle.flexCenter,{
+                            <TextInput style={[CommonStyle.flexCenter,{
                                 width: width*0.94-30-70,
-                                height:36
-                            }]}>
-                                <Text style={{color:'#999',fontSize: 13}}>目的地或体验</Text>
-                            </TouchableOpacity>
-
+                                height:36,
+                                paddingLeft: 10,
+                                paddingRight: 10
+                            }]}
+                            placeholder={'搜索体验'}
+                            defaultValue={this.state.keywords}
+                            onBlur={() => {
+                               this.loadData();
+                            }}
+                            onChangeText={(text) => {
+                                this.setState({
+                                    keywords: text
+                                })
+                            }}
+                            />
                         </View>
                     </View>
                 </SafeAreaView>
@@ -181,15 +242,210 @@ class DesCity extends Component{
         )
     }
 }
+const styles = StyleSheet.create({
+    back_icon: {
+        paddingLeft: width*0.03
+    },
+    cityitem_img:{
+        width: '100%',
+        height: 126,
+        borderRadius: 3
+    },
+    common_color:{
+        color:'#333'
+    },
+    common_weight:{
+        fontWeight:'bold'
+    },
+    tab_item:{
+        padding: 3,
+        marginRight: 15
+    },
+    screen_title:{
+        color:'#333',
+        fontSize: 13,
+        marginTop: 20,
+        fontWeight: "bold"
+    },
+    addRoll:{
+        width: 34,
+        height:34,
+        borderRadius: 17,
+        borderWidth: 1
+    }
+})
 const mapStateToProps = state => ({
     token: state.token.token,
     theme: state.theme.theme
 })
 export default connect(mapStateToProps)(DesCity)
 class CustomContent extends Component{
+    constructor(props) {
+        super(props);
+        this.languages = ['中文', 'English', '日本語']
+        this.volunteer = ['不需要', '需要'];
+        this.state = {
+            languageIndex: this.props.languageIndex,
+            needVol: this.props.needVol,
+            peopleNum: this.props.peopleNum,
+            startPrice: this.props.startPrice,
+            endPrice: this.props.endPrice
+        }
+    }
+    delNum() {
+        let num = this.state.peopleNum;
+        if(num>0) {
+            num--;
+        }
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    addNum() {
+        let num = this.state.peopleNum;
+        num ++;
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    cleanCon() {
+        if(this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999') {
+            this.setState({
+                languageIndex: -1,
+                needVol: -1,
+                peopleNum: '',
+            })
+            this.props.cleanCon();
+        }
+    }
     render(){
+        const {languageIndex, needVol} = this.state;
         return(
-            <View></View>
+            <View style={[CommonStyle.flexCenter,{flex: 1,position:'relative'}]}>
+                <ScrollView
+                    showsHorizontalScrollIndicator = {false}
+                    scrollEventThrottle={16}
+                >
+                    <View style={[CommonStyle.commonWidth]}>
+                        <Text style={styles.screen_title}>语言</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.languages.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:languageIndex==index?this.props.theme:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}
+                                                             onPress={() => {
+                                                                 this.setState({
+                                                                     languageIndex: index
+                                                                 },() => {
+                                                                     this.props.changeLan(index)
+                                                                 })
+                                                             }}
+                                    >
+                                        <Text style={{color:languageIndex==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        <Text style={styles.screen_title}>志愿者</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.volunteer.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:needVol==index?this.props.theme:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}
+                                                             onPress={() => {
+                                                                 this.setState({
+                                                                     needVol: index
+                                                                 },() => {
+                                                                     this.props.changeNeedVol(index)
+                                                                 })
+                                                             }}
+                                    >
+                                        <Text style={{color:needVol==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        <Text style={styles.screen_title}>参与人数</Text>
+                        <View style={[CommonStyle.flexStart,{marginTop: 19,marginBottom: 70}]}>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#D6D6D6'
+                            }]}
+                                              onPress={() => {
+                                                  this.delNum()
+                                              }}
+                            >
+                                <AntDesign
+                                    name={'minus'}
+                                    size={18}
+                                    style={{color:'#BFBFBF'}}
+                                />
+                            </TouchableOpacity>
+                            <Text style={{marginLeft: 25,fontSize: 18,color:'#666'}}>{this.state.peopleNum?this.state.peopleNum:0}</Text>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#14c5ca',
+                                marginLeft: 25
+                            }]}
+                                              onPress={() => {
+                                                  this.addNum()
+                                              }}
+                            >
+                                <AntDesign
+                                    name={'plus'}
+                                    size={18}
+                                    style={{color:'#14c5ca'}}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+                <View style={[CommonStyle.flexStart,{
+                    position: 'absolute',
+                    left:0,
+                    right:0,
+                    bottom: 0,
+                    height:50,
+                    backgroundColor: '#fff'
+                }]}>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        width:100,
+                        height:40,
+                        marginLeft: width*0.03
+                    }]}
+                                      onPress={() => {
+                                          this.cleanCon()
+                                      }}
+                    >
+                        <Text style={{
+                            color: this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999'
+                        }}>清除全部</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height:40,
+                        backgroundColor:'#14c5ca',
+                        borderRadius: 4,
+                        width: width*0.94-120,
+                        marginLeft: 20
+                    }]}
+                      onPress={() => {
+                          this.props.showEnd()
+                      }}
+                    >
+                        <Text style={{color:'#fff',fontSize: 15,fontWeight:'bold'}}>显示结果</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
         )
     }
 }

@@ -12,14 +12,10 @@ export default class ActiveItem extends Component{
     goDetail(table_id){
         NavigatorUtils.goPage({table_id: table_id}, 'ActiveDetail')
     }
-    formatDate(now) {
-        var year=now.getFullYear();
-        var month=now.getMonth()+1;
-        var date=now.getDate();
-        var hour=now.getHours();
-        var minute=now.getMinutes();
-        var second=now.getSeconds();
-        return year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second;
+    getDate(timestamp) {
+        let newDate = new Date();
+        newDate.setTime(timestamp * 1000);
+        return newDate.toLocaleDateString()
     }
     render(){
         const {data_a, data_index, theme, isComming} = this.props
@@ -48,7 +44,7 @@ export default class ActiveItem extends Component{
                                 backgroundColor:'rgba(0,0,0,.5)',
                                 borderRadius: 3
                             }}>
-                                <Text style={{fontSize: 10,color:'#fff'}}>即将开始{this.formatDate(new Date(data.begin_time)).split(' ')[1]}</Text>
+                                <Text style={{fontSize: 10,color:'#fff'}}>即将开始{this.getDate(data.begin_time)}</Text>
                             </View>
                         :
                             null

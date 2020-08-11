@@ -77,7 +77,8 @@ class Calendar extends Component{
         if(isAll) {
 
         }else{
-            if(isSingle&&slot.date!='1970-01-01') {
+            console.log('slot', slot)
+            if(slot.long_day==1) {
                 let data = getAll(slot.date, slot.date);
                 for(let j=0; j<data.length; j++) {
                     dateList.push({
@@ -119,7 +120,7 @@ class Calendar extends Component{
                     day: j+1,
                     status: 0
                 });
-                if(isSingle&&slot.date!='1970-01-01') {
+                if(slot.long_day==1) {
                     if(this.parseDate(data[i].y+'-'+data[i].m+'-'+(j+1))==this.parseDate(slot.date)) {
                         temp[j].status = 1
                     } else {
@@ -251,7 +252,6 @@ class Calendar extends Component{
         formData.append('version','2.0');
         formData.append('activity_id',activity_id);
         formData.append('date',date);
-        console.log(formData)
         Fetch.post(NewHttp+'ActivitySlotDetailTwo', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
@@ -521,8 +521,9 @@ class DateDetail extends Component{
     }
     delInfo(index) {
         const {slot, slotData} = this.props;
-        if(this.props.timeIndex) {
-            Alert.alert('删除','确定删除'+(slotData[index].date=='1970-01-01'?slotData[index].begin_date:slotData[index].date)+' '+slotData[index].begin_time+' -- '+slotData[index].end_time+'该天该时间段体验吗？',[
+        const slots = this.props.navigation.state.params.slot;
+        if(slots.long_day === 1) {
+            Alert.alert('删除','确定删除'+slotData[index].date+' '+slotData[index].begin_time+' -- '+slotData[index].end_time+'该天该时间段体验吗？',[
                 {text:'取消'},
                 {text:'确定', onPress: () => {this.goDel(slotData[index].slot_id)}}
             ],{
@@ -540,10 +541,12 @@ class DateDetail extends Component{
     }
     editInfo(index) {
         let _this = this;
+        const slots = this.props.navigation.state.params.slot;
         NavigatorUtils.goPage({
             timeIndex: this.props.timeIndex,
-            slotInfo: this.props.timeIndex?this.props.slotData[index]:this.props.slotData[0],
+            slotInfo: slots.long_day?this.props.slotData[index]:this.props.slotData[0],
             isEdit: true,
+            long_day: slots.long_day,
             refresh: function () {
                 _this.props.initData()
             }
@@ -551,6 +554,7 @@ class DateDetail extends Component{
     }
     render(){
         const {slotData} = this.props;
+        const slots = this.props.navigation.state.params.slot;
         return(
             <View style={CommonStyle.flexCenter}>
                 <View style={[CommonStyle.commonWidth,{
@@ -585,19 +589,19 @@ class DateDetail extends Component{
                                                     style={{color: '#CFD0D1'}}
                                                 />
                                                 {
-                                                    this.props.timeIndex&&item.date!='1970-01-01'
+                                                    slots.long_day === 1
                                                     ?
                                                         <Text style={{color: '#333',fontWeight: "bold",marginLeft: 10}}>
-                                                            {item.date} {item.begin_time} -- {item.end_time}
+                                                            {item.date} {item.begin_time} -- {item.end_time}{item.long_day}
                                                         </Text>
                                                     :
                                                         <Text style={{color: '#333',fontWeight: "bold",marginLeft: 10}}>
                                                             {
                                                                 item
-                                                                    ?
-                                                                    item.begin_date.split('-')[1]+'月'+item.begin_date.split('-')[2]+'日'+item.begin_time
-                                                                    :
-                                                                    ''
+                                                                ?
+                                                                item.begin_date.split('-')[1]+'月'+item.begin_date.split('-')[2]+'日'+item.begin_time
+                                                                :
+                                                                ''
                                                             }
                                                             -
                                                             {

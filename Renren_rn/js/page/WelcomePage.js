@@ -5,6 +5,8 @@ import CommonStyle from '../../assets/css/Common_css';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {connect} from 'react-redux'
 import AsyncStorage from '@react-native-community/async-storage';
+import Fetch from '../expand/dao/Fetch';
+import NewHttp from '../utils/NewHttp';
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
 class WelcomePage extends Component{
@@ -12,10 +14,13 @@ class WelcomePage extends Component{
         super(props);
         this.state = {
             timer_number: 5,
-            status: ''
+            status: '',
+            aIndex: 0,
+            info: ''
         }
     }
     componentDidMount(){
+        // this.loadData();
         AsyncStorage.getItem('status',(error,result)=>{
             this.setState({
                 status: result
@@ -24,7 +29,7 @@ class WelcomePage extends Component{
                 let num = timer_number
                 this.timer = setInterval(() => {
                     num --;
-                    this.setState({
+                    this.setState({ 
                         timer_number: num
                     })
                     if(num === 0) {
@@ -33,8 +38,32 @@ class WelcomePage extends Component{
                 }, 1000)
             })
         })
-
-
+    }
+    loadData() {
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('sort', 1);
+        formData.append('page', 1);
+        formData.append('price_low', '');
+        formData.append('price_high','');
+        formData.append('activ_begin_time', '');
+        formData.append('activ_end_time', '');
+        formData.append('kind_id','');
+        formData.append('is_volunteen', '');
+        formData.append('max_person_num', '');
+        formData.append('per_page', 9);
+        console.log('hahahah')
+        Fetch.post(NewHttp+'ActivityListUserTwo', formData).then(res => {
+            if(res.code === 1) {
+                this.setState({
+                    info: res.data.data[0]
+                },() => {
+                    console.log('info', info)
+                })
+            }else{
+                console.log(res.msg)
+            }
+        })
     }
     componentWillUnmount() {
         this.timer && clearInterval(this.timer)
@@ -43,7 +72,7 @@ class WelcomePage extends Component{
     render() {
         NavigatorUtils.navigation = this.props.navigation
         const {theme} = this.props
-        const {timer_number, status} = this.state
+        const {timer_number, status, info} = this.state
         return (
             <View style={styles.container}>
                 <ImageBackground
@@ -89,6 +118,7 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = state => ({
-    theme: state.theme.theme
+    theme: state.theme.theme,
+    token: state.token.token
 })
 export default connect(mapStateToProps)(WelcomePage)

@@ -20,15 +20,24 @@ export default class CreateHeader extends Component{
         </TouchableOpacity>
     }
     getRightButton() {
-        return <TouchableOpacity style={{
-            paddingRight: width*0.03
-        }}
-        onPress={() => {
-            NavigatorUtils.goPage({}, 'CreateActive')
-        }}
-        >
-            <Text style={{color:'#333'}}>退出</Text>
-        </TouchableOpacity>
+        return <View>
+                {
+                    this.props.isDetail
+                    ?
+                        null
+                    :
+                        <TouchableOpacity style={{
+                            paddingRight: width*0.03
+                        }}
+                                          onPress={() => {
+                                              NavigatorUtils.goPage({}, 'CreateActive')
+                                          }}
+                        >
+                            <Text style={{color:'#333'}}>退出</Text>
+                        </TouchableOpacity>
+                }
+            </View>
+
     }
     render(){
         return(

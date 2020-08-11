@@ -113,10 +113,8 @@ class LongTime extends Component{
                 console.log()
                 if(timeIndex&&!this.isEdit) {
                     if(singleIndex) {
-                        console.log(11111)
                         data[singleIndex-1].begin_time = begin
                     }else{
-                        console.log(13131313)
                         data.push({
                             begin_time: begin,
                             end_time: ''
@@ -402,9 +400,20 @@ class LongTime extends Component{
                                                 />
                                             </TouchableOpacity>
                                         :
-                                            <Text style={{
-                                                color:'#333'
-                                            }}>{this.state.begin_date} -- {this.state.end_date}</Text>
+                                            <Text>
+                                                {
+                                                    this.props.navigation.state.params.long_day
+                                                    ?
+                                                        <Text style={{
+                                                            color:'#333'
+                                                        }}>{this.state.begin_date}</Text>
+                                                    :
+                                                        <Text style={{
+                                                            color:'#333'
+                                                        }}>{this.state.begin_date} -- {this.state.end_date}</Text>
+                                                }
+                                            </Text>
+
                                     }
 
                                 </View>
@@ -413,7 +422,7 @@ class LongTime extends Component{
                                     {
                                         !this.isEdit
                                             ?
-                                        (!this.state.beginPeriodTime && !this.state.endPeriodTime) || this.state.timeIndex
+                                        (!this.state.beginPeriodTime && !this.state.endPeriodTime) || this.props.navigation.state.params.long_day
                                         ?
                                             <TouchableOpacity
                                                 style={[CommonStyle.flexCenter,styles.select_btn]}

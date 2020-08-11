@@ -143,16 +143,9 @@ class SearchHeader extends Component{
                                 size={16}
                                 style={{color:'#999',width:20,marginLeft: 5}}
                             />
-                            <Text
-                                numberOfLines={1} ellipsizeMode={'tail'}
-                                style={{
-                                    color:this.props.theme,
-                                    fontWeight:'bold',
-                                    maxWidth: 60
-                                }}>遂宁市</Text>
                             <TextInput
                                 style={{
-                                    width:width*0.94-50-5-20-70,
+                                    width:width*0.94-50-5-20,
                                     height:40,
                                     marginLeft: 10,
                                     borderLeftWidth: 1,
@@ -327,6 +320,7 @@ class SearchContent extends Component{
                 marginTop: data.index===1||2?15:25
             }}
             onPress={()=>{
+                this.props.closeSearch()
                 NavigatorUtils.goPage({story_id: data.item.story_id}, 'StoryDetail')
             }}
         >

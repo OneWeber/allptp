@@ -198,7 +198,7 @@ class MyStoryItem extends Component{
     render(){
         const {data_m} = this.props
         return(
-            <View style={[CommonStyle.commonWidth,{
+            <TouchableOpacity style={[CommonStyle.commonWidth,{
                 backgroundColor: '#fff',
                 marginLeft: width*0.03,
                 paddingTop: 22,
@@ -206,6 +206,9 @@ class MyStoryItem extends Component{
                 borderBottomWidth: 1,
                 borderBottomColor: '#f5f5f5'
             }]}
+              onPress={() => {
+                  NavigatorUtils.goPage({story_id:data_m.story_id}, 'StoryDetail')
+              }}
             >
                 <Text style={{
                     color:'#666',
@@ -252,7 +255,7 @@ class MyStoryItem extends Component{
 
                     </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         )
     }
 }

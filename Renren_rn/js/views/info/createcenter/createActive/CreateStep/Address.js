@@ -147,19 +147,18 @@ class Address extends Component{
     }
     async  changeAddressTitle(address, val){
         const searchResult = await Geocode.search(address);
-        console.log(searchResult)
          this.setState({
             goPlaceLatIcon:searchResult.latitude,
             goPlaceLngIcon: searchResult.longitude,
         },() => {
              const {goPlaceLatIcon, goPlaceLngIcon} = this.state;
-             let data = dd_encrypt(goPlaceLatIcon, goPlaceLngIcon)
+             let data = dd_encrypt(goPlaceLatIcon, goPlaceLngIcon);
+             console.log('data', data)
              this.setState({
                  goPlaceLatIcon: data.bg_lat,
                  goPlaceLngIcon: data.bd_lng,
              })
          })
-
     }
     async _changeCoor(data) {
          this.changeAddress(data.coordinate.latitude, data.coordinate.longitude, true)
@@ -210,6 +209,7 @@ class Address extends Component{
         this.setState({
             goplace: text
         }, () => {
+            console.log(111)
             this.changeAddressTitle(text)
         })
     }

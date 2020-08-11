@@ -63,16 +63,15 @@ class Fans extends Component{
         formData.append('user_id',user_id);
         if(val){
             onLoadFans(this.storeName, NewHttp + 'attentionl', formData,refreshType, store.items.data.data.total, callback => {
-
             })
             return
         }
         onLoadFans(this.storeName, NewHttp + 'attentionl', formData, refreshType, 0)
     }
     genIndicator(){
-        const {fans} = this.props
-        let store = fans[this.storeName]
-        return store.hideMoreshow || store.hideMoreshow === undefined  ?null:
+        const {fans} = this.props;
+        let store = fans[this.storeName];
+        return store.hideMoreshow || store.hideMoreshow === undefined ?null:
             <View style={[CommonStyle.flexCenter, {width: '100%',marginTop: 10,marginBottom: 10}]}>
                 <ActivityIndicator size={'small'} color={'#999'}/>
             </View>
@@ -92,7 +91,6 @@ class Fans extends Component{
                 type: 'info',
                 backgroundColor: '#999'
             })
-
         })
     }
     cancelCollection(user_id) {
@@ -194,7 +192,6 @@ class Fans extends Component{
                             <Text style={{color: theme,fontSize: 12}}>互相关注</Text>
                         </TouchableOpacity>
                 }
-
             </View>
         </View>
     }

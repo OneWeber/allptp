@@ -113,6 +113,15 @@ import AsyncStorage from '@react-native-community/async-storage';
 import PraiseAndBack from '../views/PraiseAndBack';
 import DesCity from '../views/destination/DesCity';
 import BatchDelete from '../views/info/createcenter/createActive/CreateStep/common/BatchDelete';
+import MorePicVideo from '../views/active/MorePicVideo';
+import VideoSwiper from '../views/active/picvideo/VideoSwiper';
+import AddFriend from '../views/info/AddFriend';
+import UserCollection from '../views/info/userinfo/UserCollection';
+import UserFans from '../views/info/userinfo/UserFans';
+import UserFocus from '../views/info/userinfo/UserFocus';
+import UserReply from '../views/info/userinfo/UserReply';
+import Dispute from '../common/Dispute';
+import Feedback from '../views/info/Feedback';
 const InitNavigator = createStackNavigator({
     WelcomePage: {
         screen: WelcomePage,
@@ -786,6 +795,60 @@ const MainNavigator = createStackNavigator({
     },
     BatchDelete: {
         screen: BatchDelete,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    MorePicVideo: {
+        screen: MorePicVideo,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    VideoSwiper: {
+        screen: VideoSwiper,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    AddFriend: {
+        screen: AddFriend,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    UserCollection: {
+        screen: UserCollection,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    UserFans: {
+        screen: UserFans,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    UserFocus: {
+        screen: UserFocus,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    UserReply: {
+        screen: UserReply,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Dispute: {
+        screen: Dispute,
+        navigationOptions: {
+            headerShown: false
+        }
+    },
+    Feedback: {
+        screen: Feedback,
         navigationOptions: {
             headerShown: false
         }

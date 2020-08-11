@@ -16,7 +16,12 @@ export default class DetailComments extends Component{
                 {
                     data.slice(0,limit).map((item, index) => {
                         return <View key={index}>
-                            <CommentItem showBackModal={(data)=>this.props.showBackModal(data)} showImg={(arr, index)=>this.showImg(arr, index)} data_c={item}/>
+                            <CommentItem
+                                showBackModal={(data)=>this.props.showBackModal(data)}
+                                showImg={(arr, index)=>this.showImg(arr, index)}
+                                data_c={item}
+                                clickPraise={(data, msg_id) => {this.props.clickPraise(data, msg_id)}}
+                            />
                         </View>
                     })
                 }

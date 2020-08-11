@@ -151,7 +151,7 @@ class Bring extends Component{
                     <SiderMenu clickIcon={()=>{this.setState({
                         isOpenning:!this.state.isOpenning
                     })}}/>
-                    <KeyboardAwareScrollView style={{flex: 1}}>
+                    <KeyboardAwareScrollView>
                         <ScrollView>
                             <View style={[CommonStyle.flexCenter,{
                                 backgroundColor:'#fff',
@@ -167,18 +167,46 @@ class Bring extends Component{
 
                                     }}>请仔细考虑，在开展体验过程中，除了您提供对东西，参与者还需要自带什么。参与者预定体验后，我们将通过邮件告知他们这些信息。</Text>
                                     <View style={{marginTop: 5}}>
-                                        <RNEasyRadio
-                                            arrange_style={{justifyContent:'flex-start',alignItems:'flex-start'}}
-                                            item_style={{marginTop: 20}}
-                                            con_left={0}
-                                            init_index={selectIndex}
-                                            is_animate={false}
-                                            text_style={{color:'#333',fontSize: 16,marginLeft: 10}}
-                                            r_props={this.tabNames}
-                                            onPress={(label, val, index) => {
-                                                this.selectBtn(val)
-                                            }}
-                                        />
+                                        {
+                                            this.tabNames.map((item, index) => {
+                                                return <TouchableOpacity style={[CommonStyle.flexStart,{
+                                                    marginTop: index===0?20:15
+                                                }]}
+                                                onPress={() => {
+                                                    this.setState({
+                                                        selectIndex: index
+                                                    })
+                                                }}
+                                                >
+                                                    <View style={[CommonStyle.flexCenter,{
+                                                        width:20,
+                                                        height:20,
+                                                        borderRadius: 10,
+                                                        borderWidth: 1,
+                                                        borderColor: this.props.theme
+                                                    }]}>
+                                                        {
+                                                            selectIndex == index
+                                                            ?
+                                                                <View style={{
+                                                                    width:16,
+                                                                    height: 16,
+                                                                    borderRadius: 8,
+                                                                    backgroundColor: this.props.theme
+                                                                }}></View>
+                                                            :
+                                                                null
+                                                        }
+                                                    </View>
+                                                    <Text style={{
+                                                        marginLeft: 5,
+                                                        color:'#333',
+                                                        fontWeight: "bold"
+                                                    }}>{item.label}</Text>
+
+                                                </TouchableOpacity>
+                                            })
+                                        }
                                     </View>
                                     {
                                         selectIndex

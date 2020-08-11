@@ -7,12 +7,14 @@ import CommonStyle from '../../../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import NewHttp from '../../../utils/NewHttp';
 import action from '../../../action'
+import Modal from 'react-native-modalbox';
+import Fetch from '../../../expand/dao/Fetch';
 const {width} = Dimensions.get('window')
 class BankList extends Component{
     constructor(props) {
         super(props);
         this.state = {
-
+            bank_id: ''
         }
     }
     componentDidMount() {
@@ -72,7 +74,7 @@ class BankList extends Component{
         return val.replace(reg, "$1 **** **** $2")
     }
     renderItem(data) {
-        return <View style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+        return <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
             marginTop: 20,
             height: 111,
             backgroundColor: '#5C6EDC',
@@ -80,7 +82,16 @@ class BankList extends Component{
             paddingLeft: 12,
             paddingRight: 12,
             alignItems:'flex-start'
-        }]}>
+        }]}
+        onLongPress={() => {
+            this.setState({
+                bank_id: data.item.bank_id
+            },() => {
+                this.refs.bank.open()
+            })
+
+        }}
+        >
             <View style={[CommonStyle.flexStart,{
                 width: '100%'
             }]}>
@@ -105,10 +116,18 @@ class BankList extends Component{
             <Text style={{marginTop: 15,color:'#fff',fontSize: 18,fontWeight: 'bold'}}>
                 {this.regCard(data.item.card_number.split(' ').join(''))}
             </Text>
-
-
-
-        </View>
+        </TouchableOpacity>
+    }
+    delBank() {
+        let formData = new FormData();
+        formData.append('token', this.props.token);
+        formData.append('bank_id', this.state.bank_id);
+        Fetch.post(NewHttp+'bankd', formData).then(res => {
+            if(res.code === 1) {
+                this.refs.bank.close();
+                this.loadCard();
+            }
+        })
     }
     render() {
         const {bank} = this.props;
@@ -144,7 +163,28 @@ class BankList extends Component{
                             <AddCard {...this.props}/>
                         </View>
                 }
-
+                <Modal
+                    style={{height:60,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"bank"}
+                    animationDuration={200}
+                    position={"bottom"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height: 60,
+                        backgroundColor: '#fff'
+                    }]}
+                    onPress={() => {
+                        this.delBank()
+                    }}
+                    >
+                        <Text style={{
+                            color: '#999'
+                        }}>取消绑定</Text>
+                    </TouchableOpacity>
+                </Modal>
             </View>
         )
     }

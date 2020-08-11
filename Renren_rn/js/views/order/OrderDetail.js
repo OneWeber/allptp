@@ -354,7 +354,11 @@ class OrderDetail extends Component{
                                                     borderWidth: 1,
                                                     borderColor: '#999',
                                                     borderRadius: 15
-                                                }]}>
+                                                }]}
+                                                onPress={() => {
+                                                    NavigatorUtils.goPage({}, 'Dispute')
+                                                }}
+                                                >
                                                     <Text style={{color: '#999', fontSize: 13}}>提交纠纷</Text>
                                                 </TouchableOpacity>
                                                 :

@@ -10,7 +10,7 @@ import {
     Image,
     RefreshControl,
     ActivityIndicator,
-    ScrollView,
+    ScrollView, TextInput,
 } from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import NavigatorUtils from '../../../navigator/NavigatorUtils';
@@ -60,13 +60,73 @@ class ActiveList extends Component{
             province: '',
             city: '',
             region: '',
-            customData: ''
+            customData: '',
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: 0,
+            startPrice: 0,
+            endPrice: 800,
+            keywords: ''
         }
     }
     getCustom(){
         return(
-            <CustomContent />
+            <CustomContent
+                {...this.props}
+                {...this.state}
+                changeLan={(data) => {
+                    this.setState({
+                        languageIndex: data
+                    })
+                }}
+                changeNeedVol={(data) => {
+                    this.setState({
+                        needVol: data
+                    })
+                }}
+                changeNum={(data) => {
+                    this.setState({
+                        peopleNum: data
+                    })
+                }}
+                cleanCon = {() => {
+                    this._cleanCon()
+                }}
+                showEnd={() => {
+                    this._showEnd()
+                }}
+            />
         )
+    }
+    _cleanCon() {
+        this.setState({
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: '',
+        })
+    }
+    _showEnd() {
+        const {onLoadActiveList} = this.props;
+        this.storeName = 'activelist'
+        let formData=new FormData();
+        formData.append('token', this.props.token);
+        formData.append('keywords', this.state.keywords);
+        formData.append('sort', this.state.sort);
+        formData.append('page', 1);
+        formData.append('price_low', '');
+        formData.append('price_high','');
+        formData.append('country',this.state.country);
+        formData.append('province', this.state.province);
+        formData.append('city', this.state.city);
+        formData.append('region', '');
+        formData.append('activ_begin_time', '');
+        formData.append('activ_end_time', '');
+        formData.append('laguage', this.state.languageIndex>-1?this.state.languageIndex:'');
+        formData.append('kind_id',this.state.kind_id);
+        formData.append('is_volunteen', this.state.needVol>-1?this.state.needVol:'');
+        formData.append('max_person_num', this.state.peopleNum?this.state.peopleNum:'');
+        onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
+        this._clickCancelBtn();
     }
     _clickConfirmBtn(data){
         this.screen.openOrClosePanel(this.state.screenIndex);
@@ -103,7 +163,7 @@ class ActiveList extends Component{
         this.storeName = 'activelist'
         let formData=new FormData();
         formData.append('token', this.props.token);
-        formData.append('keywords', '');
+        formData.append('keywords', this.state.keywords);
         formData.append('sort', this.state.sort);
         formData.append('page', 1);
         formData.append('price_low', '');
@@ -114,10 +174,10 @@ class ActiveList extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
+        formData.append('laguage', this.state.languageIndex>-1?this.state.languageIndex:'');
         formData.append('kind_id',this.state.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('is_volunteen', this.state.needVol>-1?this.state.needVol:'');
+        formData.append('max_person_num', this.state.peopleNum?this.state.peopleNum:'');
         onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
     }
     _initCustomData() {
@@ -148,24 +208,38 @@ class ActiveList extends Component{
                             size={20}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity style={[CommonStyle.flexCenter,{
-                        height:36,
-                        width: width*0.94 - 30,
-                        marginRight: width*0.03,
-                        backgroundColor:'#f5f7fa',
-                        flexDirection: 'row',
-                        borderRadius: 4
-                    }]}>
-                        <AntDesign
-                            name={'search1'}
-                            size={14}
-                            style={{color:'#999'}}
-                        />
-                        <Text style={{
-                            marginLeft:5,
-                            color:'#999'
-                        }}>探索体验</Text>
-                    </TouchableOpacity>
+                    <TextInput
+                        style={[CommonStyle.flexCenter,{
+                            height:36,
+                            width: width*0.94 - 30,
+                            marginRight: width*0.03,
+                            backgroundColor:'#f5f7fa',
+                            flexDirection: 'row',
+                            borderRadius: 4,
+                            paddingLeft: 10,
+                            paddingRight: 10
+                        }]}
+                        placeholder={'探索体验'}
+                        defaultValue={this.state.keywords}
+                        onChangeText={(text) => {
+                            this.setState({
+                                keywords: text
+                            })
+                        }}
+                        onBlur={() => {
+                            this.loadData();
+                        }}
+                    >
+                        {/*<AntDesign*/}
+                        {/*    name={'search1'}*/}
+                        {/*    size={14}*/}
+                        {/*    style={{color:'#999'}}*/}
+                        {/*/>*/}
+                        {/*<Text style={{*/}
+                        {/*    marginLeft:5,*/}
+                        {/*    color:'#999'*/}
+                        {/*}}>探索体验</Text>*/}
+                    </TextInput>
 
                 </View>
                 <Screening
@@ -188,7 +262,7 @@ class ActiveList extends Component{
                     }}
                 >
                     <View style={[CommonStyle.flexCenter,{flex: 1,justifyContent:'flex-start'}]}>
-                        <ActiveListContentMap  {...this.state}/>
+                        <ActiveListContentMap  {...this.state} {...this.props}/>
                         <RNEasyAddressPicker
                             hasCountry={true}
                             ref={picker => this.picker = picker}
@@ -247,7 +321,11 @@ export default connect(mapState, mapDispatch)(ActiveList)
 class ActiveListContent extends Component{
     constructor(props) {
         super(props);
-        this.tabs=['3折起','返差价','多套餐']
+        this.state = {
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: 0
+        }
     }
     componentDidMount(){
         this.loadData()
@@ -258,7 +336,7 @@ class ActiveListContent extends Component{
         this.step = 1;
         let formData=new FormData();
         formData.append('token', token);
-        formData.append('keywords', '');
+        formData.append('keywords', this.props.keywords);
         formData.append('sort', this.props.sort);
         formData.append('page', 1);
         formData.append('price_low', '');
@@ -269,10 +347,10 @@ class ActiveListContent extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
+        formData.append('laguage', this.props.languageIndex>-1?this.props.languageIndex:'');
         formData.append('kind_id',this.props.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('is_volunteen', this.props.needVol>-1?this.props.needVol:'');
+        formData.append('max_person_num', this.props.peopleNum?this.props.peopleNum:'');
         onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
     }
     goDetail(activity_id) {
@@ -288,7 +366,9 @@ class ActiveListContent extends Component{
         onPress={() => {this.goDetail(data.item.activity_id)}}
         >
             <LazyImage
-                source={{uri: data.item.domain + data.item.image_url}}
+                source={data.item.domain&&data.item.image_url?
+                    {uri: data.item.domain + data.item.image_url}:
+                require('../../../../assets/images/error.png')}
                 style={styles.cityitem_img}
             />
             {
@@ -399,7 +479,7 @@ class ActiveListContent extends Component{
         this.step ++;
         let formData=new FormData();
         formData.append('token', token);
-        formData.append('keywords', '');
+        formData.append('keywords', this.props.keywords);
         formData.append('sort', this.props.sort);
         formData.append('page', this.step);
         formData.append('price_low', '');
@@ -410,10 +490,10 @@ class ActiveListContent extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
+        formData.append('laguage', this.props.languageIndex>-1?this.props.languageIndex:'');
         formData.append('kind_id',this.props.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('is_volunteen', this.props.needVol>-1?this.props.needVol:'');
+        formData.append('max_person_num', this.props.peopleNum?this.props.peopleNum:'');
         onLoadMoreActive(this.storeName, NewHttp + 'ActivityListUserTwo', formData, store.items, callback => {
 
         })
@@ -480,9 +560,47 @@ class CustomContent extends Component{
     constructor(props) {
         super(props);
         this.languages = ['中文', 'English', '日本語']
-        this.volunteer = ['需要', '不需要']
+        this.volunteer = ['不需要', '需要'];
+        this.state = {
+            languageIndex: this.props.languageIndex,
+            needVol: this.props.needVol,
+            peopleNum: this.props.peopleNum,
+            startPrice: this.props.startPrice,
+            endPrice: this.props.endPrice
+        }
+    }
+    delNum() {
+        let num = this.state.peopleNum;
+        if(num>0) {
+            num--;
+        }
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    addNum() {
+        let num = this.state.peopleNum;
+        num ++;
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    cleanCon() {
+        if(this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999') {
+            this.setState({
+                languageIndex: -1,
+                needVol: -1,
+                peopleNum: '',
+            })
+            this.props.cleanCon();
+        }
     }
     render(){
+        const {languageIndex, needVol} = this.state;
         return(
             <View style={[CommonStyle.flexCenter,{flex: 1,position:'relative'}]}>
                 <ScrollView
@@ -497,27 +615,35 @@ class CustomContent extends Component{
                                     return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
                                         width:70,
                                         height:36,
-                                        backgroundColor:'#F5F7FA',
+                                        backgroundColor:languageIndex==index?this.props.theme:'#F5F7FA',
                                         marginRight: 22
-                                    }]}>
-                                        <Text style={{color:'#333',fontSize: 13}}>{item}</Text>
+                                    }]}
+                                        onPress={() => {
+                                            this.setState({
+                                                languageIndex: index
+                                            },() => {
+                                                this.props.changeLan(index)
+                                            })
+                                        }}
+                                    >
+                                        <Text style={{color:languageIndex==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
                                     </TouchableOpacity>
                                 })
                             }
                         </View>
-                        <Text style={styles.screen_title}>价格</Text>
-                        <View style={{marginTop: 15}}>
-                            <PriceRange range={1000} startPrice={0} endPrice={500}/>
-                        </View>
-                        <Text style={styles.screen_title}>日期</Text>
-                        <View style={{
-                            width:'100%',
-                            height:49,
-                            backgroundColor:'#f5f7fa',
-                            marginTop: 19
-                        }}>
+                        {/*<Text style={styles.screen_title}>价格</Text>*/}
+                        {/*<View style={{marginTop: 15}}>*/}
+                        {/*    <PriceRange range={1000} startPrice={this.state.startPrice} endPrice={this.state.endPrice}/>*/}
+                        {/*</View>*/}
+                        {/*<Text style={styles.screen_title}>日期</Text>*/}
+                        {/*<View style={{*/}
+                        {/*    width:'100%',*/}
+                        {/*    height:49,*/}
+                        {/*    backgroundColor:'#f5f7fa',*/}
+                        {/*    marginTop: 19*/}
+                        {/*}}>*/}
 
-                        </View>
+                        {/*</View>*/}
                         <Text style={styles.screen_title}>志愿者</Text>
                         <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
                             {
@@ -525,10 +651,18 @@ class CustomContent extends Component{
                                     return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
                                         width:70,
                                         height:36,
-                                        backgroundColor:'#F5F7FA',
+                                        backgroundColor:needVol==index?this.props.theme:'#F5F7FA',
                                         marginRight: 22
-                                    }]}>
-                                        <Text style={{color:'#333',fontSize: 13}}>{item}</Text>
+                                    }]}
+                                         onPress={() => {
+                                             this.setState({
+                                                 needVol: index
+                                             },() => {
+                                                 this.props.changeNeedVol(index)
+                                             })
+                                         }}
+                                    >
+                                        <Text style={{color:needVol==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
                                     </TouchableOpacity>
                                 })
                             }
@@ -537,18 +671,26 @@ class CustomContent extends Component{
                         <View style={[CommonStyle.flexStart,{marginTop: 19,marginBottom: 70}]}>
                             <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
                                 borderColor:'#D6D6D6'
-                            }]}>
+                            }]}
+                            onPress={() => {
+                                this.delNum()
+                            }}
+                            >
                                 <AntDesign
                                     name={'minus'}
                                     size={18}
                                     style={{color:'#BFBFBF'}}
                                 />
                             </TouchableOpacity>
-                            <Text style={{marginLeft: 25,fontSize: 18,color:'#666'}}>0</Text>
+                            <Text style={{marginLeft: 25,fontSize: 18,color:'#666'}}>{this.state.peopleNum?this.state.peopleNum:0}</Text>
                             <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
                                 borderColor:'#14c5ca',
                                 marginLeft: 25
-                            }]}>
+                            }]}
+                              onPress={() => {
+                                  this.addNum()
+                              }}
+                            >
                                 <AntDesign
                                     name={'plus'}
                                     size={18}
@@ -558,7 +700,7 @@ class CustomContent extends Component{
                         </View>
                     </View>
                 </ScrollView>
-                <View style={[CommonStyle.flexCenter,{
+                <View style={[CommonStyle.flexStart,{
                     position: 'absolute',
                     left:0,
                     right:0,
@@ -566,11 +708,30 @@ class CustomContent extends Component{
                     height:50,
                     backgroundColor: '#fff'
                 }]}>
-                    <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.flexCenter,{
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        width:100,
+                        height:40,
+                        marginLeft: width*0.03
+                    }]}
+                          onPress={() => {
+                              this.cleanCon()
+                          }}
+                    >
+                        <Text style={{
+                            color: this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999'
+                        }}>清除全部</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
                         height:40,
                         backgroundColor:'#14c5ca',
-                        borderRadius: 4
-                    }]}>
+                        borderRadius: 4,
+                        width: width*0.94-120,
+                        marginLeft: 20
+                    }]}
+                      onPress={() => {
+                          this.props.showEnd()
+                      }}
+                    >
                         <Text style={{color:'#fff',fontSize: 15,fontWeight:'bold'}}>显示结果</Text>
                     </TouchableOpacity>
                 </View>

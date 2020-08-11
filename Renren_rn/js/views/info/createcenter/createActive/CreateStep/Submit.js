@@ -11,25 +11,33 @@ import HttpUrl from '../../../../../utils/Http';
 import action from '../../../../../action';
 class Submit extends Component{
     _submitActive() {
-        const {userinfo} = this.props;
-        let store = userinfo['userinfo'];
-        let info = store.items&&store.items.data&&store.items.data.data?store.items.data.data[0]:'';
-        if(info.audit_face!=2) {
-            this.refs.prompt.open()
-        } else {
-            let formData = new FormData();
-            formData.append("token",this.props.token);
-            formData.append("complete",1);
-            formData.append("activity_id",this.props.activity_id);
-            Fetch.post(HttpUrl+'Activity/save_activity', formData).then(res => {
-                if(res.code === 1) {
-                    this.initDate();
-                    this.initUn();
-                    this.initAl();
-                    this.initNot();
-                    NavigatorUtils.goPage({}, 'CreateActive')
-                }
-            })
+        if(this.props.type) {
+            this.initDate();
+            this.initUn();
+            this.initAl();
+            this.initNot();
+            NavigatorUtils.goPage({},'CreateActive')
+        }else{
+            const {userinfo} = this.props;
+            let store = userinfo['userinfo'];
+            let info = store.items&&store.items.data&&store.items.data.data?store.items.data.data[0]:'';
+            if(info.audit_face!=2) {
+                this.refs.prompt.open()
+            } else {
+                let formData = new FormData();
+                formData.append("token",this.props.token);
+                formData.append("complete",1);
+                formData.append("activity_id",this.props.activity_id);
+                Fetch.post(HttpUrl+'Activity/save_activity', formData).then(res => {
+                    if(res.code === 1) {
+                        this.initDate();
+                        this.initUn();
+                        this.initAl();
+                        this.initNot();
+                        NavigatorUtils.goPage({}, 'CreateActive')
+                    }
+                })
+            }
         }
     }
     initDate() {
@@ -93,7 +101,7 @@ class Submit extends Component{
                         <View style={CommonStyle.commonWidth}>
                             <Text style={[styles.main_title,{
                                 marginTop: 10
-                            }]}>提交体验前，请先查看相关政策</Text>
+                            }]}>{this.props.type?'保存':'提交'}体验前，请先查看相关政策</Text>
                             <Text style={{
                                 color:'#333',
                                 marginTop: 15,
@@ -120,7 +128,7 @@ class Submit extends Component{
                                 marginTop: 15,
                                 lineHeight: 20
                             }}>
-                                在人人耍上安排的各体验日期，您只能接待爱彼迎的参与者。 请您安排其他时间接待通过其他平台预订和支付的活动参与者。
+                                在人人耍上安排的各体验日期，您只能接待人人耍的参与者。 请您安排其他时间接待通过其他平台预订和支付的活动参与者。
                             </Text>
                             <TouchableOpacity style={[CommonStyle.flexCenter,{
                                 height: 40,

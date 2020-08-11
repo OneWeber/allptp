@@ -19,7 +19,8 @@ class Bindemail extends Component<Props>{
     constructor(props) {
         super(props);
         let timeInterEmail=null;
-        let newtTimeInterEmail=null
+        let newtTimeInterEmail=null;
+        let btTimeInterEmail = null
         this.state={
             token:'',
             isLoading:false,
@@ -93,7 +94,7 @@ class Bindemail extends Component<Props>{
             newSmsCodeEmail:true
         },()=>{
             let time=this.state.emailSmsTime;
-            this.newtTimeInterEmail=setInterval(()=>{
+            this.btTimeInterEmail=setInterval(()=>{
                 time--;
                 this.setState({
                     newEmailSmsTime:time
@@ -114,6 +115,49 @@ class Bindemail extends Component<Props>{
         Fetch.post(NewHttp+'email',formData).then(
 
         )
+    }
+    bEmailSmsCode() {
+        this.setState({
+            bSmsCodeEmail:true
+        },()=>{
+            let time=this.state.emailSmsTime;
+            this.btTimeInterEmail=setInterval(()=>{
+                time--;
+                this.setState({
+                    bEmailSmsTime:time
+                })
+                if(time==0){
+                    this.setState({
+                        bSmsCodeEmail:false,
+                        bEmailSmsTime:60
+                    })
+                    clearInterval(this.btTimeInterEmail)
+                }
+            },1000)
+        })
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("toemail",this.state.bEmailVal);
+        formData.append("flag",4);
+        Fetch.post(NewHttp+'email',formData).then(
+
+        )
+    }
+    bindEmail() {
+        let formData = new FormData();
+        formData.append("token",this.props.token);
+        formData.append("email",this.state.bEmailVal);
+        formData.append("sms_code",this.state.bEmailCode);
+        Fetch.post(NewHttp+ 'BindEmail', formData).then(res => {
+            if(res.code === 1) {
+                this.getUserinfo();
+                this.setState({
+                    isChange:false
+                })
+            }else{
+                console.log(res.msg)
+            }
+        })
     }
     changeEmail(){
         let formData = new FormData();
@@ -308,7 +352,7 @@ class Bindemail extends Component<Props>{
                                                         <TextInput
                                                             placeholder="请输入邮箱验证码"
                                                             editable={true}//是否可编辑
-                                                            onChangeText={(text)=>this.setState({bEmbEmailCodeailCode:text})}//输入框改变触发的函数
+                                                            onChangeText={(text)=>this.setState({bEmailCode:text})}//输入框改变触发的函数
                                                             keyboardType="number-pad"
                                                             style={{width:'100%',height:40,borderRadius:5,backgrundColor:'#ffffff',color:'#666666',paddingLeft:5}}
                                                         />
@@ -327,7 +371,7 @@ class Bindemail extends Component<Props>{
                                                                 :
                                                                 <View style={{position:'absolute',left:0,right:0,top:0,bottom:0,borderRadius:5,backgroundColor:'rgba(255,255,255,.5)',justifyContent:'center',alignItems:'center'}}>
                                                                     {
-                                                                        this.state.newSmsCodeEmail
+                                                                        this.state.bSmsCodeEmail
                                                                             ?
                                                                             <Text style={{color:'#ffffff'}}>已发送({this.state.bEmailSmsTime})</Text>
                                                                             :
@@ -345,7 +389,7 @@ class Bindemail extends Component<Props>{
                                                             <TouchableHighlight
                                                                 underlayColor='rgba(255,255,255,.1)'
                                                                 style={{width:'100%',height:40,borderRadius:5,justifyContent:'center',alignItems:'center'}}
-                                                                onPress={() =>{}}
+                                                                onPress={() =>{this.bindEmail()}}
                                                             >
                                                                 <Text style={{color:'#ffffff'}}>确认绑定</Text>
                                                             </TouchableHighlight>

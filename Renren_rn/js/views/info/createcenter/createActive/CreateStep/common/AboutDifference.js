@@ -5,6 +5,10 @@ import CommonStyle from '../../../../../../../assets/css/Common_css';
 import {connect} from 'react-redux'
 import NavigatorUtils from '../../../../../../navigator/NavigatorUtils';
 class AboutDifference extends Component{
+    constructor(props) {
+        super(props);
+        this.isDetail = this.props.navigation.state.params.isDetail?this.props.navigation.state.params.isDetail:false
+    }
     hasRead(){
         NavigatorUtils.backToUp(this.props)
     }
@@ -12,7 +16,7 @@ class AboutDifference extends Component{
         const {theme} = this.props;
         return (
             <View style={{flex: 1,position:'relative',backgroundColor: "#fff"}}>
-                <CreateHeader title={'关于退差价'} navigation={this.props.navigation}/>
+                <CreateHeader title={'关于退差价'} navigation={this.props.navigation} isDetail={this.isDetail}/>
                 <ScrollView>
                     <View style={CommonStyle.flexCenter}>
                         <View style={CommonStyle.commonWidth}>

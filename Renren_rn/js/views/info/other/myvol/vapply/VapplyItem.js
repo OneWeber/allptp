@@ -20,12 +20,10 @@ export default class VapplyItem extends Component{
         let formData=new FormData();
         formData.append('token', this.props.token);
         formData.append('page', 1);
-        Fetch.post(NewHttp+'ErollListMy', formData).then(res => {
+        Fetch.post(NewHttp+'ErollL', formData).then(res => {
             if(res.code === 1) {
                 this.setState({
                     applyList: res.data.data
-                },()=>{
-                    console.log(this.state.applyList)
                 })
             }
         })
@@ -125,7 +123,7 @@ export default class VapplyItem extends Component{
                 <Text style={{
                     color:this.props.theme,
                     fontSize: 12
-                }}>邀请志愿时间:</Text>
+                }}>申请志愿时间:</Text>
                 {
                     data.item.slot_id.map((item, index) => {
                         return <Text key={index} style={{
@@ -145,7 +143,7 @@ export default class VapplyItem extends Component{
         return(
             <View style={{flex: 1}}>
                 {
-                    applyList.length>0
+                    applyList&&applyList.length>0
                     ?
                         <FlatList
                             data={applyList}
@@ -156,7 +154,9 @@ export default class VapplyItem extends Component{
                     :
                         <View style={[CommonStyle.flexCenter,{
                             flex: 1
-                        }]}></View>
+                        }]}>
+                            <Text style={{color:'#999'}}>暂无数据</Text>
+                        </View>
                 }
             </View>
         )

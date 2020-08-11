@@ -35,6 +35,7 @@ import MapView, {
     Callout,
     AnimatedRegion,} from 'react-native-maps';
 import Modal from 'react-native-modalbox';
+import Video from 'react-native-video';
 const {width, height} = Dimensions.get('window');
 const screen = Dimensions.get('window');
 class ActiveDetail extends Component{
@@ -55,7 +56,9 @@ class ActiveDetail extends Component{
             discount: [],
             table_id: '',
             houseData: '',
-            isMe:0
+            isMe:0,
+            videoUrl: '',
+            paused: true
         }
     }
     componentDidMount(){
@@ -98,7 +101,11 @@ class ActiveDetail extends Component{
                   }
                   this.getSlot();
                   let imgArr= this.bannerImg(this.state.data.image);
-                  let bannerArr = this.bannerImg(this.state.data.image).slice(0, 5)
+                  let bannerArr = this.bannerImg(this.state.data.image).slice(0, 5);
+                    bannerArr.unshift({
+                        url: {uri: this.state.data.cover.domain + this.state.data.cover.image_url},
+                        extension: this.state.data.cover.extension
+                    })
                     this.setState({
                         activeImgs:imgArr,
                         banner: bannerArr
@@ -130,6 +137,8 @@ class ActiveDetail extends Component{
             if(res.code === 1) {
                 this.setState({
                     discount: res.data
+                },() => {
+                    console.log('discount', this.state.discount)
                 })
             }
         })
@@ -175,7 +184,8 @@ class ActiveDetail extends Component{
         for(let i=0;i<data.length;i++) {
             if(data[i].extension==='jpg'||'jpeg'||'png'){
                 totalImg.push({
-                    url: {uri: data[i].domain + data[i].image_url}
+                    url: {uri: data[i].domain + data[i].image_url},
+                    extension: data[i].extension
                 })
             }
         }
@@ -258,10 +268,6 @@ class ActiveDetail extends Component{
                 },'ManyDay', 'navigate')
             }
         }
-
-    }
-    _onSliderChange(index){
-
     }
     goAddWishList(){
         this.refs.wishList.close()
@@ -372,6 +378,7 @@ class ActiveDetail extends Component{
                 isLoading: false
             }
         }
+        const list = ['MP3','MP4','AVI','MOV', 'ASF', 'WMV', 'VOB', '3GP', 'SWF', 'MKV', 'FLV','RMVB','WEBM','F4V'];
         return(
             <View style={{flex: 1,position:'relative'}}>
                 {nav}
@@ -381,33 +388,74 @@ class ActiveDetail extends Component{
                     onScroll={(event)=>this._onScroll(event)}
                 >
                     <View style={styles.banner_con}>
-                        <Swiper
-                            showsButtons={false}
-                            horizontal={true}
-                            loop={true}
-                            showsPagination={true}
-                            autoplay={true}
-                            autoplayTimeout={6}
-                            activeDotColor={this.props.theme}
-                            style={{backgroundColor: '#f5f5f5'}}
+                        {
+                            this.state.banner.length>0
+                            ?
+                                <Swiper
+                                    showsButtons={false}
+                                    horizontal={true}
+                                    loop={true}
+                                    showsPagination={true}
+                                    autoplay={true}
+                                    autoplayTimeout={6}
+                                    activeDotColor={this.props.theme}
+                                    style={{backgroundColor: '#f5f5f5',height:height*0.7}}
+                                >
+                                    {
+                                        this.state.banner.map((item, index) => {
+                                            return <View>
+                                                {
+                                                   list.indexOf(item.extension.toUpperCase())>-1
+                                                    ?
+                                                        <View style={[CommonStyle.flexCenter,{
+                                                            width:width,
+                                                            height:height*0.7,
+                                                            backgroundColor:'#333'
+                                                        }]}
+                                                        >
+                                                            <AntDesign
+                                                                name={'play'}
+                                                                size={45}
+                                                                style={{color:'#f5f5f5'}}
+                                                                onPress={() => {
+                                                                    this.setState({
+                                                                        videoUrl: item.url.uri,
+                                                                        paused: false
+                                                                    },() => {
+                                                                        this.refs.video.open()
+                                                                    })
+                                                                }}
+                                                            />
+                                                        </View>
+                                                    :
+                                                        <LazyImage
+                                                            key={index}
+                                                            source={{uri:item.url.uri}}
+                                                            style={{
+                                                                width:width,
+                                                                height:height*0.7
+                                                            }}
+                                                        />
+                                                }
+                                            </View>
+                                        })
+                                    }
+                                </Swiper>
+                            :
+                                null
+                        }
+                        <TouchableOpacity
+                            style={[CommonStyle.flexCenter, styles.more_img_btn]}
+                            onPress={() => {
+                                NavigatorUtils.goPage({
+                                    data: data.image,
+                                    domain: data.cover.domain,
+                                    image_url: data.cover.image_url
+                                }, 'MorePicVideo')
+                            }}
                         >
-                            {
-                                this.state.banner.map((item, index) => {
-                                    return <LazyImage
-                                        key={index}
-                                        source={{uri:item.url.uri}}
-                                        style={{
-                                            width:width,
-                                            height:height*0.7
-                                        }}
-                                    />
-                                })
-                            }
-                        </Swiper>
-
-                        <View style={[CommonStyle.flexCenter, styles.more_img_btn]}>
                             <Text style={{color:'#999'}}>更多图集与视频</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     {
                         isLoading
@@ -454,12 +502,19 @@ class ActiveDetail extends Component{
                                             :'匿名用户'
                                         }
                                         </Text>
-                                        <LazyImage
-                                            source={data.user&&data.user.headimage?
-                                                {uri:data.user.headimage.domain+data.user.headimage.image_url}:
-                                                require('../../../assets/images/touxiang.png')}
-                                            style={aboutStyles.headimage}
-                                        />
+                                        <TouchableOpacity
+                                            style={{width: 60}}
+                                            onPress={() => {
+                                                NavigatorUtils.goPage({user_id: data.user.user_id},'UserInfo')
+                                            }}
+                                        >
+                                            <LazyImage
+                                                source={data.user&&data.user.headimage?
+                                                    {uri:data.user.headimage.domain+data.user.headimage.image_url}:
+                                                    require('../../../assets/images/touxiang.png')}
+                                                style={aboutStyles.headimage}
+                                            />
+                                        </TouchableOpacity>
                                         <Text style={{lineHeight:22,fontSize:15,color:'#333',marginTop:20}}>{data.introduce}</Text>
                                         <Text style={aboutStyles.translate_btn}>查看翻译</Text>
                                         <Text style={{color:'#333',fontSize:16,fontWeight:'bold',marginTop:35}}>体验内容</Text>
@@ -536,10 +591,8 @@ class ActiveDetail extends Component{
                                                 },'Map')
                                             }}></TouchableOpacity>
                                         </View>
-
                                     </View>
                                 </View>
-
                                 <Comments
                                     showBackModal={(data)=>{
                                         this._showBackModal(data)
@@ -551,7 +604,6 @@ class ActiveDetail extends Component{
                                 <SameActiveMap {...this.state} {...this.props} table_id={this.table_id}/>
                             </View>
                     }
-
                 </ScrollView>
                 <SafeAreaView style={[CommonStyle.flexCenter,styles.active_bot]}>
                     {
@@ -626,8 +678,58 @@ class ActiveDetail extends Component{
                                 <Text style={{color: '#ff5673'}}>当前无网络连接，请连接后重试</Text>
                             </View>
                     }
-
                 </SafeAreaView>
+                <Modal
+                    style={{height:height,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                    ref={"video"}
+                    animationDuration={200}
+                    position={"center"}
+                    backdropColor={'rgba(0,0,0,0.9)'}
+                    swipeToClose={false}
+                    backdropPressToClose={true}
+                    coverScreen={true}>
+                    <View style={{
+                        width: width,
+                        height: height,
+                        backgroundColor: '#333',
+                        position:'relative'
+                    }}>
+                        <Video
+                            ref={(ref: Video) => { //方法对引用Video元素的ref引用进行操作
+                                this.video = ref
+                            }}
+                            /* source={{ uri: 'https://gslb.miaopai.com/stream/HNkFfNMuhjRzDd-q6j9qycf54OaKqInVMu0YhQ__.mp4?ssig=bbabfd7684cae53660dc2d4c2103984e&time_stamp=1533631567740&cookie_id=&vend=1&os=3&partner=1&platform=2&cookie_id=&refer=miaopai&scid=HNkFfNMuhjRzDd-q6j9qycf54OaKqInVMu0YhQ__', type: 'mpd' }} */
+                            source={{uri:this.state.videoUrl}}//设置视频源
+                            paused={this.state.paused}//暂停
+                            style={{
+                                width: width,
+                                height: height,
+                            }}//组件样式
+                            rate={1}//播放速率
+                            muted={true}//控制音频是否静音
+                            resizeMode={'cover'}//缩放模式
+
+                            repeat={true}//确定在到达结尾时是否重复播放视频。
+                        />
+                        <AntDesign
+                            name={'close'}
+                            size={25}
+                            style={{
+                                color:'#fff',
+                                position:'absolute',
+                                right: width*0.03,
+                                top:40
+                            }}
+                            onPress={() => {
+                                this.setState({
+                                    paused: true,
+                                },() => {
+                                    this.refs.video.close()
+                                })
+                            }}
+                        />
+                    </View>
+                </Modal>
                 <Modal
                     style={{height:195,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
                     ref={"translate"}
@@ -687,9 +789,9 @@ class ActiveDetail extends Component{
                             backgroundColor: '#fff',
                             borderRadius: 5
                         }]}
-                                          onPress={()=>{
-                                              this.commentsBack()
-                                          }}
+                          onPress={()=>{
+                              this.commentsBack()
+                          }}
                         >
                             <Text style={{color:'#333'}}>回复</Text>
                         </TouchableOpacity>
@@ -810,8 +912,6 @@ class ActiveDetail extends Component{
                                                                         style={{color:'#f3f5f8'}}
                                                                     />
                                                             }
-
-
                                                         </TouchableOpacity>
                                                     })
                                                 }
@@ -828,11 +928,8 @@ class ActiveDetail extends Component{
                                     }
                                 </View>
                             </ScrollView>
-
-
                         </View>
                     </View>
-
                 </Modal>
             </View>
         )
@@ -980,8 +1077,6 @@ class AboutActive extends Component{
                         }</Text>
                     </View>}/>
                 </View>
-
-
             </View>
         )
     }
@@ -1148,7 +1243,12 @@ class Preferential extends Component{
                                     {
                                         this.props.discount&&this.props.discount.length>0
                                         ?
-                                            <Text>有折扣</Text>
+                                            this.props.discount.map((item, index) => {
+                                                return <Text key={index}>
+                                                    {item.long_day?item.date:item.begin_date} {item.begin_time} - {item.long_day?'':item.end_date+' '}{item.end_time}
+                                                    时间内标准价{item.price_discount}折儿童价{item.kids_price_discount}折扣{index===this.props.discount.length-1?'':';'}
+                                                </Text>
+                                            })
                                         :
                                             <Text>此体验暂无折扣</Text>
                                     }
@@ -1179,14 +1279,19 @@ class Preferential extends Component{
                                             次体验暂无返差价
                                         </Text>
                                 }
-                                <View style={[CommonStyle.flexStart,{marginTop: 5}]}>
+                                <TouchableOpacity
+                                    style={[CommonStyle.flexStart,{marginTop: 5}]}
+                                    onPress={() => {
+                                        NavigatorUtils.goPage({isDetail: true}, 'AboutDifference')
+                                    }}
+                                >
                                     <Text style={{color:'#666',fontSize:12}}>返差价说明</Text>
                                     <MaterialIcons
                                         name={'help-outline'}
                                         size={14}
                                         style={{color:'#666'}}
                                     />
-                                </View>
+                                </TouchableOpacity>
                             </View>
                         </View>
                         {/*套餐*/}
@@ -1197,11 +1302,23 @@ class Preferential extends Component{
                             <View style={aboutStyles.p_tabs_con}>
                                 <Text style={{color:'#222',lineHeight:20}}>
                                     {
-                                        this.props.data.is_combine
+                                        this.props.data.is_combine_qinzi&&this.props.data.is_combine_zuhe
                                         ?
                                             '包含亲子和组合套餐'
                                         :
-                                            '未包含亲子和组合套餐'
+                                        this.props.data.is_combine_qinzi&&!this.props.data.is_combine_zuhe
+                                        ?
+                                            '包含亲子套餐'
+                                        :
+                                        !this.props.data.is_combine_qinzi&&this.props.data.is_combine_zuhe
+                                        ?
+                                            '包含综合套餐'
+                                        :
+                                        !this.props.data.is_combine_qinzi&&!this.props.data.is_combine_zuhe
+                                        ?
+                                            '未包含套餐'
+                                        :
+                                            '未包含套餐'
                                     }
                                 </Text>
                             </View>

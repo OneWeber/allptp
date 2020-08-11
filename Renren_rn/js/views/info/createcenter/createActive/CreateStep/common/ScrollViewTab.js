@@ -73,13 +73,21 @@ class ScrollViewTab extends Component{
         })
     }
     leftType() {
-        return <FlatList
-            ref={flat=>this.flat=flat}
-            data={this.state.timeList}
-            extraData={this.state.timeList}
-            renderItem={(data) => this._renderItem(data)}
-            keyExtractor={(item, index) => index.toString()}
-        />
+        return <View>
+            {
+                this.state.timeList.length>0
+                    ?
+                    <FlatList
+                        ref={flat=>this.flat=flat}
+                        data={this.state.timeList}
+                        extraData={this.state.timeList}
+                        renderItem={(data) => this._renderItem(data)}
+                        keyExtractor={(item, index) => index.toString()}
+                    />
+                    :
+                    null
+            }
+        </View>
     }
     _changeType(index) {
         this.setState({
@@ -182,7 +190,6 @@ class ScrollViewTab extends Component{
         formData.append('end_time', this.state.timeList[this.state.typeIndex].end_time);
         formData.append('date', JSON.stringify(subData));
         formData.append('is_all', 0);
-        console.log('foramData', formData)
         Fetch.post(NewHttp+'ActivitySlotDelTwo', formData).then(res => {
             if(res.code === 1) {
                 NavigatorUtils.goPage({}, 'Time')
@@ -210,6 +217,8 @@ class ScrollViewTab extends Component{
                             paddingBottom: 110
                         }]}>
                             {
+                                dateList.length>0
+                                ?
                                 dateList.map((item, index) => {
                                     return <TouchableOpacity key={index} style={{
                                         paddingLeft: 5,
@@ -232,6 +241,8 @@ class ScrollViewTab extends Component{
                                         </Text>
                                     </TouchableOpacity>
                                 })
+                                    :
+                                    null
                             }
                         </View>
                     </ScrollView>

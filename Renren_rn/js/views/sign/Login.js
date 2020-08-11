@@ -184,12 +184,12 @@ class InputContainer extends Component{
         Fetch.post(HttpUrl + 'User/login_psw', formData).then(res => {
             if(res.code === 1) {
                 AsyncStorage.setItem('username', res.data.family_name||res.data.middle_name||res.data.name?
-                    JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name):'匿名用户')
+                    JSON.stringify(res.data.family_name+' '+res.data.middle_name+' '+res.data.name):'匿名用户')
                 AsyncStorage.setItem('avatar', JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url))
                 AsyncStorage.setItem('userid', JSON.stringify(res.data.user_id))
                 onInitUser({
                     username: res.data.family_name||res.data.middle_name||res.data.name?
-                        JSON.stringify(res.data.family_name+res.data.middle_name+res.data.name):'匿名用户',
+                        JSON.stringify(res.data.family_name+' '+res.data.middle_name+' '+res.data.name):'匿名用户',
                     avatar: JSON.stringify(res.data.headimage.domain + res.data.headimage.image_url),
                     userid:res.data.user_id
                 });
@@ -290,11 +290,11 @@ class Third extends Component{
                         const {userInfo} = this.state;
                         AsyncStorage.setItem('avatar', JSON.stringify(userInfo.headimage.domain+userInfo.headimage.image_url));
                         AsyncStorage.setItem('username', userInfo.family_name||userInfo.middle_name||userInfo.name?
-                            JSON.stringify(userInfo.family_name+userInfo.middle_name+userInfo.name):'匿名用户');
+                            JSON.stringify(userInfo.family_name+' '+userInfo.middle_name+' '+userInfo.name):'匿名用户');
                         AsyncStorage.setItem('userid', JSON.stringify(userInfo.user_id));
                         onInitUser({
                             username: userInfo.family_name||userInfo.middle_name||userInfo.name?
-                                JSON.stringify(userInfo.family_name+userInfo.middle_name+userInfo.name):'匿名用户',
+                                JSON.stringify(userInfo.family_name+' '+userInfo.middle_name+' '+userInfo.name):'匿名用户',
                             avatar: JSON.stringify(userInfo.headimage.domain + userInfo.headimage.image_url),
                             userid:userInfo.user_id
                         });

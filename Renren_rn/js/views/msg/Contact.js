@@ -55,12 +55,10 @@ class Contact extends Component{
         </TouchableOpacity>
     }
     renderItem(data) {
-        return <TouchableOpacity style={[CommonStyle.spaceRow,{
+        return <View style={[CommonStyle.spaceRow,{
             marginTop: data.index===0?24:40
         }]}
-        onPress={()=>{
-            NavigatorUtils.goPage({user_id: data.item.f_user_id},'UserInfo')
-        }}
+
         onLongPress={() => {
             this.setState({
                 f_user_id: data.item.f_user_id
@@ -70,20 +68,30 @@ class Contact extends Component{
 
         }}
         >
-            <LazyImage
-                source={data.item.user&&data.item.user.headimage&&data.item.user.headimage.domain&&data.item.user.headimage.image_url?
-                    {uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:require('../../../assets/images/touxiang.png')}
-                style={{
-                    width:45,
-                    height:45,
-                    borderRadius: 22.5
+            <TouchableOpacity
+                onPress={()=>{
+                    NavigatorUtils.goPage({user_id: data.item.f_user_id},'UserInfo')
                 }}
-            />
-            <View style={[CommonStyle.spaceCol,{
+            >
+                <LazyImage
+                    source={data.item.user&&data.item.user.headimage&&data.item.user.headimage.domain&&data.item.user.headimage.image_url?
+                        {uri:data.item.user.headimage.domain+data.item.user.headimage.image_url}:require('../../../assets/images/touxiang.png')}
+                    style={{
+                        width:45,
+                        height:45,
+                        borderRadius: 22.5
+                    }}
+                />
+            </TouchableOpacity>
+            <TouchableOpacity style={[CommonStyle.spaceCol,{
                 width:width*0.94-60,
                 height: 45,
                 alignItems:'flex-start'
-            }]}>
+            }]}
+            onPress={() => {
+                NavigatorUtils.goPage({user_id:data.item.user_id,name:data.item.user.family_name+data.item.user.middle_name+data.item.user.name}, 'Chat')
+            }}
+            >
                 {
                     data.item.user.family_name||data.item.user.middle_name||data.item.user.name
                         ?
@@ -96,8 +104,8 @@ class Contact extends Component{
                         <Text style={{color:'#333333',fontSize:15}}>匿名用户</Text>
                 }
 
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+        </View>
     }
     render(){
         const {contact} = this.props;

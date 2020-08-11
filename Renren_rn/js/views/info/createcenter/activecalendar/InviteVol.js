@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
-    Dimensions, ScrollView, TouchableHighlight, Image,
+    Dimensions,
 } from 'react-native';
 import {connect} from 'react-redux'
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
@@ -55,7 +55,7 @@ class InviteVol extends Component{
         </TouchableOpacity>
     }
     loadData(val){
-        const {token, onLoadVolunteer,volunteer} = this.props
+        const {token, onLoadVolunteer,volunteer} = this.props;
         this.storeName='volunteer'
         let store = volunteer[this.storeName]
         this.step = 1

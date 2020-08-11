@@ -24,6 +24,7 @@ import NewHttp from '../../../../../utils/NewHttp';
 import action from '../../../../../action'
 import Modal from 'react-native-modalbox';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import {removeDuplicatedItem} from '../../../../../utils/auth'
 const {width, height} = Dimensions.get('window')
 class Time extends Component{
     constructor(props) {
@@ -67,7 +68,6 @@ class Time extends Component{
         formData.append("activity_id",this.props.activity_id);
         Fetch.post(NewHttp+'ActivityETwo', formData).then(res => {
             if(res.code === 1) {
-                console.log('ressssss', res)
                 this.setState({
                     minAge: res.data.kids_stand_low,
                     maxAge: res.data.kids_stand_high,
@@ -91,7 +91,6 @@ class Time extends Component{
                     slot: res.data,
                     // timeIndex: res.data.length>0?res.data[0].long_day:0
                 },() => {
-                    console.log(res.data)
                     if(this.state.timeIndex) {
                         this.initSingleDate(this.state.slot)
                     }else{
@@ -106,6 +105,8 @@ class Time extends Component{
                     }
                     this.setState({
                         showSlot: data
+                    },() => {
+                        console.log(this.state.showSlot)
                     })
                     changeLongDay(this.state.slot)
                 })
@@ -270,7 +271,7 @@ class Time extends Component{
                             color:dateIndex===data.index?theme:'#333',
                             fontSize: 13
                         }}>{
-                            this.state.timeIndex&&data.item.date!='1970-01-01'
+                            this.state.timeIndex&&data.item.long_day == 1
                                 ?
                                 data.item.date
                                 :

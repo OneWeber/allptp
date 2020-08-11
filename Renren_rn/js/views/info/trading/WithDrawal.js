@@ -105,7 +105,7 @@ class WithDrawal extends Component{
         })
     }
     goDrawal() {
-        if(parseFloat(this.state.money) > 200) {
+        if(parseFloat(this.state.money) >= 200) {
             this.refs.drawal.open()
         }else {
             this.refs.toast.show('最低提现额度为200');

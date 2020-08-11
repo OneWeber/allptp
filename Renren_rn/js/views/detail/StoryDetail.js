@@ -56,6 +56,7 @@ class StoryDetail extends Component{
                     this.setState({
                         storyData: res.data
                     },() => {
+                        console.log(this.state.storyData)
                         if(!val) {
                             this.closeLoading()
                         }
@@ -693,24 +694,31 @@ class StoryContent extends Component{
                                 <Text style={{color:'#666',fontSize: 12}}>{storyData.create_time}</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={[CommonStyle.flexCenter,{
-                            width:60,
-                            height:32,
-                            borderWidth: this.state.attention?0:1,
-                            borderColor: this.props.theme,
-                            borderRadius: 5,
-                            backgroundColor: this.state.attention?this.props.theme:'#fff'
-                        }]} onPress={()=>{this.state.focusLoading?null:this.onFocus(this.state.attention)}}>
-                            {
-                                this.state.focusLoading
-                                ?
-                                    <ActivityIndicator color="#999" size="small" />
-                                :
-                                    <Text style={{color: this.state.attention?'#fff':this.props.theme}}>
-                                        {this.state.attention?'已关注':'关注'}
-                                    </Text>
-                            }
-                        </TouchableOpacity>
+                        {
+                            storyData.user_id == this.props.user.userid
+                            ?
+                                null
+                            :
+                                <TouchableOpacity style={[CommonStyle.flexCenter,{
+                                    width:60,
+                                    height:32,
+                                    borderWidth: this.state.attention?0:1,
+                                    borderColor: this.props.theme,
+                                    borderRadius: 5,
+                                    backgroundColor: this.state.attention?this.props.theme:'#fff'
+                                }]} onPress={()=>{this.state.focusLoading?null:this.onFocus(this.state.attention)}}>
+                                    {
+                                        this.state.focusLoading
+                                            ?
+                                            <ActivityIndicator color="#999" size="small" />
+                                            :
+                                            <Text style={{color: this.state.attention?'#fff':this.props.theme}}>
+                                                {this.state.attention?'已关注':'关注'}
+                                            </Text>
+                                    }
+                                </TouchableOpacity>
+                        }
+
                     </View>
                     <Text style={{
                         color:'#666',
@@ -765,9 +773,12 @@ class StoryContent extends Component{
                         marginTop: 40
                     }]}>评价</Text>
                     {/*评价*/}
-                    <Comments showBackModal={(data)=>{
-                        this._showBackModal(data)
-                    }} {...this.props}/>
+                    <Comments
+                        showBackModal={(data)=>{
+                            this._showBackModal(data)
+                        }}
+                        {...this.props}
+                    />
                     <Text style={[styles.story_title,{
                         marginTop: 40
                     }]}>你可能还会想看</Text>

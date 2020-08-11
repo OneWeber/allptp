@@ -115,57 +115,57 @@ class SelectAddress extends Component{
                         leftButton={this.getLeftButton()}
                         style={{borderBottomColor:'#f5f5f5',borderBottomWidth: 1}}
                     />
-                        <View style={[CommonStyle.commonWidth,CommonStyle.flexStart,{
-                            marginTop: 15,
-                            marginLeft:width*0.03
-                        }]}>
-                            <View>
-                                <Text style={{
-                                    color:'#333',
-                                    fontWeight: 'bold',
-                                    fontSize: 12
-                                }} >当前地址:</Text>
-                            </View>
-                            <View>
-                                <Text style={{
-                                    fontSize: 12,
-                                    fontWeight: 'bold',
-                                    color:this.props.theme,
-                                    marginLeft: 5
-                                }}>{nowAddress.country}{nowAddress.province}{nowAddress.city}{nowAddress.street}</Text>
-                            </View>
-                        </View>
-                        <View style={[CommonStyle.commonWidth,styles.search_header,CommonStyle.flexStart,{
-                            marginLeft:width*0.03
-                        }]}>
-                            <AntDesign
-                                name={'search1'}
-                                size={14}
-                                style={{color:'#666'}}
-                            />
-                            <TextInput
-                                placeholder="输入城市名称"
-                                style={styles.search_input}
-                            />
-                        </View>
-                        <View style={[CommonStyle.commonWidth,{
-                            marginTop: 20,
-                            marginLeft:width*0.03
-                        }]}>
-                            <Text style={{
-                                color:'#333',
-                                fontWeight: 'bold',
-                            }}>最近搜索</Text>
-                        </View>
-                        <View style={{width: width,marginTop: 20}}>
-                            <FlatList
-                                data={this.tabNames}
-                                horizontal={true}
-                                renderItem={(data)=>this._renderItem(data)}
-                                showsHorizontalScrollIndicator = {false}
-                                keyExtractor={(item, index) => index.toString()}
-                            />
-                        </View>
+                        {/*<View style={[CommonStyle.commonWidth,CommonStyle.flexStart,{*/}
+                        {/*    marginTop: 15,*/}
+                        {/*    marginLeft:width*0.03*/}
+                        {/*}]}>*/}
+                        {/*    <View>*/}
+                        {/*        <Text style={{*/}
+                        {/*            color:'#333',*/}
+                        {/*            fontWeight: 'bold',*/}
+                        {/*            fontSize: 12*/}
+                        {/*        }} >当前地址:</Text>*/}
+                        {/*    </View>*/}
+                        {/*    <View>*/}
+                        {/*        <Text style={{*/}
+                        {/*            fontSize: 12,*/}
+                        {/*            fontWeight: 'bold',*/}
+                        {/*            color:this.props.theme,*/}
+                        {/*            marginLeft: 5*/}
+                        {/*        }}>{nowAddress.country}{nowAddress.province}{nowAddress.city}{nowAddress.street}</Text>*/}
+                        {/*    </View>*/}
+                        {/*</View>*/}
+                        {/*<View style={[CommonStyle.commonWidth,styles.search_header,CommonStyle.flexStart,{*/}
+                        {/*    marginLeft:width*0.03*/}
+                        {/*}]}>*/}
+                        {/*    <AntDesign*/}
+                        {/*        name={'search1'}*/}
+                        {/*        size={14}*/}
+                        {/*        style={{color:'#666'}}*/}
+                        {/*    />*/}
+                        {/*    <TextInput*/}
+                        {/*        placeholder="输入城市名称"*/}
+                        {/*        style={styles.search_input}*/}
+                        {/*    />*/}
+                        {/*</View>*/}
+                        {/*<View style={[CommonStyle.commonWidth,{*/}
+                        {/*    marginTop: 20,*/}
+                        {/*    marginLeft:width*0.03*/}
+                        {/*}]}>*/}
+                        {/*    <Text style={{*/}
+                        {/*        color:'#333',*/}
+                        {/*        fontWeight: 'bold',*/}
+                        {/*    }}>最近搜索</Text>*/}
+                        {/*</View>*/}
+                        {/*<View style={{width: width,marginTop: 20}}>*/}
+                        {/*    <FlatList*/}
+                        {/*        data={this.tabNames}*/}
+                        {/*        horizontal={true}*/}
+                        {/*        renderItem={(data)=>this._renderItem(data)}*/}
+                        {/*        showsHorizontalScrollIndicator = {false}*/}
+                        {/*        keyExtractor={(item, index) => index.toString()}*/}
+                        {/*    />*/}
+                        {/*</View>*/}
                         <View style={[CommonStyle.commonWidth,CommonStyle.flexStart,{
                             marginTop: 10,
                             marginLeft:width*0.03
@@ -226,7 +226,7 @@ class SelectAddress extends Component{
                                 position:'absolute',
                                 left:0,
                                 right:0,
-                                top:270,
+                                top:90,
                                 bottom: 0,
                                 zIndex: 5
                             }}>
@@ -296,6 +296,12 @@ class Inland extends Component{
                 })
             }
         })
+    }
+    clickCity(city) {
+        if (this.props.navigation.state.params.callback) {
+            this.props.navigation.state.params.callback(city);
+            NavigatorUtils.backToUp(this.props)
+        }
     }
     render() {
         const {loadingHot, hotCity, cityIndex} = this.state;
@@ -413,7 +419,9 @@ class Inland extends Component{
                                                                 marginRight: 15,
                                                                 marginTop: 10,
                                                                 borderRadius: 3
-                                                            }]}>
+                                                            }]} onPress={() => {
+                                                                this.clickCity(item.city)
+                                                            }}>
                                                                 <Text style={{
                                                                     color:'#666'
                                                                 }}>{item.city}</Text>

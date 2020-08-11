@@ -168,6 +168,21 @@ class PublishStory extends Component{
             console.log(formData)
             Fetch.post(HttpUrl+'Story/save_story', formData).then(res => {
                 if(res.code === 1) {
+                    this.setState({
+                        title: '',
+                        content: '',
+                        address: '',
+                        country_id: '',
+                        country: '',
+                        province_id: '',
+                        province: '',
+                        city_id: '',
+                        city: '',
+                        cover_image: '',
+                        story_id: '',
+                        kind_id: '',
+                        imageId: []
+                    })
                     if(this.isEdit) {
                         this.initStory();
                         NavigatorUtils.backToUp(this.props)

@@ -27,6 +27,8 @@ import ImagePickers from 'react-native-image-crop-picker';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import NewHttp from '../../../../../utils/NewHttp';
 import action from '../../../../../action';
+import Video from 'react-native-video';
+import Modal from 'react-native-modalbox';
 const {width, height} = Dimensions.get('window');
 const photoOptions={
     title: '选择图片',
@@ -68,7 +70,8 @@ class Photo extends Component{
             lodingImages: false,
             isLoading: false,
             initImage: [],
-            loadingImg: false
+            loadingImg: false,
+            videoUrl: ''
         }
     }
     componentDidMount(){
@@ -104,7 +107,8 @@ class Photo extends Component{
                     if(initImage.length>0) {
                         for(let i=0;i<initImage.length; i++) {
                             list.push({
-                                send: {image_id:initImage[i].image_id,img:initImage[i].domain+initImage[i].image_url}
+                                send: {image_id:initImage[i].image_id,img:initImage[i].domain+initImage[i].image_url},
+                                extension: initImage[i].extension
                             });
                         }
                     }
@@ -190,8 +194,6 @@ class Photo extends Component{
 
     }
     uploadImageMore(images, i){
-        //let arr=this.state.showImage;
-        //let img=[];
         this.setState({
             lodingImages: true
         })
@@ -206,7 +208,8 @@ class Photo extends Component{
                 if(res.code === 1) {
                     list.push({
                         imageDetail: images,
-                        send: {image_id:res.data.image_id,img:res.data.domain+res.data.image_url}
+                        send: {image_id:res.data.image_id,img:res.data.domain+res.data.image_url},
+                        extension: res.data.extension
                     })
                     for(let i=0;i<list.length;i++) {
                         image_id.push({image_id:list[i].send.image_id})
@@ -293,6 +296,7 @@ class Photo extends Component{
         const {isOpenning, coverUri, imageList, lodingImages} = this.state;
         const menu = <MenuContent navigation={this.props.navigation}/>;
         let Images = [];
+        const list = ['MP3','MP4','AVI','MOV', 'ASF', 'WMV', 'VOB', '3GP', 'SWF', 'MKV', 'FLV','RMVB','WEBM','F4V'];
         for(let i=0;i<imageList.length;i++) {
             Images.push(
                 <TouchableOpacity key={i} style={[styles.detail_imgs_btn,{
@@ -304,14 +308,39 @@ class Photo extends Component{
                 }]} onPress={()=>{
                     this.dropImage(imageList[i])
                 }}>
-                    <LazyImage
-                        source={{uri: imageList[i].send.img}}
-                        style={{
-                            width:(width*0.94-30)/3,
-                            height: (width*0.94-30)/3,
-                            borderRadius: 3
-                        }}
-                    />
+                    {
+                        list.indexOf(imageList[i].extension.toUpperCase())>-1
+                        ?
+                            <View style={[CommonStyle.flexCenter,{
+                                width:(width*0.94-30)/3,
+                                height: (width*0.94-30)/3,
+                                borderRadius: 3,
+                                backgroundColor: '#333'
+                            }]}>
+                                <AntDesign
+                                    name={'play'}
+                                    size={20}
+                                    style={{color:'#f5f5f5'}}
+                                    onPress={() => {
+                                        this.setState({
+                                            videoUrl: imageList[i].send.img
+                                        },() => {
+                                            this.refs.video.open()
+                                        })
+                                    }}
+                                />
+                            </View>
+                        :
+                            <LazyImage
+                                source={{uri: imageList[i].send.img}}
+                                style={{
+                                    width:(width*0.94-30)/3,
+                                    height: (width*0.94-30)/3,
+                                    borderRadius: 3
+                                }}
+                            />
+                    }
+
                     <TouchableOpacity style={{
                         position:'absolute',
                         top:0,
@@ -326,25 +355,7 @@ class Photo extends Component{
                             style={{color:'#999'}}
                         />
                     </TouchableOpacity>
-                    {
-                        imageList[i].imageDetail
-                        ?
-                            <View style={[CommonStyle.flexCenter,{
-                                paddingLeft:3,
-                                height:15,
-                                backgroundColor:'rgba(0,0,0,.3)',
-                                position:'absolute',
-                                left:0,
-                                right:0,
-                                bottom:0,
-                                borderBottomRightRadius: 3,
-                                borderBottomLeftRadius: 3,
-                            }]}>
-                                <Text style={{color:'#fff',fontSize: 12}}>可裁剪</Text>
-                            </View>
-                        :
-                            null
-                    }
+
                 </TouchableOpacity>
             )
         }
@@ -478,6 +489,57 @@ class Photo extends Component{
                                 }
                             </TouchableOpacity>
                         </View>
+                        <Modal
+                            style={{height:height,width:'100%',backgroundColor:'rgba(0,0,0,0)'}}
+                            ref={"video"}
+                            animationDuration={200}
+                            position={"center"}
+                            backdropColor={'rgba(0,0,0,0.9)'}
+                            swipeToClose={false}
+                            backdropPressToClose={true}
+                            coverScreen={true}>
+                            <View style={{
+                                width: width,
+                                height: height,
+                                backgroundColor: '#333',
+                                position:'relative'
+                            }}>
+                                <Video
+                                    ref={(ref: Video) => { //方法对引用Video元素的ref引用进行操作
+                                        this.video = ref
+                                    }}
+                                    /* source={{ uri: 'https://gslb.miaopai.com/stream/HNkFfNMuhjRzDd-q6j9qycf54OaKqInVMu0YhQ__.mp4?ssig=bbabfd7684cae53660dc2d4c2103984e&time_stamp=1533631567740&cookie_id=&vend=1&os=3&partner=1&platform=2&cookie_id=&refer=miaopai&scid=HNkFfNMuhjRzDd-q6j9qycf54OaKqInVMu0YhQ__', type: 'mpd' }} */
+                                    source={{uri:this.state.videoUrl}}//设置视频源
+                                    paused={false}//暂停
+                                    style={{
+                                        width: width,
+                                        height: height,
+                                    }}//组件样式
+                                    rate={1}//播放速率
+                                    muted={true}//控制音频是否静音
+                                    resizeMode={'cover'}//缩放模式
+
+                                    repeat={true}//确定在到达结尾时是否重复播放视频。
+                                />
+                                <AntDesign
+                                    name={'close'}
+                                    size={25}
+                                    style={{
+                                        color:'#fff',
+                                        position:'absolute',
+                                        right: width*0.03,
+                                        top:40
+                                    }}
+                                    onPress={() => {
+                                        this.setState({
+                                            paused: true,
+                                        },() => {
+                                            this.refs.video.close()
+                                        })
+                                    }}
+                                />
+                            </View>
+                        </Modal>
                     </SafeAreaView>
                 </View>
             </SideMenu>

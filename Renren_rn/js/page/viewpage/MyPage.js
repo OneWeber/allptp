@@ -388,7 +388,7 @@ class AboutMe extends Component{
                           redirect: 'PraiseAndBack'
                       })}
                 >
-                    <Text style={styles.txt}>{token&&user&&user.username&&user.userid?userInfo.praise_num+userInfo.leaving_num:0}</Text>
+                    <Text style={styles.txt}>{token&&user&&user.username&&user.userid?parseFloat(userInfo.praise_num)+parseFloat(userInfo.leaving_num):0}</Text>
                     <Text style={styles.down_txt}>
                         {
                             language===1?languageType.CH.my.back:language===2?languageType.EN.my.back:languageType.JA.my.back
@@ -727,7 +727,7 @@ class Other extends Component{
             {
                 title:this.props.language===1?'帮助与反馈':this.props.language===2?'Help and feedback':'ヘルプとフィードバック',
                 icon:require('../../../assets/images/home/bzyfk.png'),
-                router:'',
+                router:'Feedback',
                 width:21,
                 height:21
             }

@@ -41,6 +41,18 @@ class ManyDay extends Component{
     componentDidMount(){
         this.initSlot()
     }
+    toSignUp(slot_id) {
+        let _this = this;
+        const {join} = this.props;
+        this.refs.list.close();
+        NavigatorUtils.goPage({
+            slot_id: slot_id,
+            activity_id: join.activity_id,
+            refresh:function () {
+                _this.refs.toast.show('申请已成功提交')
+            }
+        }, 'SignUp')
+    }
     initSlot() {
         let slot = this.props.slot,monthArr=[];
         for(let i=0;i<slot.length;i++){
@@ -382,7 +394,11 @@ class ManyDay extends Component{
                                         height: 40,
                                         backgroundColor: this.props.theme,
                                         borderRadius: 6
-                                    }]}>
+                                    }]}
+                                      onPress={()=>{
+                                          this.toSignUp(data.item.slot_id)
+                                      }}
+                                    >
                                         <Text style={{
                                             color:'#fff'
                                         }}>报名</Text>

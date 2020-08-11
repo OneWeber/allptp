@@ -9,7 +9,7 @@ import {
     ScrollView,
     FlatList,
     ImageBackground,
-    ActivityIndicator,
+    ActivityIndicator, TextInput,
 } from 'react-native';
 import CommonStyle from '../../../assets/css/Common_css';
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -24,7 +24,7 @@ class Destination extends Component{
         this.tabNames = [
             {
                 title:'类型',
-                data:[{title:'全部',id: 1},{title:'户外活动',id: 1},{title:'少数民族',id: 2},{title:'本土文化', id:3}],
+                data:[{title:'全部',id: 0},{title:'户外活动',id: 1},{title:'少数民族',id: 2},{title:'本土文化', id:3}],
                 type: 1
             },
             {
@@ -52,7 +52,11 @@ class Destination extends Component{
             country: '',
             province: '',
             city: '',
-            kind_id: ''
+            kind_id: '',
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: '',
+            keywords: ''
         }
     }
     componentDidMount() {
@@ -71,8 +75,46 @@ class Destination extends Component{
     }
     getCustom() {
         return(
-            <CustomContent />
+            <CustomContent
+                {...this.props}
+                {...this.state}
+                changeLan={(data) => {
+                    this.setState({
+                        languageIndex: data
+                    })
+                }}
+                changeNeedVol={(data) => {
+                    this.setState({
+                        needVol: data
+                    })
+                }}
+                changeNum={(data) => {
+                    this.setState({
+                        peopleNum: data
+                    })
+                }}
+                cleanCon = {() => {
+                    this._cleanCon()
+                }}
+                showEnd={() => {
+                    this._showEnd()
+                }}
+            />
         )
+    }
+    _cleanCon() {
+        this.setState({
+            languageIndex: -1,
+            needVol: -1,
+            peopleNum: '',
+        })
+    }
+    _showEnd() {
+        this.loadData();
+        this._clickCancelBtn();
+    }
+    _clickCancelBtn() {
+        this.screen.openOrClosePanel(this.state.screenIndex)
     }
     _itemOnpress(tIndex, index, data) {
         if(tIndex===0) {
@@ -93,8 +135,8 @@ class Destination extends Component{
         const {onLoadActiveList} = this.props;
         let formData=new FormData();
         formData.append('token', this.props.token);
-        formData.append('keywords', '');
-        formData.append('sort', this.state.sort);
+        formData.append('keywords', this.state.keywords);
+        formData.append('sort', this.state.sort?this.state.sort: '');
         formData.append('page', 1);
         formData.append('price_low', '');
         formData.append('price_high','');
@@ -104,10 +146,10 @@ class Destination extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
-        formData.append('kind_id',this.state.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('laguage', this.state.languageIndex>-1?this.state.languageIndex:'');
+        formData.append('kind_id',this.state.kind_id?this.state.kind_id:'');
+        formData.append('is_volunteen', this.state.needVol>-1?this.state.needVol: '');
+        formData.append('max_person_num', this.state.peopleNum);
         onLoadActiveList('activelist', NewHttp + 'ActivityListUserTwo', formData)
     }
     _initCustomData() {
@@ -145,14 +187,26 @@ class Destination extends Component{
                             style={{color: '#333'}}
                             onPress={()=>NavigatorUtils.backToUp(this.props)}
                         />
-                        <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        <TextInput style={[CommonStyle.flexCenter,{
                             height: 36,
                             width:width*0.94-30,
                             backgroundColor: '#f5f7fa',
-                            borderRadius: 4
-                        }]}>
-                            <Text style={{color:'#999',fontSize: 13}}>目的地或体验</Text>
-                        </TouchableOpacity>
+                            borderRadius: 4,
+                            paddingLeft: 10,
+                            paddingRight: 10
+                        }]}
+                        placeholder={'搜索体验'}
+                        defaultValue={this.state.keywords}
+                        onChangeText={(text) => {
+                            this.setState({
+                                keywords: text
+                            })
+                        }}
+                        onBlur={() => {
+                            this.loadData();
+                        }}
+                        >
+                        </TextInput>
                     </View>
                 </SafeAreaView>
                 <Screening
@@ -226,7 +280,8 @@ class Destination extends Component{
 }
 const mapState = state => ({
     token: state.token.token,
-    activelist: state.activelist
+    activelist: state.activelist,
+    theme: state.theme.theme
 });
 const mapDispatch = dispatch => ({
     onLoadActiveList: (storeName, url, data) => dispatch(action.onLoadActiveList(storeName, url, data)),
@@ -243,6 +298,36 @@ const styles = StyleSheet.create({
         height:90,
         borderRadius: 4,
         overflow:'hidden',
+    },
+    back_icon: {
+        paddingLeft: width*0.03
+    },
+    cityitem_img:{
+        width: '100%',
+        height: 126,
+        borderRadius: 3
+    },
+    common_color:{
+        color:'#333'
+    },
+    common_weight:{
+        fontWeight:'bold'
+    },
+    tab_item:{
+        padding: 3,
+        marginRight: 15
+    },
+    screen_title:{
+        color:'#333',
+        fontSize: 13,
+        marginTop: 20,
+        fontWeight: "bold"
+    },
+    addRoll:{
+        width: 34,
+        height:34,
+        borderRadius: 17,
+        borderWidth: 1
     }
 })
 class DestinationCity extends Component{
@@ -304,8 +389,8 @@ class DestinationActive extends Component{
         this.step = 1;
         let formData=new FormData();
         formData.append('token', this.props.token);
-        formData.append('keywords', '');
-        formData.append('sort', this.props.sort);
+        formData.append('keywords', this.props.keywords);
+        formData.append('sort', this.props.sort?this.props.sort: '');
         formData.append('page', 1);
         formData.append('price_low', '');
         formData.append('price_high','');
@@ -315,10 +400,10 @@ class DestinationActive extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
-        formData.append('kind_id',this.props.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('laguage', this.props.languageIndex>-1?this.props.languageIndex:'');
+        formData.append('kind_id',this.props.kind_id?this.props.kind_id:'');
+        formData.append('is_volunteen', this.props.needVol>-1?this.props.needVol: '');
+        formData.append('max_person_num', this.props.peopleNum);
         onLoadActiveList(this.storeName, NewHttp + 'ActivityListUserTwo', formData)
     }
 
@@ -338,8 +423,8 @@ class DestinationActive extends Component{
         this.step ++;
         let formData=new FormData();
         formData.append('token', token);
-        formData.append('keywords', '');
-        formData.append('sort', this.props.sort);
+        formData.append('keywords', this.props.keywords);
+        formData.append('sort', this.props.sort?this.props.sort: '');
         formData.append('page', this.step);
         formData.append('price_low', '');
         formData.append('price_high','');
@@ -349,10 +434,10 @@ class DestinationActive extends Component{
         formData.append('region', '');
         formData.append('activ_begin_time', '');
         formData.append('activ_end_time', '');
-        formData.append('laguage', '');
-        formData.append('kind_id',this.props.kind_id);
-        formData.append('is_volunteen', '');
-        formData.append('max_person_num', '');
+        formData.append('laguage', this.props.languageIndex>-1?this.props.languageIndex:'');
+        formData.append('kind_id',this.props.kind_id?this.props.kind_id:'');
+        formData.append('is_volunteen', this.props.needVol>-1?this.props.needVol: '');
+        formData.append('max_person_num', this.props.peopleNum);
         onLoadMoreActive(this.storeName, NewHttp + 'ActivityListUserTwo', formData, store.items, callback => {
 
         })
@@ -398,9 +483,185 @@ class DestinationActive extends Component{
     }
 }
 class CustomContent extends Component{
+    constructor(props) {
+        super(props);
+        this.languages = ['中文', 'English', '日本語']
+        this.volunteer = ['不需要', '需要'];
+        this.state = {
+            languageIndex: this.props.languageIndex,
+            needVol: this.props.needVol,
+            peopleNum: this.props.peopleNum,
+            startPrice: this.props.startPrice,
+            endPrice: this.props.endPrice
+        }
+    }
+    delNum() {
+        let num = this.state.peopleNum;
+        if(num>0) {
+            num--;
+        }
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    addNum() {
+        let num = this.state.peopleNum;
+        num ++;
+        this.setState({
+            peopleNum: num
+        },() => {
+            this.props.changeNum(num)
+        })
+    }
+    cleanCon() {
+        if(this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999') {
+            this.setState({
+                languageIndex: -1,
+                needVol: -1,
+                peopleNum: '',
+            })
+            this.props.cleanCon();
+        }
+    }
     render(){
+        const {languageIndex, needVol} = this.state;
         return(
-            <View></View>
+            <View style={[CommonStyle.flexCenter,{flex: 1,position:'relative'}]}>
+                <ScrollView
+                    showsHorizontalScrollIndicator = {false}
+                    scrollEventThrottle={16}
+                >
+                    <View style={[CommonStyle.commonWidth]}>
+                        <Text style={styles.screen_title}>语言</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.languages.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:languageIndex==index?this.props.theme:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}
+                                                             onPress={() => {
+                                                                 this.setState({
+                                                                     languageIndex: index
+                                                                 },() => {
+                                                                     this.props.changeLan(index)
+                                                                 })
+                                                             }}
+                                    >
+                                        <Text style={{color:languageIndex==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        {/*<Text style={styles.screen_title}>价格</Text>*/}
+                        {/*<View style={{marginTop: 15}}>*/}
+                        {/*    <PriceRange range={1000} startPrice={this.state.startPrice} endPrice={this.state.endPrice}/>*/}
+                        {/*</View>*/}
+                        {/*<Text style={styles.screen_title}>日期</Text>*/}
+                        {/*<View style={{*/}
+                        {/*    width:'100%',*/}
+                        {/*    height:49,*/}
+                        {/*    backgroundColor:'#f5f7fa',*/}
+                        {/*    marginTop: 19*/}
+                        {/*}}>*/}
+
+                        {/*</View>*/}
+                        <Text style={styles.screen_title}>志愿者</Text>
+                        <View style={[CommonStyle.flexStart,{flexWrap:'wrap',marginTop: 19}]}>
+                            {
+                                this.volunteer.map((item, index) => {
+                                    return <TouchableOpacity key={index} style={[CommonStyle.flexCenter,{
+                                        width:70,
+                                        height:36,
+                                        backgroundColor:needVol==index?this.props.theme:'#F5F7FA',
+                                        marginRight: 22
+                                    }]}
+                                                             onPress={() => {
+                                                                 this.setState({
+                                                                     needVol: index
+                                                                 },() => {
+                                                                     this.props.changeNeedVol(index)
+                                                                 })
+                                                             }}
+                                    >
+                                        <Text style={{color:needVol==index?'#fff':'#333',fontSize: 13}}>{item}</Text>
+                                    </TouchableOpacity>
+                                })
+                            }
+                        </View>
+                        <Text style={styles.screen_title}>参与人数</Text>
+                        <View style={[CommonStyle.flexStart,{marginTop: 19,marginBottom: 70}]}>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#D6D6D6'
+                            }]}
+                                              onPress={() => {
+                                                  this.delNum()
+                                              }}
+                            >
+                                <AntDesign
+                                    name={'minus'}
+                                    size={18}
+                                    style={{color:'#BFBFBF'}}
+                                />
+                            </TouchableOpacity>
+                            <Text style={{marginLeft: 25,fontSize: 18,color:'#666'}}>{this.state.peopleNum?this.state.peopleNum:0}</Text>
+                            <TouchableOpacity style={[CommonStyle.flexCenter,styles.addRoll,{
+                                borderColor:'#14c5ca',
+                                marginLeft: 25
+                            }]}
+                                              onPress={() => {
+                                                  this.addNum()
+                                              }}
+                            >
+                                <AntDesign
+                                    name={'plus'}
+                                    size={18}
+                                    style={{color:'#14c5ca'}}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+                <View style={[CommonStyle.flexStart,{
+                    position: 'absolute',
+                    left:0,
+                    right:0,
+                    bottom: 0,
+                    height:50,
+                    backgroundColor: '#fff'
+                }]}>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        width:100,
+                        height:40,
+                        marginLeft: width*0.03
+                    }]}
+                                      onPress={() => {
+                                          this.cleanCon()
+                                      }}
+                    >
+                        <Text style={{
+                            color: this.state.languageIndex>-1||this.state.needVol>-1||this.state.peopleNum?this.props.theme:'#999'
+                        }}>清除全部</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                        height:40,
+                        backgroundColor:'#14c5ca',
+                        borderRadius: 4,
+                        width: width*0.94-120,
+                        marginLeft: 20
+                    }]}
+                                      onPress={() => {
+                                          this.props.showEnd()
+                                      }}
+                    >
+                        <Text style={{color:'#fff',fontSize: 15,fontWeight:'bold'}}>显示结果</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
         )
     }
 }

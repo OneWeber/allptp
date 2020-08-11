@@ -216,7 +216,11 @@ class HomePage extends Component{
                             borderWidth: 1,
                             borderColor:'#484A4D',
                             marginTop: 30
-                        }]}>
+                        }]}
+                        onPress={() => {
+                            NavigatorUtils.goPage({}, 'StoryList')
+                        }}
+                        >
                             <Text style={[styles.common_weight,styles.common_color]}>
                                 {
                                     this.props.language===1?

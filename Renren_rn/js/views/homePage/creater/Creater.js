@@ -28,16 +28,6 @@ class Creater extends Component{
         super(props);
         this.tabNames = [
             {
-                title:'排序',
-                data:[{title:'全部', id:0},{title:'评分降序', id:1},{title:'点赞降序',id:2},{title:'留言降序',id:5},{title:'粉丝总数降序',id:6}],
-                type: 1
-            },
-            {
-                title:'语言',
-                data:[{title:'全部',id: 0}, {title:'中文',id: 1},{title:'English',id: 2},{title:'日本語', id:3}],
-                type: 1
-            },
-            {
                 title:'地区',
                 data:[],
                 type: 2
@@ -142,7 +132,7 @@ class Creater extends Component{
                             screenIndex: index
                         })
                     }}
-                    selectIndex={[0,0,0]}
+                    selectIndex={[0]}
                     customContent={this.getCustom()}
                     customData={this.state.customData}
                     customFunc={()=>{
@@ -256,11 +246,15 @@ class CreaterContent extends Component{
     }
     renderItem(data){
         const {theme} = this.props
-        return <View style={[CommonStyle.flexCenter,{
+        return <TouchableOpacity style={[CommonStyle.flexCenter,{
             width: (width*0.94-15) /2,
             marginLeft: data.index%2===0?width*0.03:15,
             marginTop: 15
-        }]}>
+        }]}
+         onPress={()=>{
+             NavigatorUtils.goPage({user_id: data.item.user_id},'UserInfo')
+         }}
+        >
             <LazyImage
                 source={data.item.headimage?{uri:data.item.headimage.domain + data.item.headimage.image_url}:
                     require('../../../../assets/images/touxiang.png')}
@@ -283,7 +277,7 @@ class CreaterContent extends Component{
                 color:'#333',
                 fontSize: 12
             }}>志愿{data.item.activ_num}个活动</Text>
-        </View>
+        </TouchableOpacity>
     }
     render(){
         const {creater, theme} = this.props

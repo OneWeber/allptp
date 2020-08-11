@@ -197,6 +197,11 @@ class GetBack extends Component{
             }
         })
     }
+    getDate(timestamp) {
+        let newDate = new Date();
+        newDate.setTime(timestamp * 1000);
+        return newDate.toLocaleDateString()
+    }
     renderItem(data) {
         return <View style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{
             marginTop: data.index===0?20:30,
@@ -246,7 +251,7 @@ class GetBack extends Component{
                     style={{
                     color:'#999',
                     fontSize: 12
-                }}>{data.item.create_time}</Text>
+                }}>{this.getDate(data.item.create_time)}</Text>
                 <Text
                     numberOfLines={1} ellipsizeMode={'tail'}
                     style={{

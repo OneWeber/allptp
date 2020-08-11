@@ -40,11 +40,8 @@ class FriendApply extends Component{
         formData.append('token',this.props.token);
         formData.append('notice_id',notice_id);
         formData.append('status',val);
-        console.log(formData)
         Fetch.post(HttpUrl+'Friend/agree', formData).then(res => {
-            if(res.code === 1) {
-                this.loadData()
-            }
+            this.loadData()
         })
     }
     renderItem(data) {

@@ -75,7 +75,7 @@ class SystemMsg extends Component{
             onLoadNoRead(this.storeName, HttpUrl+ 'Sysmsg/noread', formDatas)
         })
 
-        NavigatorUtils.goPage({msg_id: data.msg_id, step: this.step}, 'SystemWebview')
+        NavigatorUtils.goPage({msg_id: data.msg_id, step: this.step, data: data}, 'SystemWebview')
     }
     renderItem(data) {
         return <TouchableOpacity style={[CommonStyle.commonWidth,CommonStyle.spaceRow,{

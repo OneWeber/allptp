@@ -16,7 +16,7 @@ import NavigatorUtils from '../../navigator/NavigatorUtils';
 import Fetch from '../../expand/dao/Fetch';
 import NewHttp from '../../utils/NewHttp';
 import LazyImage from 'animated-lazy-image';
-const {width} = Dimensions.get('window')
+const {width} = Dimensions.get('window');
 class RefundDetail extends Component{
     constructor(props) {
         super(props);
@@ -251,11 +251,15 @@ class RefundDetail extends Component{
                                 borderTopWidth: 1,
                                 borderTopColor: '#f5f5f5'
                             }}>
-                                <View style={[CommonStyle.flexCenter,{
+                                <TouchableOpacity style={[CommonStyle.flexCenter,{
                                     height: 50
-                                }]}>
+                                }]}
+                                  onPress={() => {
+                                      NavigatorUtils.goPage({}, 'Dispute')
+                                  }}
+                                >
                                     <Text style={{color:'#666'}}>提交纠纷</Text>
-                                </View>
+                                </TouchableOpacity>
                             </SafeAreaView>
                         </View>
                 }

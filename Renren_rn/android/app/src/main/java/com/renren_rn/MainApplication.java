@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import cn.jiguang.plugins.push.JPushPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import xyz.plan.android.pptmapview.PPTGoogleMapPackage;

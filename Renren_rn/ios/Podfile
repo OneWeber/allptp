@@ -42,6 +42,8 @@ target 'Renren_rn' do
   pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
   pod 'react-native-geolocation', path: '../node_modules/@react-native-community/geolocation'
 
+  pod 'JPush', :path => '../node_modules/jpush-react-native'
+
   target 'Renren_rnTests' do
     inherit! :search_paths
     # Pods for testing

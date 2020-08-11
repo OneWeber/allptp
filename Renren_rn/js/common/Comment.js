@@ -8,6 +8,7 @@ import action from '../action'
 import ImageViewer from 'react-native-image-zoom-viewer';
 import DetailComments from './DetailComments';
 import NavigatorUtils from '../navigator/NavigatorUtils';
+import Fetch from '../expand/dao/Fetch';
 class Comment extends Component{
     constructor(props) {
         super(props);
@@ -59,6 +60,19 @@ class Comment extends Component{
             NavigatorUtils.goPage({}, 'Login')
         }
     }
+    _clickPraise(data, msg_id) {
+        const {flag, token} = this.props;
+        let formData = new FormData();
+        formData.append('token', token);
+        formData.append('flag', flag==1?3:4);
+        formData.append('table_id', msg_id);
+        formData.append('type', data?2:1);
+        Fetch.post(HttpUrl+'Comment/praise', formData).then(res => {
+            if(res.code === 1) {
+                this.loadData();
+            }
+        })
+    }
     render(){
         const {theme, comments} = this.props;
         let store = comments[this.storeName];
@@ -76,6 +90,7 @@ class Comment extends Component{
                         this.props.type === 'detail'
                             ?
                             <DetailComments
+                                clickPraise={(data, msg_id) => {this._clickPraise(data, msg_id)}}
                                 showImg={(arr, index)=>this._showImg(arr, index)}
                                 theme={this.props.theme}
                                 limit={3}

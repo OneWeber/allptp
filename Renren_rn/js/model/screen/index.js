@@ -225,10 +225,10 @@ export default class Screening extends Component{
                                 <Text
                                     numberOfLines={1} ellipsizeMode={'tail'}
                                     style={{fontWeight:'bold',maxWidth:80}}>
-                                    {selectData[index]?selectData[index].title:item.type===2?this.props.customData?this.props.customData:item.title:item.title}
+                                    {selectData[index]?selectData[index].title:item.type===2&&item.title=='地区'?this.props.customData?this.props.customData:item.title:item.title}
                                 </Text>
                                 {
-                                    item.type===2&&this.props.customData
+                                    item.type===2&&item.title=='地区'&&this.props.customData
                                     ?
                                         <AntDesign
                                             name={'close'}

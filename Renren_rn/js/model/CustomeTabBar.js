@@ -147,11 +147,7 @@ export default class CustomTabBar extends Component {
                             alignItems: 'center',
                             flexDirection: 'row'
                         }}>
-                            <AntDesign
-                                name={'search1'}
-                                size={20}
-                                style={{color:'#999',marginRight:widthScreen*0.03}}
-                            />
+
                         </View>
                     :
                         null

@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     FlatList,
     Image,
-    ScrollView, ActivityIndicator, RefreshControl,
+    ScrollView, ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import RNEasyTopNavBar from 'react-native-easy-top-nav-bar';
 import CommonStyle from '../../../../assets/css/Common_css';
@@ -45,6 +45,7 @@ class StoryList extends Component{
             country: '',
             province: '',
             city: '',
+            keywords: ''
         }
     }
     getLeftButton(){
@@ -113,7 +114,7 @@ class StoryList extends Component{
         const {onLoadStoryList} = this.props;
         let formData=new FormData();
         formData.append('token', this.props.token);
-        formData.append('keywords','');
+        formData.append('keywords',this.state.keywords);
         formData.append('sort',this.state.sort);
         formData.append('page',1);
         formData.append('kind_id','');
@@ -141,24 +142,29 @@ class StoryList extends Component{
                             size={20}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity style={[CommonStyle.flexCenter,{
+                    <TextInput
+                        placeholder={'搜索故事'}
+                        style={[CommonStyle.flexCenter,{
                         height:36,
                         width: width*0.94 - 30,
                         marginRight: width*0.03,
                         backgroundColor:'#f5f7fa',
                         flexDirection: 'row',
-                        borderRadius: 4
-                    }]}>
-                        <AntDesign
-                            name={'search1'}
-                            size={14}
-                            style={{color:'#999'}}
-                        />
-                        <Text style={{
-                            marginLeft:5,
-                            color:'#999'
-                        }}>搜索故事</Text>
-                    </TouchableOpacity>
+                        borderRadius: 4,
+                        paddingLeft: 10,
+                        paddingRight: 10
+                    }]}
+                     defaultValue={this.state.keywords}
+                     onChangeText={(text) => {
+                         this.setState({
+                             keywords: text
+                         })
+                     }}
+                     onBlur={() => {
+                         this.loadData()
+                     }}
+                    >
+                    </TextInput>
                 </View>
                 <Screening
                     ref={screen => this.screen = screen}
@@ -239,7 +245,7 @@ class StoryListContent extends Component{
         }
         let formData=new FormData();
         formData.append('token', token);
-        formData.append('keywords','');
+        formData.append('keywords',this.props.keywords);
         formData.append('sort',this.props.sort);
         formData.append('page',1);
         formData.append('kind_id','');
@@ -327,7 +333,7 @@ class StoryListContent extends Component{
         this.step++;
         let formData=new FormData();
         formData.append('token', token);
-        formData.append('keywords','');
+        formData.append('keywords',this.props.keywords);
         formData.append('sort',this.props.sort);
         formData.append('page',this.step);
         formData.append('kind_id','');

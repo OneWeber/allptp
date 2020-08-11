@@ -75,7 +75,7 @@ class MyVol extends Component{
                             backgroundColor={'#fff'}
                             overlayColor={'rgba(0,0,0,.4)'}
                             containerStyle={{height:90}}
-                            popover={<Text style={{color:'#666'}}>志愿者被策划者邀请或者申请体验志愿者，都免费体验活动</Text>}>
+                            popover={<Text style={{color:'#666',lineHeight: 22}}>志愿者被策划者邀请或者申请体验志愿者，都免费体验活动</Text>}>
                             <View style={[CommonStyle.flexEnd,{
                                 width:50,
                                 marginRight: width*0.03

@@ -124,7 +124,9 @@ class Ractive extends Component{
                         </View>
                     </View>
                     <LazyImage
-                        source={data_r.headimage}
+                        source={data_r.user_domain&&data_r.user_image_url?{
+                            uri:data_r.user_domain+data_r.user_image_url
+                        }:require('../../assets/images/touxiang.png')}
                         style={{width: 40,height:40,borderRadius: 20}}
                     />
                 </View>

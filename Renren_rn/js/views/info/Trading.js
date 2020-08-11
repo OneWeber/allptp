@@ -18,6 +18,7 @@ import NoData from '../../common/NoData';
 import CommonStyle from '../../../assets/css/Common_css';
 import Fetch from '../../expand/dao/Fetch';
 import Toast from 'react-native-easy-toast';
+import { Tooltip } from 'react-native-elements';
 const {width, height} = Dimensions.get('window')
 class Trading extends Component{
     constructor(props) {
@@ -182,6 +183,21 @@ class Trading extends Component{
                             }]}>
                                 <View style={CommonStyle.flexStart}>
                                     <Text style={{color:'#666',fontSize: 12}}>未到账金额(元)</Text>
+                                    <Tooltip
+                                        backgroundColor={'#fff'}
+                                        overlayColor={'rgba(0,0,0,.2)'}
+                                        containerStyle={{height:140}}
+                                        popover={
+                                            <Text style={{color:'#333',lineHeight:22}}>
+                                                为保障游客们的资金安全，在游客们预定体验活动时间结束时对应的资金才会变为可用余额。
+                                            </Text>
+                                        }>
+                                        <AntDesign
+                                            name={'questioncircleo'}
+                                            size={14}
+                                            style={{color: '#999',marginLeft: 5}}
+                                        />
+                                    </Tooltip>
                                 </View>
                                 <Text style={{
                                     color:'#333',
